@@ -2,11 +2,14 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { startActivityTracking } from "../../utils/tokenManager";
+import { useAuth, type AuthUser } from "../../context/authStore";
 
 export default function EmailVerification() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { setUser } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading",
   );
@@ -18,6 +21,9 @@ export default function EmailVerification() {
         const response = await apiCall<{
           success: boolean;
           message: string;
+          user?: AuthUser;
+          accessToken?: string;
+          refreshToken?: string;
         }>(API_ENDPOINTS.auth.verifyEmail(verificationToken), {
           method: "GET",
         });
@@ -25,10 +31,30 @@ export default function EmailVerification() {
         if (response.success) {
           setStatus("success");
           setMessage(response.message);
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
-            navigate("/login");
-          }, 3000);
+
+          if (response.accessToken && response.refreshToken && response.user) {
+            // Auto-login: the user is already verified and authenticated, no
+            // need to make them log in again manually.
+            localStorage.setItem("accessToken", response.accessToken);
+            localStorage.setItem("refreshToken", response.refreshToken);
+            setUser(response.user);
+            startActivityTracking();
+
+            setTimeout(() => {
+              navigate(
+                response.user!.mustChangePassword
+                  ? "/change-password"
+                  : response.user!.profileId
+                    ? "/safeai-ui"
+                    : "/login",
+              );
+            }, 3000);
+          } else {
+            // Redirect to login after 3 seconds
+            setTimeout(() => {
+              navigate("/login");
+            }, 3000);
+          }
         }
       } catch (err: unknown) {
         console.error("Email verification error:", err);
@@ -38,7 +64,7 @@ export default function EmailVerification() {
         setMessage(errorMessage);
       }
     },
-    [navigate, t],
+    [navigate, setUser, t],
   );
 
   useEffect(() => {
