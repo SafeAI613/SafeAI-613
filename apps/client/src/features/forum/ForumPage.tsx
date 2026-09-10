@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AddPostModal } from './AddPostModal';
 import { fetchPosts as fetchPostsFromApi, fetchSimilarPosts, moderatePost as moderatePostApi } from './api';
 import type { Post } from './types';
+import { SEO } from '../../components/SEO';
 import '../../styles/forum.css';
 
 export const ForumPage: React.FC = () => {
@@ -221,15 +222,34 @@ export const ForumPage: React.FC = () => {
 
   return (
     <div className="forum-page">
+      <SEO
+        title="פורום טכנולוגי מקצועי"
+        description="הצטרפו לקהילת המפתחים והמשתמשים של SafeAI613 בפורום הרשמי. מקום לדיונים מקצועיים, שאלות ותשובות, טיפים, ושיתוף מוצרים איכותיים בעולם ה-AI המסונן."
+        keywords="פורום SafeAI613, קהילת AI חרדית, שאלות ותשובות בינה מלאכותית, פורום מפתחים נטפרי"
+        canonicalUrl="https://safeai613.com/forum"
+      />
 
       <div className="forum-toolbar">
+        <div className="forum-add-btn-wrapper">
         <button
-          onClick={() => setIsModalOpen(true)}
-          className="forum-add-btn"
+          onClick={() => {
+            if (currentUser) {
+              setIsModalOpen(true);
+            }
+          }}
+          disabled={!currentUser}
+          title={!currentUser ? "יש להתחבר כדי להוסיף פוסט" : ""}
+          className={`forum-add-btn ${!currentUser ? "forum-add-btn-disabled" : ""}`}
         >
           הוסף פוסט חדש
         </button>
-
+        {!currentUser && (
+        <span className="forum-login-hint">
+        יש <Link to="/login">להתחבר</Link> כדי להוסיף פוסט חדש
+        </span>
+        )}
+        </div>
+        
         <div className="forum-search-wrap">
           <input
             type="text"

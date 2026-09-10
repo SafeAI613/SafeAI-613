@@ -11,12 +11,37 @@ import {
   getProductTypeList,
   getAIApplicationTypeList,
   // createSmartTender,  // נעקוף את פונקציית המעבר הבעייתית
-  smartSearchTenders,     
+  smartSearchTenders,
+  getTenderAgentContext,
+  requestTenderSpecification,
+  saveTenderSpecification,
+  setTenderSpecificationPublished,
+  filterApplicantsForRequester,
 } from "../services/tenderBoardService";
-import { TBAIService } from "../services/tenderBoardAIService";
+import type { LogActor } from "../services/tenderBoardService";
+import { TBAIService, TenderTopicMismatchError } from "../services/tenderBoardAIService";
 import { generatePresignedDownloadUrl } from "../services/s3Service";
 import { getProfileById } from "../services/professionalProfileService";
+import { triggerTenderSpecAgent, cancelTenderSpecAgent } from "../services/tenderSpecAgentRunner";
+import { getUserById } from "../repositories/userRepository";
 import logger from "../logger";
+
+/**
+ * Resolves the audit-log identity for the current request. userId comes straight off the
+ * decoded JWT (req.user), but organizationId isn't part of the token payload, so it requires
+ * a DB lookup. Never throws — logging enrichment must never be able to break a request.
+ */
+async function getActor(req: Request): Promise<LogActor> {
+  const user = (req as any).user;
+  if (!user?.userId) return {};
+
+  try {
+    const dbUser = await getUserById(user.userId);
+    return { userId: user.userId, organizationId: (dbUser as any)?.organizationId?.toString() };
+  } catch {
+    return { userId: user.userId };
+  }
+}
 
 /**
  * GET all static product types
@@ -93,13 +118,25 @@ async function withSignedApplicantDetails(req: Request, tender: any): Promise<an
  */
 export async function createTenderHandler(req: Request, res: Response) {
   try {
+    await TBAIService.assertTenderIsProgrammingRelated(req.body);
+  } catch (error: any) {
+    logger.warn("Tender rejected by domain guardrail", { error: error.message });
+    return res.status(error.statusCode ?? 400).json({ error: error.message });
+  }
+
+  const actor = await getActor(req);
+  try {
     const user = (req as any).user;
     // publisherUserCode is derived from the authenticated user, never trusted from the client body,
     // otherwise any caller could create a tender that impersonates another publisher.
-    const tender = await createTender({ ...req.body, publisherUserCode: user?.userId });
+    const tender = await createTender({ ...req.body, publisherUserCode: user?.userId }, actor);
     res.status(201).json({ success: true, tender });
   } catch (error) {
-    logger.error("Create tender failed", { error });
+    logger.error("Create tender failed", {
+      error,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to create tender" });
   }
 }
@@ -108,14 +145,23 @@ export async function createTenderHandler(req: Request, res: Response) {
  * GET all Tenders
  */
 export async function listTendersHandler(req: Request, res: Response) {
+  const actor = await getActor(req);
   try {
-    const tenders = await listTenders();
+    const user = (req as any).user;
+    const tenders = await listTenders(actor);
+    const filtered = tenders.map((tender: any) =>
+      filterApplicantsForRequester(tender, user?.userId, user?.role)
+    );
     const withSignedResumes = await Promise.all(
-      tenders.map((tender: any) => withSignedApplicantDetails(req, tender))
+      filtered.map((tender: any) => withSignedApplicantDetails(req, tender))
     );
     res.json(withSignedResumes);
   } catch (error) {
-    logger.error("List tenders failed", { error });
+    logger.error("List tenders failed", {
+      error,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to fetch tenders" });
   }
 }
@@ -124,16 +170,24 @@ export async function listTendersHandler(req: Request, res: Response) {
  * GET Tender by ID
  */
 export async function getTenderHandler(req: Request<{ id: string }>, res: Response) {
+  const actor = await getActor(req);
   try {
-    const tender = await getTenderById(req.params.id);
+    const user = (req as any).user;
+    const tender = await getTenderById(req.params.id, actor);
 
     if (!tender) {
       return res.status(404).json({ error: "Tender not found" });
     }
 
-    res.json(await withSignedApplicantDetails(req, tender));
+    const filtered = filterApplicantsForRequester(tender, user?.userId, user?.role);
+    res.json(await withSignedApplicantDetails(req, filtered));
   } catch (error) {
-    logger.error("Get tender failed", { error });
+    logger.error("Get tender failed", {
+      error,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to fetch tender" });
   }
 }
@@ -142,8 +196,9 @@ export async function getTenderHandler(req: Request<{ id: string }>, res: Respon
  * UPDATE Tender
  */
 export async function updateTenderHandler(req: Request<{ id: string }>, res: Response) {
+  const actor = await getActor(req);
   try {
-    const existing = await getTenderById(req.params.id);
+    const existing = await getTenderById(req.params.id, actor);
 
     if (!existing) {
       return res.status(404).json({ error: "Tender not found" });
@@ -153,11 +208,16 @@ export async function updateTenderHandler(req: Request<{ id: string }>, res: Res
       return res.status(403).json({ error: "Access denied" });
     }
 
-    const tender = await updateTender(req.params.id, req.body);
+    const tender = await updateTender(req.params.id, req.body, actor);
 
     res.json({ success: true, tender });
   } catch (error) {
-    logger.error("Update tender failed", { error });
+    logger.error("Update tender failed", {
+      error,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to update tender" });
   }
 }
@@ -166,8 +226,9 @@ export async function updateTenderHandler(req: Request<{ id: string }>, res: Res
  * DELETE Tender
  */
 export async function deleteTenderHandler(req: Request<{ id: string }>, res: Response) {
+  const actor = await getActor(req);
   try {
-    const existing = await getTenderById(req.params.id);
+    const existing = await getTenderById(req.params.id, actor);
 
     if (!existing) {
       return res.status(404).json({ error: "Tender not found" });
@@ -177,10 +238,15 @@ export async function deleteTenderHandler(req: Request<{ id: string }>, res: Res
       return res.status(403).json({ error: "Access denied" });
     }
 
-    await deleteTender(req.params.id);
+    await deleteTender(req.params.id, actor);
     res.json({ success: true });
   } catch (error) {
-    logger.error("Delete tender failed", { error });
+    logger.error("Delete tender failed", {
+      error,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to delete tender" });
   }
 }
@@ -191,6 +257,7 @@ export async function deleteTenderHandler(req: Request<{ id: string }>, res: Res
  * Body: { name, email, details, proposal?, contactMethod? }
  */
 export async function applyToTenderHandler(req: Request, res: Response) {
+  const actor = await getActor(req);
   try {
     const tenderId = req.params.id as string;
 
@@ -200,12 +267,14 @@ export async function applyToTenderHandler(req: Request, res: Response) {
       });
     }
 
+    const user = (req as any).user;
     const applicant = {
       name: req.body.name,
       email: req.body.email,
       details: req.body.details,
       proposal: req.body.proposal,
       contactMethod: req.body.contactMethod,
+      userId: user?.userId,
       resumeFileKey: req.body.resumeFileKey,
       portfolioLink: req.body.portfolioLink,
       professionalProfileId: req.body.professionalProfileId,
@@ -219,19 +288,23 @@ export async function applyToTenderHandler(req: Request, res: Response) {
       }
     }
 
-    const result = await applyToTender(tenderId, applicant);
+    const result = await applyToTender(tenderId, applicant, actor);
 
     res.status(200).json({
       success: true,
-      tender: result,
+      tender: filterApplicantsForRequester(result, user?.userId, user?.role),
     });
   } catch (error: any) {
-    logger.error("Apply to tender failed", { 
-      error: error.message, 
-      tenderId: req.params.id 
+    logger.error("Apply to tender failed", {
+      error: error.message,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
     });
     res.status(400).json({
       error: error.message || "Failed to apply to tender",
+      // lets the client (TenderBoardPage) distinguish "already applied" from other failures
+      code: error.code,
     });
   }
 }
@@ -241,8 +314,9 @@ export async function applyToTenderHandler(req: Request, res: Response) {
  * PATCH /tender-board/:id/close
  */
 export async function closeTenderHandler(req: Request<{ id: string }>, res: Response) {
+  const actor = await getActor(req);
   try {
-    const existing = await getTenderById(req.params.id);
+    const existing = await getTenderById(req.params.id, actor);
 
     if (!existing) {
       return res.status(404).json({ error: "Tender not found" });
@@ -252,11 +326,16 @@ export async function closeTenderHandler(req: Request<{ id: string }>, res: Resp
       return res.status(403).json({ error: "Access denied" });
     }
 
-    const tender = await closeTender(req.params.id);
+    const tender = await closeTender(req.params.id, actor);
 
     res.json({ success: true, tender });
   } catch (error) {
-    logger.error("Close tender failed", { error });
+    logger.error("Close tender failed", {
+      error,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: "Failed to close tender" });
   }
 }
@@ -266,6 +345,77 @@ export async function closeTenderHandler(req: Request<{ id: string }>, res: Resp
  * PATCH /tender-board/:id/view-offers
  */
 export async function viewTenderOffersHandler(req: Request<{ id: string }>, res: Response) {
+  const actor = await getActor(req);
+  try {
+    const existing = await getTenderById(req.params.id, actor);
+
+    if (!existing) {
+      return res.status(404).json({ error: "Tender not found" });
+    }
+
+    if (!isOwnerOrAdmin(req, existing)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const tender = await markTenderOffersViewed(req.params.id, actor);
+
+    res.json({ success: true, tender });
+  } catch (error) {
+    logger.error("Mark tender offers as viewed failed", {
+      error,
+      tenderId: req.params.id,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
+    res.status(500).json({ error: "Failed to mark tender offers as viewed" });
+  }
+}
+
+/**
+ * ========================================================
+ * אפיון אוטומטי + המלצת פיתוח (SCRUM-287/291/293)
+ * ========================================================
+ */
+
+/**
+ * GET /tender-board/:id/agent-context
+ * Agent-facing (service-token / admin JWT via requireAdmin, see router).
+ */
+export async function getTenderAgentContextHandler(req: Request<{ id: string }>, res: Response) {
+  try {
+    const context = await getTenderAgentContext(req.params.id);
+
+    if (!context) {
+      return res.status(404).json({ error: "Tender not found" });
+    }
+
+    res.json(context);
+  } catch (error) {
+    logger.error("Get tender agent context failed", { error });
+    res.status(500).json({ error: "Failed to fetch tender agent context" });
+  }
+}
+
+/**
+ * POST /tender-board/:id/specification
+ * Agent-facing write-back (service-token / admin JWT via requireAdmin, see router).
+ * Body: { status, techStackRecommendation?, openSourceReferences?, readingSources?, document?, errorMessage? }
+ */
+export async function saveTenderSpecificationHandler(req: Request<{ id: string }>, res: Response) {
+  try {
+    const tender = await saveTenderSpecification(req.params.id, req.body);
+    res.json({ success: true, tender });
+  } catch (error: any) {
+    logger.error("Save tender specification failed", { error: error.message, tenderId: req.params.id });
+    res.status(400).json({ error: error.message || "Failed to save tender specification" });
+  }
+}
+
+/**
+ * POST /tender-board/:id/generate-specification-request
+ * בעל המכרז/אדמין בלבד - מסמן status=pending ומפעיל את ה-agent (SCRUM-293).
+ */
+export async function requestTenderSpecificationHandler(req: Request<{ id: string }>, res: Response) {
   try {
     const existing = await getTenderById(req.params.id);
 
@@ -277,12 +427,68 @@ export async function viewTenderOffersHandler(req: Request<{ id: string }>, res:
       return res.status(403).json({ error: "Access denied" });
     }
 
-    const tender = await markTenderOffersViewed(req.params.id);
+    const tender = await requestTenderSpecification(req.params.id);
+    triggerTenderSpecAgent(req.params.id);
 
+    res.status(202).json({ success: true, tender });
+  } catch (error: any) {
+    logger.error("Request tender specification failed", { error: error.message, tenderId: req.params.id });
+    res.status(500).json({ error: error.message || "Failed to request tender specification" });
+  }
+}
+
+/**
+ * POST /tender-board/:id/cancel-specification-request
+ * בעל המכרז/אדמין בלבד - מבטלת ריצת agent פעילה ומסמנת status=failed עם הודעה
+ * שהמשתמש ביטל (SCRUM-293 follow-up).
+ */
+export async function cancelTenderSpecificationHandler(req: Request<{ id: string }>, res: Response) {
+  try {
+    const existing = await getTenderById(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ error: "Tender not found" });
+    }
+
+    if (!isOwnerOrAdmin(req, existing)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const cancelled = cancelTenderSpecAgent(req.params.id);
+
+    if (!cancelled) {
+      return res.status(409).json({ error: "No specification generation is currently running for this tender" });
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    logger.error("Cancel tender specification failed", { error: error.message, tenderId: req.params.id });
+    res.status(500).json({ error: error.message || "Failed to cancel specification generation" });
+  }
+}
+
+/**
+ * PATCH /tender-board/:id/specification/publish
+ * בעל המכרז/אדמין בלבד - הבחירה אם לפרסם את האפיון יחד עם המכרז או להשאיר פרטי.
+ * Body: { isPublished: boolean }
+ */
+export async function publishTenderSpecificationHandler(req: Request<{ id: string }>, res: Response) {
+  try {
+    const existing = await getTenderById(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ error: "Tender not found" });
+    }
+
+    if (!isOwnerOrAdmin(req, existing)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const tender = await setTenderSpecificationPublished(req.params.id, Boolean(req.body?.isPublished));
     res.json({ success: true, tender });
-  } catch (error) {
-    logger.error("Mark tender offers as viewed failed", { error });
-    res.status(500).json({ error: "Failed to mark tender offers as viewed" });
+  } catch (error: any) {
+    logger.error("Publish tender specification failed", { error: error.message, tenderId: req.params.id });
+    res.status(400).json({ error: error.message || "Failed to update specification publish state" });
   }
 }
 
@@ -298,6 +504,7 @@ export async function viewTenderOffersHandler(req: Request<{ id: string }>, res:
  * Body: { text: "מחפש מישהו שיבנה לי אתר למכירת מוצרים..." }
  */
 export async function createSmartTenderHandler(req: Request, res: Response) {
+  const actor = await getActor(req);
   try {
     const { text } = req.body;
 
@@ -305,12 +512,23 @@ export async function createSmartTenderHandler(req: Request, res: Response) {
       return res.status(400).json({ error: "Text description is required for AI generation" });
     }
 
-    const parsedAiData = await TBAIService.generateTenderData(text);
-    
+    const parsedAiData = await TBAIService.generateTenderData(text, actor);
+
     // החזרת האובייקט המפורסר מה-AI ללא יצירת המכרז בבסיס הנתונים
     res.status(201).json({ success: true, tender: parsedAiData });
   } catch (error: any) {
-    logger.error("Smart create tender failed", { error: error.message });
+    if (error instanceof TenderTopicMismatchError) {
+      return res.status(400).json({
+        error: "TENDER_TOPIC_MISMATCH",
+        code: "TENDER_TOPIC_MISMATCH",
+        message: error.message,
+      });
+    }
+    logger.error("Smart create tender failed", {
+      error: error.message,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
     res.status(500).json({ error: error.message || "Failed to generate tender using AI" });
   }
 }
@@ -320,6 +538,7 @@ export async function createSmartTenderHandler(req: Request, res: Response) {
  * GET /tender-board/smart-search?q=מכרזים של אפליקציות בצפון
  */
 export async function smartSearchTendersHandler(req: Request, res: Response) {
+  const actor = await getActor(req);
   try {
     const searchText = req.query.q as string;
 
@@ -328,11 +547,19 @@ export async function smartSearchTendersHandler(req: Request, res: Response) {
     }
 
     // קריאה לפונקציית השירות שתמיר את הטקסט לשאילתת מונגו ותשלוף מה-DB
-    const tenders = await smartSearchTenders(searchText);
+    const user = (req as any).user;
+    const tenders = await smartSearchTenders(searchText, actor);
+    const filtered = tenders.map((tender: any) =>
+      filterApplicantsForRequester(tender, user?.userId, user?.role)
+    );
 
-    res.json(tenders);
+    res.json(filtered);
   } catch (error: any) {
-    logger.error("Smart search tenders failed", { error: error.message });
+    logger.error("Smart search tenders failed", {
+      error: error.message,
+      userId: actor.userId,
+      organizationId: actor.organizationId,
+    });
 
     // שימוש ב-statusCode שהוצמד לשגיאה ב-Service (למשל 429), אחרת 500
     const statusCode = error?.statusCode ?? 500;
