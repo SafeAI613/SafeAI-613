@@ -14,10 +14,11 @@ import {
   incrementPostView,
   deleteComment,
   getUploadUrl,
-  uploadFileToS3,
+  uploadFileViaPresignedPost,
   createComment,
   ratePost,
 } from './api';
+import { validateFileForUpload } from './uploadValidation';
 import type { Post, Comment } from './types';
 import { SEO } from '../../components/SEO';
 import '../../styles/forum.css';
@@ -180,12 +181,18 @@ export const PostThreadPage: React.FC = () => {
 
     if (selectedFile) {
       try {
-        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type);
+        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type, {
+          fileSize: selectedFile.size,
+          context: 'comment',
+        });
 
-        if (!urlResponse.ok) throw new Error('נכשלה קבלת קישור מאובטח לתגובה');
-        const { uploadUrl, fileUrl } = await urlResponse.json();
+        if (!urlResponse.ok) {
+          const errData = await urlResponse.json().catch(() => null);
+          throw new Error(errData?.error || 'נכשלה קבלת קישור מאובטח לתגובה');
+        }
+        const { url, fields, fileUrl } = await urlResponse.json();
 
-        const awsResponse = await uploadFileToS3(uploadUrl, selectedFile);
+        const awsResponse = await uploadFileViaPresignedPost(url, fields, selectedFile);
 
         if (!awsResponse.ok) throw new Error('העלאת קובץ התגובה ל-S3 נכשלה');
         finalFileUrl = fileUrl;
@@ -223,6 +230,23 @@ export const PostThreadPage: React.FC = () => {
     } finally {
       setCommentLoading(false);
     }
+  };
+
+  const handleCommentFileSelect = async (file: File | null) => {
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const error = await validateFileForUpload(file, 'comment');
+    if (error) {
+      alert(error);
+      if (commentFileInputRef.current) commentFileInputRef.current.value = '';
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
   };
 
   const handleStarClick = async (selectedRating: number) => {
@@ -752,7 +776,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 {commentLoading ? "שומר..." : "שמור תגובה"}
               </button>
               
-              <input type="file" ref={commentFileInputRef} className="forum-file-input-hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+              <input type="file" ref={commentFileInputRef} className="forum-file-input-hidden" onChange={(e) => handleCommentFileSelect(e.target.files?.[0] || null)} />
               <button type="button" onClick={() => commentFileInputRef.current?.click()} className="forum-attach-comment-btn">
                 <i className="fa-solid fa-paperclip"></i> צרף קובץ לתגובה
               </button>

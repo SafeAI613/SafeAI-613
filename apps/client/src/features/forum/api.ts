@@ -101,20 +101,37 @@ export function fetchTags(): Promise<Response> {
 
 // --- העלאת קבצים ---
 
-export function getUploadUrl(fileName: string, fileType: string): Promise<Response> {
+export function getUploadUrl(
+  fileName: string,
+  fileType: string,
+  opts?: { fileSize?: number; context?: string }
+): Promise<Response> {
   return fetch(`${API_BASE_URL}/api/upload/get-url`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fileName, fileType }),
+    body: JSON.stringify({ fileName, fileType, ...opts }),
   });
 }
 
 // שימי לב: זו העלאה ישירה ל-S3 (לא לשרת שלנו) - בכוונה נשארת fetch רגיל,
 // בלי authFetch, כי אין צורך בטוקן ההתחברות שלנו מול S3 (ה-URL כבר חתום).
-export function uploadFileToS3(uploadUrl: string, file: File): Promise<Response> {
-  return fetch(uploadUrl, {
-    method: 'PUT',
-    headers: { 'Content-Type': file.type },
-    body: file,
+// לפי הדרישות של S3, כל השדות מ-`fields` חייבים להיות מצורפים ל-FormData
+// *לפני* השדה `file` - S3 מתעלם משדות שמגיעים אחריו.
+export function uploadFileViaPresignedPost(
+  url: string,
+  fields: Record<string, string>,
+  file: File
+): Promise<Response> {
+  const formData = new FormData();
+
+  Object.entries(fields).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+
+  formData.append('file', file);
+
+  return fetch(url, {
+    method: 'POST',
+    body: formData,
   });
 }
