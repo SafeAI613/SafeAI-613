@@ -388,7 +388,7 @@ export default function ManageTenderDetails({
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
               <button
                 type="button"
-                className={specification.isPublished ? 'secondary-button' : 'button-green'}
+                className={specification.isPublished ? 'secondary-button' : 'button-primary'}
                 onClick={handleTogglePublishSpecification}
                 style={{ padding: '8px 16px', cursor: 'pointer' }}
               >
@@ -528,7 +528,7 @@ export default function ManageTenderDetails({
               ))}
             </div>
             {draftTender.aiApplicationType === 'מולטי אייגנט' && (
-              <button type="button" className="button-green" style={{ marginTop: '12px', padding: '6px 12px', cursor: 'pointer' }} onClick={addAgent}>
+              <button type="button" className="button-primary" style={{ marginTop: '12px', padding: '6px 12px', cursor: 'pointer' }} onClick={addAgent}>
                 {t('tenders.addAgentBtn')}
               </button>
             )}
@@ -603,7 +603,7 @@ export default function ManageTenderDetails({
         {errorMessage && <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: '4px' }}>{errorMessage}</div>}
         {successMessage && <div className="success-message" style={{ color: 'var(--color-success)', background: 'var(--color-success-bg)', padding: '8px 12px', borderRadius: '4px' }}>{successMessage}</div>}
         
-        <button type="button" className="button-green submit-button" onClick={saveTender} disabled={isLoading} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+        <button type="button" className="button-primary submit-button" onClick={saveTender} disabled={isLoading} style={{ padding: '10px 20px', cursor: 'pointer' }}>
           {isLoading ? t('tenders.savingBtn') : t('tenders.saveUpdateBtn')}
         </button>
 
