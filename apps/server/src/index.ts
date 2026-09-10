@@ -11,11 +11,15 @@ import providerKeyRouter from "./routes/providerKeyRouter";
 import authRouter from "./routes/authRouter";
 import usageRouter from "./routes/usageRouter";
 import adminStatsRouter from "./routes/adminStatsRouter";
+import publicStatsRouter from "./routes/publicStatsRouter";
 import proxyKeyRouter from "./routes/proxyKeyRouter";
+import professionalProfileRouter from "./routes/professionalProfileRouter";
 import promptRouter from "./routes/promptRouter";
 import organizationRouter from "./routes/organizationRouter";
+import paymeRouter, { paymeWebhookRouter } from "./routes/paymeRouter";
 import contactRouter from "./routes/contactRouter";
 import tenderBoardRouter from "./routes/tenderBoardRouter";
+import agentRouter from "./routes/agentRouter";
 import contactTypeRoutes from "./routes/contactTypeRoutes"; // הייבוא של הקובץ שיצרת
 
 import newsRouter from "./routes/newsRouter";
@@ -26,12 +30,14 @@ import { errorHandler } from "./middleware/errorHandler";
 import { connectDatabase } from "./config/db";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
 import postRoutes from './routes/postRoutes';
-import logger from "./logger";
+import logger, { requestContext } from "./logger";
+import { randomUUID } from "node:crypto";
 import path from 'path';
 import tagRoutes from './routes/tagRoutes';
 import uploadRouter from "./routes/uploadRoutes";
 import cookieParser from 'cookie-parser';
 import { initializeAutoPostBot } from './services/autoPostService';
+import { initializeAttachmentCleanupJob } from './services/attachmentService';
 
 const PORT = process.env.PORT || 3001;
 
@@ -54,7 +60,12 @@ app.use(compression());
 
 // הגדרה ל-50 מגה-בייט כדי להיות בטוחים
 app.use(express.json({ limit: "50mb" }));
+// PayMe's Sale Callback (webhook) is posted as x-www-form-urlencoded.
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+app.use((req, _res, next) => {
+  requestContext.run({ requestId: randomUUID() }, next);
+});
 
 app.use(requestLogger);
 
@@ -66,6 +77,7 @@ app.get("/health", (_req, res) => {
 
 // ===== Public Routes (No Authentication) =====
 app.use("/auth", authRouter);
+app.use("/public-stats", publicStatsRouter); // Landing page counts — no auth, counts only
 
 // ===== JWT Protected Routes (User Self-Management) =====
 // Import the handler for self-profile updates
@@ -79,9 +91,17 @@ app.use("/users", authenticateToken, requireAdmin, userRouter);
 app.use("/profiles", authenticateToken, profileRouter);
 app.use("/provider-keys", authenticateToken, providerKeyRouter);
 app.use("/proxy-key", proxyKeyRouter); // User's own proxy key management
+app.use("/professional-profile", professionalProfileRouter); // User's own professional profile (tender board)
 app.use("/admin/stats", adminStatsRouter); // Admin stats already has auth middleware
 app.use("/prompts", authenticateToken, promptRouter); // Prompt management (admin routes protected in router)
+// paymeWebhookRouter must be mounted before organizationRouter: its route
+// is intentionally public (PayMe cannot carry our auth token), but
+// organizationRouter applies authenticateToken to every /organizations/*
+// path via a pathless router.use(), which would otherwise shadow it and
+// 401 every PayMe callback before it reaches the handler.
+app.use("/organizations", paymeWebhookRouter); // PayMe webhook (public, see paymeRouter.ts)
 app.use("/organizations", organizationRouter); // Organization management (auth middleware in router)
+app.use("/organizations", paymeRouter); // PayMe wallet top-up (initiate/status - auth middleware in router)
 app.use("/contact", contactRouter); // Contact form (requires authentication)
 app.use("/contact-types", contactTypeRoutes); // Contact form types
 app.use("/articles", articlesRouter);
@@ -90,6 +110,9 @@ app.use("/articles", articlesRouter);
 // ===== Public routes for filter evaluation =====
 app.use("/filter", filterRouter);
 app.use("/tender-board", tenderBoardRouter);
+
+// ===== Agents Marketplace (reads public, writes require auth — see agentRouter.ts) =====
+app.use("/agents", agentRouter);
 
 // ===== Public AI News Routes =====
 app.use("/api/news", newsRouter); // News routes are public
@@ -115,6 +138,7 @@ async function start() {
       logger.info(`Server running on port ${PORT}`);
     });
     initializeAutoPostBot();
+    initializeAttachmentCleanupJob();
 
   } catch (err) {
     logger.error("Startup failed:", err);

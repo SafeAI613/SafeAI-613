@@ -6,12 +6,14 @@
 import { Request, Response } from "express";
 import * as authService from "../services/authService";
 import { validateRequest } from "../utils/validation";
+import { TokenPayload } from "../utils/jwt";
 import {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  changePasswordSchema,
   verifyEmailSchema,
 } from "../utils/validation";
 import logger from "../logger";
@@ -43,7 +45,8 @@ export async function registerHandler(req: Request, res: Response) {
     logger.error("Registration error:", { error: error.message, stack: error.stack });
     res.status(400).json({
       success: false,
-      error: error.message || "ההרשמה נכשלה",
+      error: error.message || "Registration failed",
+      code: error.code || "REGISTRATION_FAILED",
     });
   }
 }
@@ -74,7 +77,7 @@ export async function loginHandler(req: Request, res: Response) {
 
     res.status(statusCode).json({
       success: false,
-      message: error.message || "ההתחברות נכשלה",
+      message: error.message || "Login failed",
       code: error.code || "LOGIN_FAILED",
     });
   
@@ -199,6 +202,30 @@ export async function resetPasswordHandler(req: Request, res: Response) {
     res.status(400).json({
       success: false,
       error: error.message || "איפוס הסיסמה נכשל",
+    });
+  }
+}
+
+/**
+ * Change password (used to clear a forced mustChangePassword flag)
+ * POST /api/auth/change-password
+ */
+export async function changePasswordHandler(req: Request, res: Response) {
+  try {
+    const user = (req as Request & { user: TokenPayload }).user;
+    const data = validateRequest(changePasswordSchema, req.body);
+    await authService.changePassword(user.userId, data.currentPassword, data.newPassword);
+
+    res.json({
+      success: true,
+      message: "הסיסמה עודכנה בהצלחה",
+    });
+  } catch (error: any) {
+    logger.error("Change password error:", { error: error.message, stack: error.stack });
+    const statusCode = error.statusCode || 400;
+    res.status(statusCode).json({
+      success: false,
+      error: error.message || "עדכון הסיסמה נכשל",
     });
   }
 }

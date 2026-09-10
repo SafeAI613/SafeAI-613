@@ -1,11 +1,19 @@
 import { Request, Response } from "express";
 import { createUser, listUsers, getUserById, updateUser, deleteUser } from "../services/userService";
 import { sanitizeUser } from "../utils/sanitizeUser";
+import { createUserSchema, validateRequest } from "../utils/validation";
 import logger from "../logger";
 
 export async function createUserHandler(req: Request, res: Response) {
+  let email: string;
   try {
-    const result = await createUser(req.body);
+    ({ email } = validateRequest(createUserSchema, { email: req.body.email }));
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  try {
+    const result = await createUser({ ...req.body, email });
 
     res.json({
       success: true,

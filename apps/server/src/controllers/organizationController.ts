@@ -22,6 +22,7 @@ import {
   getMyOrganization,
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
+import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
 import logger from "../logger";
 
 /**
@@ -96,9 +97,7 @@ export async function getOrganizationHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -130,10 +129,9 @@ export async function updateOrganizationHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
     const isAdmin = user.role === "admin";
 
-    if (!isAdmin && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -199,11 +197,7 @@ export async function getOrganizationUsersHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const orgOwnerId = organization.ownerId?._id
-        ? organization.ownerId._id.toString()
-        : organization.ownerId.toString();
-
-    if (user.role !== "admin" && orgOwnerId !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied - You are not the owner" });
     }
 
@@ -237,9 +231,7 @@ export async function addUserToOrganizationHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -278,9 +270,7 @@ export async function createOrganizationMemberHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -328,9 +318,7 @@ export async function addUserByEmailToOrganizationHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -373,9 +361,7 @@ export async function removeUserFromOrganizationHandler(
       return res.status(404).json({ error: "User not found or not in an organization" });
     }
 
-    const ownerId = (targetOrg.ownerId as any)?._id ?? targetOrg.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, targetOrg)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -444,9 +430,7 @@ export async function topUpOrganizationWalletHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const ownerId = (organization.ownerId as any)?._id ?? organization.ownerId;
-
-    if (user.role !== "admin" && ownerId.toString() !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -492,7 +476,8 @@ export async function suspendOrganizationHandler(
   res: Response
 ) {
   try {
-    const updated = await setOrganizationActive(req.params.id, false);
+    const actingAdminEmail = (req as any).user?.email;
+    const updated = await setOrganizationActive(req.params.id, false, actingAdminEmail);
     res.json({ success: true, message: "Organization suspended", organization: updated });
   } catch (error: any) {
     logger.error("Failed to suspend organization", {
@@ -513,7 +498,8 @@ export async function activateOrganizationHandler(
   res: Response
 ) {
   try {
-    const updated = await setOrganizationActive(req.params.id, true);
+    const actingAdminEmail = (req as any).user?.email;
+    const updated = await setOrganizationActive(req.params.id, true, actingAdminEmail);
     res.json({ success: true, message: "Organization reactivated", organization: updated });
   } catch (error: any) {
     logger.error("Failed to reactivate organization", {
@@ -542,11 +528,7 @@ export async function getOrganizationStatsHandler(
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    const orgOwnerId = organization.ownerId?._id
-      ? organization.ownerId._id.toString()
-      : organization.ownerId.toString();
-
-    if (user.role !== "admin" && orgOwnerId !== user.userId) {
+    if (!isOrganizationAccessAllowed(user, organization)) {
       return res.status(403).json({ error: "Access denied" });
     }
 
@@ -633,7 +615,8 @@ export async function approveOrganizationHandler(
   res: Response
 ) {
   try {
-    const updated = await approveOrganization(req.params.id);
+    const actingAdminEmail = (req as any).user?.email;
+    const updated = await approveOrganization(req.params.id, actingAdminEmail);
     res.json({ success: true, message: "Organization approved", organization: updated });
   } catch (error: any) {
     logger.error("Failed to approve organization", {
@@ -654,7 +637,8 @@ export async function rejectOrganizationHandler(
   res: Response
 ) {
   try {
-    const updated = await rejectOrganization(req.params.id);
+    const actingAdminEmail = (req as any).user?.email;
+    const updated = await rejectOrganization(req.params.id, actingAdminEmail);
     res.json({ success: true, message: "Organization rejected", organization: updated });
   } catch (error: any) {
     logger.error("Failed to reject organization", {

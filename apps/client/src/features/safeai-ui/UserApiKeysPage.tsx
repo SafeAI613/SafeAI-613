@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import ProviderKeysManagement from "./ProviderKeysManagement";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
 import { useAuth } from "../../context/authStore";
@@ -21,6 +22,7 @@ interface ProxyKeyInfo {
 }
 
 export default function UserApiKeysPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [keys, setKeys] = useState<ProviderKey[]>([]);
   const [proxyKey, setProxyKey] = useState<ProxyKeyInfo | null>(null);
@@ -75,22 +77,18 @@ export default function UserApiKeysPage() {
       
       if (result.success) {
         setProxyKey(result.keyInfo);
-        alert(result.keyInfo.isActive ? "המפתח הופעל בהצלחה" : "המפתח הושבת בהצלחה");
+        alert(result.keyInfo.isActive ? t("userApiKeys.keyEnabledSuccess") : t("userApiKeys.keyDisabledSuccess"));
       }
     } catch (error) {
       console.error("Failed to toggle proxy key:", error);
-      alert("שגיאה בשינוי סטטוס המפתח");
+      alert(t("userApiKeys.errorTogglingKey"));
     } finally {
       setProxyKeyLoading(false);
     }
   };
 
   const handleRegenerateProxyKey = async () => {
-    const confirmed = confirm(
-      "האם אתה בטוח שברצונך ליצור מפתח חדש?\n\n" +
-      "⚠️ המפתח הישן יפסיק לעבוד מיד!\n" +
-      "זו ההזדמנות האחרונה שלך לראות את המפתח החדש."
-    );
+    const confirmed = confirm(t("userApiKeys.regenerateConfirm"));
     
     if (!confirmed) return;
     
@@ -115,7 +113,7 @@ export default function UserApiKeysPage() {
       }
     } catch (error) {
       console.error("Failed to regenerate proxy key:", error);
-      alert("שגיאה ביצירת מפתח חדש");
+      alert(t("userApiKeys.errorRegeneratingKey"));
     } finally {
       setProxyKeyLoading(false);
     }
@@ -124,7 +122,7 @@ export default function UserApiKeysPage() {
   const handleCopyProxyKey = async () => {
     try {
       await navigator.clipboard.writeText(newProxyKey);
-      alert("המפתח הועתק ללוח!");
+      alert(t("usersManagement.keyCopiedAlert"));
     } catch (err) {
       console.error("Failed to copy:", err);
     }
@@ -150,14 +148,14 @@ export default function UserApiKeysPage() {
   };
 
   if (loading) {
-    return <div className="loading-state">טוען...</div>;
+    return <div className="loading-state">{t("common.loading")}</div>;
   }
 
-  if (!user) {
+  if (!user || !user._id) {
     return (
       <div className="empty-state">
-        <h2>לא מחובר</h2>
-        <p>אנא התחבר כדי לנהל מפתחות API</p>
+        <h2>{t("orgUsers.notAuthenticated")}</h2>
+        <p>{t("userApiKeys.loginToManageKeys")}</p>
       </div>
     );
   }
@@ -166,9 +164,9 @@ export default function UserApiKeysPage() {
     <div>
       <div className="management-header">
         <div>
-          <h2>🔑 ניהול מפתחות API</h2>
-          <p style={{ margin: "10px 0 0 0", color: "#666" }}>
-            שלום {user.name} ({user.email})
+          <h2>🔑 {t("userApiKeys.pageTitle")}</h2>
+          <p style={{ margin: "10px 0 0 0", color: "var(--text-muted)" }}>
+            {t("userApiKeys.greetingWithEmail", { name: user.name, email: user.email })}
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -176,7 +174,7 @@ export default function UserApiKeysPage() {
             {user.mode === "BYOK" ? "🔑 BYOK" : "🏢 MANAGED"}
           </span>
           <span className={`badge ${user.role === "admin" ? "badge-warning" : "badge-info"}`}>
-            {user.role === "admin" ? "👑 מנהל" : "👤 משתמש"}
+            {user.role === "admin" ? `👑 ${t("userApiKeys.adminBadge")}` : `👤 ${t("userApiKeys.userBadge")}`}
           </span>
         </div>
       </div>
@@ -184,7 +182,7 @@ export default function UserApiKeysPage() {
       {/* Proxy API Key Section - Always visible for all users */}
       <div className="card" style={{ marginBottom: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h3>🔐 מפתח Proxy API שלי</h3>
+          <h3>🔐 {t("userApiKeys.myProxyKeyTitle")}</h3>
         </div>
 
         {proxyKey ? (
@@ -194,25 +192,25 @@ export default function UserApiKeysPage() {
                 border: "2px solid #667eea",
                 borderRadius: "8px",
                 padding: "20px",
-                backgroundColor: proxyKey.isActive ? "#f8f9ff" : "#f5f5f5",
+                backgroundColor: proxyKey.isActive ? "#f8f9ff" : "var(--bg-elevated)",
                 marginBottom: "15px",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
                 <div>
-                  <h4 style={{ margin: 0, marginBottom: "5px" }}>מפתח הגישה שלך למערכת</h4>
-                  <p style={{ margin: 0, fontSize: "14px", color: "#666", fontFamily: "monospace" }}>
+                  <h4 style={{ margin: 0, marginBottom: "5px" }}>{t("userApiKeys.myAccessKeyTitle")}</h4>
+                  <p style={{ margin: 0, fontSize: "14px", color: "var(--text-muted)", fontFamily: "monospace" }}>
                     {proxyKey.proxyKeyPrefix}...
                   </p>
                 </div>
                 <span className={proxyKey.isActive ? "badge badge-success" : "badge badge-secondary"}>
-                  {proxyKey.isActive ? "✅ פעיל" : "⏸️ מושבת"}
+                  {proxyKey.isActive ? `✅ ${t("orgUsers.active")}` : `⏸️ ${t("userApiKeys.disabledStatus")}`}
                 </span>
               </div>
 
               {proxyKey.createdAt && (
-                <p style={{ margin: "0 0 15px 0", fontSize: "12px", color: "#999" }}>
-                  נוצר: {new Date(proxyKey.createdAt).toLocaleDateString("he-IL")}
+                <p style={{ margin: "0 0 15px 0", fontSize: "12px", color: "var(--text-muted)" }}>
+                  {t("userApiKeys.createdLabel", { date: new Date(proxyKey.createdAt).toLocaleDateString("he-IL") })}
                 </p>
               )}
 
@@ -223,7 +221,7 @@ export default function UserApiKeysPage() {
                   disabled={proxyKeyLoading}
                   style={{ flex: "1", minWidth: "150px" }}
                 >
-                  {proxyKeyLoading ? "⏳ מעבד..." : proxyKey.isActive ? "⏸️ השבת מפתח" : "▶️ הפעל מפתח"}
+                  {proxyKeyLoading ? `⏳ ${t("userApiKeys.processingButton")}` : proxyKey.isActive ? `⏸️ ${t("userApiKeys.disableKeyButton")}` : `▶️ ${t("userApiKeys.enableKeyButton")}`}
                 </button>
                 <button
                   className="btn btn-warning"
@@ -231,47 +229,45 @@ export default function UserApiKeysPage() {
                   disabled={proxyKeyLoading}
                   style={{ flex: "1", minWidth: "150px" }}
                 >
-                  {proxyKeyLoading ? "⏳ מעבד..." : "🔄 צור מפתח חדש"}
+                  {proxyKeyLoading ? `⏳ ${t("userApiKeys.processingButton")}` : `🔄 ${t("userApiKeys.regenerateKeyButton")}`}
                 </button>
               </div>
             </div>
 
             <div className="alert alert-info" style={{ fontSize: "13px" }}>
-              <strong>💡 טיפ:</strong> השתמש במפתח זה כדי לגשת ל-API של SafeAI מהקוד שלך.
-              אם שכחת את המפתח, תוכל ליצור אחד חדש (המפתח הישן יפסיק לעבוד).
+              <strong>💡 {t("userDashboard.tipLabel")}</strong> {t("userApiKeys.proxyKeyTipText")}
             </div>
           </div>
         ) : (
-          <div className="loading-state">טוען מידע על מפתח...</div>
+          <div className="loading-state">{t("userApiKeys.loadingKeyInfo")}</div>
         )}
       </div>
 
       {user.mode === "BYOK" ? (
         <>
           <div className="alert alert-info" style={{ marginBottom: "20px" }}>
-            <strong>ℹ️ מצב BYOK (Bring Your Own Key)</strong>
+            <strong>ℹ️ {t("userApiKeys.byokModeTitle")}</strong>
             <p style={{ margin: "10px 0 0 0" }}>
-              במצב זה, אתה מוסיף מפתחות API משלך לספקים שונים (OpenAI, Anthropic, Google, Groq).
-              המפתחות מוצפנים ונשמרים בצורה מאובטחת במערכת.
+              {t("userApiKeys.byokModeDescription")}
             </p>
           </div>
 
           <div className="card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-              <h3>המפתחות שלי ({keys.length})</h3>
-              <button 
-                className="btn btn-primary" 
+              <h3>{t("userApiKeys.myKeysTitle", { count: keys.length })}</h3>
+              <button
+                className="btn btn-primary"
                 onClick={() => setShowAddModal(true)}
               >
-                + הוסף מפתח חדש
+                + {t("userApiKeys.addNewKeyButton")}
               </button>
             </div>
 
             {keys.length === 0 ? (
               <div className="empty-state">
-                <p>עדיין לא הוספת מפתחות API</p>
+                <p>{t("userApiKeys.noKeysYet")}</p>
                 <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-                  הוסף מפתח ראשון
+                  {t("userApiKeys.addFirstKeyButton")}
                 </button>
               </div>
             ) : (
@@ -280,10 +276,10 @@ export default function UserApiKeysPage() {
                   <div 
                     key={key._id} 
                     style={{
-                      border: "1px solid #ddd",
+                      border: "1px solid var(--border-default)",
                       borderRadius: "8px",
                       padding: "15px",
-                      backgroundColor: key.isActive ? "#fff" : "#f5f5f5",
+                      backgroundColor: key.isActive ? "var(--bg-surface)" : "var(--bg-elevated)",
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -299,18 +295,18 @@ export default function UserApiKeysPage() {
                              key.provider === "anthropic" ? "Anthropic (Claude)" : 
                              key.provider === "google" ? "Google (Gemini)" : "Groq"}
                           </h4>
-                          <p style={{ margin: "5px 0 0 0", fontSize: "13px", color: "#666", fontFamily: "monospace" }}>
+                          <p dir="ltr" style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-muted)", fontFamily: "monospace", textAlign: "left" }}>
                             {key.keyPrefix}...
                           </p>
                         </div>
                       </div>
                       <span className={key.isActive ? "badge badge-success" : "badge badge-secondary"}>
-                        {key.isActive ? "פעיל" : "לא פעיל"}
+                        {key.isActive ? t("orgUsers.active") : t("orgUsers.inactive")}
                       </span>
                     </div>
                     {key.createdAt && (
-                      <p style={{ margin: "10px 0 0 0", fontSize: "12px", color: "#999" }}>
-                        נוצר: {new Date(key.createdAt).toLocaleDateString("he-IL")}
+                      <p style={{ margin: "10px 0 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
+                        {t("userApiKeys.createdLabel", { date: new Date(key.createdAt).toLocaleDateString("he-IL") })}
                       </p>
                     )}
                   </div>
@@ -321,14 +317,14 @@ export default function UserApiKeysPage() {
         </>
       ) : (
         <div className="alert alert-info">
-          <strong>🏢 מצב MANAGED</strong>
+          <strong>🏢 {t("userApiKeys.managedModeTitle")}</strong>
           <p style={{ margin: "10px 0 0 0" }}>
-            במצב זה, המערכת מנהלת את המפתחות עבורך. אין צורך להוסיף מפתחות משלך.
+            {t("userApiKeys.managedModeDescription")}
           </p>
         </div>
       )}
 
-      {showAddModal && user && (
+      {showAddModal && user?._id && (
         <ProviderKeysManagement
           userId={user._id ?? ""}
           userEmail={user.email}
@@ -348,7 +344,7 @@ export default function UserApiKeysPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            backgroundColor: "var(--bg-overlay)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -359,7 +355,7 @@ export default function UserApiKeysPage() {
         >
           <div
             style={{
-              backgroundColor: "white",
+              backgroundColor: "var(--bg-surface)",
               borderRadius: "12px",
               padding: "30px",
               maxWidth: "600px",
@@ -370,7 +366,7 @@ export default function UserApiKeysPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ marginTop: 0, marginBottom: "20px", textAlign: "center" }}>
-              🎉 המפתח החדש נוצר בהצלחה!
+              🎉 {t("userApiKeys.newKeyCreatedTitle")}
             </h2>
 
             <div
@@ -383,24 +379,24 @@ export default function UserApiKeysPage() {
             >
               <p
                 style={{
-                  color: "white",
+                  color: "var(--text-inverse)",
                   marginBottom: "15px",
                   fontWeight: "bold",
                   fontSize: "16px",
                 }}
               >
-                מפתח ה-Proxy API החדש שלך:
+                {t("userApiKeys.newProxyKeyLabel")}
               </p>
               <div
                 style={{
-                  background: "white",
+                  background: "var(--bg-surface)",
                   padding: "15px",
                   borderRadius: "8px",
                   fontFamily: "monospace",
                   fontSize: "13px",
                   wordBreak: "break-all",
-                  border: "3px solid #fff",
-                  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                  border: "3px solid var(--bg-surface)",
+                  boxShadow: "var(--shadow-md)",
                 }}
               >
                 {newProxyKey}
@@ -410,23 +406,23 @@ export default function UserApiKeysPage() {
             <div
               className="alert alert-warning"
               style={{
-                background: "#fff3cd",
-                border: "2px solid #ffc107",
+                background: "var(--color-warning-bg)",
+                border: "2px solid var(--color-warning-border)",
                 borderRadius: "8px",
                 padding: "15px",
                 marginBottom: "20px",
               }}
             >
-              <h4 style={{ color: "#856404", marginTop: 0, marginBottom: "10px" }}>
-                ⚠️ חשוב מאוד!
+              <h4 style={{ color: "var(--color-warning)", marginTop: 0, marginBottom: "10px" }}>
+                ⚠️ {t("userApiKeys.importantTitle")}
               </h4>
-              <ul style={{ margin: 0, paddingRight: "20px", color: "#856404" }}>
-                <li>שמור מפתח זה במקום בטוח</li>
+              <ul style={{ margin: 0, paddingRight: "20px", color: "var(--color-warning)" }}>
+                <li>{t("userApiKeys.saveKeySafely")}</li>
                 <li>
-                  <strong>זו ההזדמנות האחרונה שלך לראות אותו!</strong>
+                  <strong>{t("userApiKeys.lastChanceToSee")}</strong>
                 </li>
-                <li>לא תוכל לשחזר את המפתח אחרי סגירת חלון זה</li>
-                <li>המפתח הישן כבר לא עובד</li>
+                <li>{t("userApiKeys.cannotRestoreKey")}</li>
+                <li>{t("userApiKeys.oldKeyNoLongerWorks")}</li>
               </ul>
             </div>
 
@@ -436,14 +432,14 @@ export default function UserApiKeysPage() {
                 className="btn btn-primary"
                 style={{ flex: 1, minWidth: "150px" }}
               >
-                📋 העתק ללוח
+                📋 {t("usersManagement.copyToClipboardButton")}
               </button>
               <button
                 onClick={handleDownloadProxyKey}
                 className="btn btn-secondary"
                 style={{ flex: 1, minWidth: "150px" }}
               >
-                💾 הורד כקובץ
+                💾 {t("userApiKeys.downloadAsFileButton")}
               </button>
             </div>
 
@@ -452,7 +448,7 @@ export default function UserApiKeysPage() {
               className="btn btn-primary btn-full"
               style={{ width: "100%" }}
             >
-              סגור ← (לא אוכל לראות את המפתח שוב)
+              {t("userApiKeys.closeCannotSeeAgainButton")}
             </button>
           </div>
         </div>
