@@ -106,7 +106,7 @@ export function getUploadUrl(
   fileType: string,
   opts?: { fileSize?: number; context?: string }
 ): Promise<Response> {
-  return fetch(`${API_BASE_URL}/api/upload/get-url`, {
+  return authFetch(`${API_BASE_URL}/api/upload/get-url`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fileName, fileType, ...opts }),
