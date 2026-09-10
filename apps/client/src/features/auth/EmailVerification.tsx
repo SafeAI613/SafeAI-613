@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { startActivityTracking } from "../../utils/tokenManager";
+import ProfileSelectionModal from "../../components/ProfileSelectionModal";
 import { useAuth, type AuthUser } from "../../context/authStore";
 
 export default function EmailVerification() {
@@ -14,6 +15,8 @@ export default function EmailVerification() {
     "loading",
   );
   const [message, setMessage] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<AuthUser | null>(null);
   const hasVerified = useRef(false);
   const verifyEmail = useCallback(
     async (verificationToken: string) => {
@@ -41,16 +44,17 @@ export default function EmailVerification() {
             startActivityTracking();
 
             setTimeout(() => {
-              navigate(
-                response.user!.mustChangePassword
-                  ? "/change-password"
-                  : response.user!.profileId
-                    ? "/safeai-ui"
-                    : "/login",
-              );
-            }, 3000);
+              if (response.user!.mustChangePassword) {
+                navigate("/change-password");
+              } else if (!response.user!.profileId) {
+                setLoggedInUser(response.user!);
+                setShowProfileModal(true);
+              } else {
+                navigate("/safeai-ui");
+              }
+            }, 1500);
           } else {
-            // Redirect to login after 3 seconds
+            // Fallback: no tokens returned, send the user to log in manually
             setTimeout(() => {
               navigate("/login");
             }, 3000);
@@ -81,7 +85,14 @@ export default function EmailVerification() {
   }, [token]);
 
   return (
-    <div className="auth-form-container">
+    <>
+      <ProfileSelectionModal
+        isOpen={showProfileModal}
+        onClose={() => {}}
+        userId={loggedInUser?._id || ""}
+        onProfileSelected={() => navigate("/safeai-ui")}
+      />
+      <div className="auth-form-container">
       <div className="auth-form-wrapper">
         {status === "loading" && (
           <div style={{ textAlign: "center", padding: "40px" }}>
@@ -106,7 +117,7 @@ export default function EmailVerification() {
             </h2>
             <p style={{ color: "var(--text-muted)", marginBottom: "20px" }}>{message}</p>
             <p style={{ color: "var(--gray-400)", fontSize: "14px" }}>
-              {t("resetPassword.redirectingMsg")}
+              {t("emailVerification.redirectingMsg")}
             </p>
           </div>
         )}
@@ -144,6 +155,7 @@ export default function EmailVerification() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
