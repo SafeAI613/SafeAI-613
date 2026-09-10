@@ -1,5 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import LandingPage from "../pages/LandingPage";
+import LandingPageV2 from "../pages/LandingPageV2";
 import SafeAIUIPage from "../pages/SafeAIUIPage";
 import NotFound from "../pages/NotFound";
 import OrganizationUsersPage from "../pages/OrganizationUsersPage";
@@ -15,12 +17,18 @@ import AboutPage from "../pages/AboutPage";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage";
 import TenderBoardPage from "../pages/TenderBoardPage";
 import DownloadAgentsPage from "../pages/AgentDownloadsPage";
+import AgentsIndexPage from "../features/agents/AgentsIndexPage";
+import AgentsMarketplace from "../features/agents/AgentsMarketplace";
+import AgentDetailPage from "../features/agents/AgentDetailPage";
+import AgentSubmitPage from "../features/agents/AgentSubmitPage";
+import AgentStatsPage from "../features/agents/AgentStatsPage";
 import LoginForm from "../features/auth/LoginForm";
 import RegisterForm from "../features/auth/RegisterForm";
 import ApiKeyDisplay from "../features/auth/ApiKeyDisplay";
 import EmailVerification from "../features/auth/EmailVerification";
 import ForgotPassword from "../features/auth/ForgotPassword";
 import ResetPassword from "../features/auth/ResetPassword";
+import ChangePassword from "../features/auth/ChangePassword";
 import RegisterFormSuccess from "../features/auth/RegisterFormSuccess";
 import TopNavigation from "../components/TopNavigation";
 import BetaBanner from "../components/BetaBanner";
@@ -33,6 +41,9 @@ import AiNewsDetailsPage from "../pages/AiNewsDetailsPage";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ForumPage from '../features/forum/ForumPage';
 import { PostThreadPage } from '../features/forum/PostThreadPage';
+import PaymeResultPage from '../features/organizations/PaymeResultPage';
+import SafeAIHubHomePage from "../pages/SafeAIHubHomePage";
+import SafeAIPlatformHomePage from "../pages/SafeAIPlatformHomePage";
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -63,18 +74,34 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 const ROUTER_BASE = import.meta.env.VITE_BASE_PATH?.replace(/\/$/, "") || "";
 
+// The SafeAI Hub / SafeAI Platform dashboards (SCRUM-228/229) ship their own
+// complete sidebar navigation — showing the global header/banner above them
+// too just duplicates every link a second time. Hidden only on these two
+// routes; every other page keeps the global chrome unchanged.
+const ROUTES_WITHOUT_GLOBAL_CHROME = ["/safeai-hub", "/safeai-platform"];
+
+function GlobalChrome() {
+  const location = useLocation();
+  if (ROUTES_WITHOUT_GLOBAL_CHROME.includes(location.pathname)) return null;
+  return (
+    <>
+      <TopNavigation />
+      <BetaBanner />
+    </>
+  );
+}
+
 export default function AppRouter() {
   return (
+    <HelmetProvider>
     <BrowserRouter basename={ROUTER_BASE}>
-      {/* Global Top Navigation */}
-      <TopNavigation />
-
-      {/* Beta Banner */}
-      <BetaBanner />
+      <GlobalChrome />
 
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        {/* טיוטת דף בית חדש (SCRUM-227) — לתצוגה מקדימה בלבד, טרם מוחלף בנתיב הראשי */}
+        <Route path="/landing-preview" element={<LandingPageV2 />} />
         <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
 
         <Route
@@ -115,6 +142,15 @@ export default function AppRouter() {
         />
 
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Routes */}
         <Route
@@ -160,8 +196,26 @@ export default function AppRouter() {
         <Route
           path="/forum"
           element={
-            <ProtectedRoute>
               <ForumPage />
+          }
+        />
+
+        {/* Sub-homepages (SCRUM-228 / SCRUM-229) — not yet linked from the
+            main navigation; the SafeAI Hub / SafeAI Platform banners on
+            /landing-preview stay "בעדכון" until that connection is made. */}
+        <Route
+          path="/safeai-hub"
+          element={
+            <ProtectedRoute>
+              <SafeAIHubHomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/safeai-platform"
+          element={
+            <ProtectedRoute>
+              <SafeAIPlatformHomePage />
             </ProtectedRoute>
           }
         />
@@ -198,6 +252,28 @@ export default function AppRouter() {
 
         <Route path="/admin/organizations" element={<Navigate to="/safeai-ui" replace />} />
 
+        {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
+        <Route
+          path="/organizations/:id/wallet/payme/success"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <PaymeResultPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizations/:id/wallet/payme/fail"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <PaymeResultPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/articles"
           element={
@@ -223,7 +299,16 @@ export default function AppRouter() {
         <Route path="/activity-log" element={<ActivityLogPage />} />
         <Route path="/tender-board" element={<TenderBoardPage />} />
         <Route path="/download-agents" element={<DownloadAgentsPage />} />
-        <Route path="/forum/post/:id" element={<ProtectedRoute><PostThreadPage /></ProtectedRoute>} />
+
+        {/* Agents Marketplace — community-submitted agents, separate from the desktop-app download page above */}
+        <Route path="/agents-marketplace" element={<AgentsIndexPage />}>
+          <Route index element={<AgentsMarketplace />} />
+          <Route path="submit" element={<AgentSubmitPage />} />
+          <Route path="stats" element={<AgentStatsPage />} />
+          <Route path=":id" element={<AgentDetailPage />} />
+        </Route>
+
+        <Route path="/forum/post/:id" element={<PostThreadPage />} />
 
         {/* Catch all - 404 */}
         <Route path="*" element={<NotFound />} />
@@ -231,5 +316,6 @@ export default function AppRouter() {
 
       <Footer />
     </BrowserRouter>
+    </HelmetProvider>
   );
 }

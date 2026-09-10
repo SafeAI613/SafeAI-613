@@ -7,9 +7,10 @@ import {
   fetchStrictSimilarPosts,
   generateAiAssistance,
   getUploadUrl,
-  uploadFileToS3,
+  uploadFileViaPresignedPost,
   createPost,
 } from './api';
+import { validateFileForUpload } from './uploadValidation';
 import '../../styles/forum.css';
 
 interface AddPostModalProps {
@@ -164,12 +165,18 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
 
     if (selectedFile) {
       try {
-        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type);
+        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type, {
+          fileSize: selectedFile.size,
+          context: 'post',
+        });
 
-        if (!urlResponse.ok) throw new Error('נכשלה קבלת קישור מאובטח מהשרת');
-        const { uploadUrl, fileUrl } = await urlResponse.json();
+        if (!urlResponse.ok) {
+          const errData = await urlResponse.json().catch(() => null);
+          throw new Error(errData?.error || 'נכשלה קבלת קישור מאובטח מהשרת');
+        }
+        const { url, fields, fileUrl } = await urlResponse.json();
 
-        const awsResponse = await uploadFileToS3(uploadUrl, selectedFile);
+        const awsResponse = await uploadFileViaPresignedPost(url, fields, selectedFile);
 
         if (!awsResponse.ok) throw new Error('העלאת הקובץ ל-S3 נכשלה');
         finalFileUrl = fileUrl;
@@ -220,6 +227,24 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
 
   const handleClipClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (file: File | null) => {
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const error = await validateFileForUpload(file, 'post');
+    if (error) {
+      setValidationError(error);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setValidationError(null);
+    setSelectedFile(file);
   };
 
   const isContentTooShort = formData.content.trim().length < 15;
@@ -297,7 +322,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               type="file"
               ref={fileInputRef}
               className="forum-file-input-hidden"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
             />
 
             <button
@@ -414,18 +439,18 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               styles={{
                 control: (base) => ({
                   ...base,
-                  borderColor: '#DEEFF7',
+                  borderColor: 'var(--color-success-border)',
                   borderWidth: '2px',
                   borderRadius: '6px',
                   minHeight: '40px',
                   height: 'auto',
                   textAlign: 'right',
                   boxShadow: 'none',
-                  backgroundColor: '#fff',
+                  backgroundColor: 'var(--bg-surface)',
                   paddingLeft: '8px',
                   paddingRight: '8px',
                   boxSizing: 'border-box',
-                  '&:hover': { borderColor: '#1C7AA6' }
+                  '&:hover': { borderColor: 'var(--brand-secondary)' }
                 }),
                 valueContainer: (base) => ({
                   ...base,
@@ -440,19 +465,19 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 menu: (base) => ({
                   ...base,
                   zIndex: 1050,
-                  border: '1px solid #1C7AA6',
-                  boxShadow: '0 -4px 12px rgba(0,0,0,0.1)'
+                  border: '1px solid var(--brand-secondary)',
+                  boxShadow: 'var(--shadow-md)'
                 }),
                 multiValue: (base) => ({
                   ...base,
-                  backgroundColor: '#DEEFF7',
+                  backgroundColor: 'var(--color-success-bg)',
                   borderRadius: '4px',
-                  border: '1px solid #A6C9D9',
+                  border: '1px solid var(--color-success-border)',
                   margin: '2px'
                 }),
                 multiValueLabel: (base) => ({
                   ...base,
-                  color: '#135471',
+                  color: 'var(--color-success)',
                   fontWeight: 'bold',
                   fontSize: '13px'
                 }),

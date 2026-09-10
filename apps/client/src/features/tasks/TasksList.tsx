@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { type Task } from './tasksSlice';
 
 // הגדרת RootState כאן כדי למנוע שגיאות ייבוא אדומות
@@ -13,6 +14,7 @@ interface RootState {
 const TasksList: React.FC = () => {
     const list = useSelector((state: RootState) => state.tasks.todos);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const [titleSearch, setTitleSearch] = useState<string>("");
     const [dateSearch, setDateSearch] = useState<string>("");
@@ -38,8 +40,8 @@ const TasksList: React.FC = () => {
             <button 
                 onClick={() => navigate("/add-task")} 
                 style={{ 
-                    backgroundColor: "#4CAF50", 
-                    color: "white", 
+                    backgroundColor: "var(--color-success)",
+                    color: "var(--text-inverse)",
                     padding: "10px 20px", 
                     marginBottom: "20px",
                     cursor: "pointer",
@@ -52,12 +54,12 @@ const TasksList: React.FC = () => {
 
             {/* פילטרים וחיפוש */}
             <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
-                <input type="text" placeholder="חיפוש לפי כותרת" value={titleSearch} onChange={(e) => setTitleSearch(e.target.value)} />
+                <input type="text" placeholder={t("tasks.searchByTitlePlaceholder")} value={titleSearch} onChange={(e) => setTitleSearch(e.target.value)} />
                 <input type="date" value={dateSearch} onChange={(e) => setDateSearch(e.target.value)} />
                 <select value={completedFilter} onChange={(e) => setCompletedFilter(e.target.value)}>
-                    <option value="all">הכול</option>
-                    <option value="completed">הושלמו</option>
-                    <option value="notCompleted">לא הושלמו</option>
+                    <option value="all">{t("common.all")}</option>
+                    <option value="completed">{t("tasks.completedFilterOption")}</option>
+                    <option value="notCompleted">{t("tasks.notCompletedFilterOption")}</option>
                 </select>
             </div>
 
@@ -66,7 +68,7 @@ const TasksList: React.FC = () => {
             {/* הצגת המשימות */}
             <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
                 {filteredList.map((task) => (
-                    <div key={task.id} style={{ border: "1px solid black", padding: "15px", borderRadius: "8px" }}>
+                    <div key={task.id} style={{ border: "1px solid var(--gray-950)", padding: "15px", borderRadius: "8px" }}>
                         <h3>{task.title}</h3>
                         <p>{task.desc}</p>
                         <p><strong>Date:</strong> {task.date}</p>

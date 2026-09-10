@@ -843,6 +843,85 @@ export async function sendOrgStatusEmail(
   }
 }
 
+const ORG_ADMIN_ACTION_COPY = {
+  approved: (orgName: string) => `אישר את הארגון "${orgName}"`,
+  rejected: (orgName: string) => `דחה את הארגון "${orgName}"`,
+  suspended: (orgName: string) => `השעה את הארגון "${orgName}"`,
+  reactivated: (orgName: string) => `הפעיל מחדש את הארגון "${orgName}"`,
+} as const;
+
+/**
+ * Audit notification: let the OTHER admins know one of their peers took an
+ * approve/reject/suspend/reactivate action on an organization, so the team
+ * has visibility into moderation actions it didn't itself perform.
+ */
+export async function sendOrgAdminActionEmail(
+  adminEmail: string,
+  kind: keyof typeof ORG_ADMIN_ACTION_COPY,
+  orgName: string,
+  actingAdminEmail: string,
+) {
+  const dashboardUrl = `${FRONTEND_URL}/safeai-ui`;
+  const safeOrgName = escapeHtml(orgName);
+  const safeActingAdminEmail = escapeHtml(actingAdminEmail);
+  const summary = ORG_ADMIN_ACTION_COPY[kind](orgName);
+  const safeSummary = ORG_ADMIN_ACTION_COPY[kind](safeOrgName);
+
+  const mailOptions = {
+    from: EMAIL_FROM,
+    to: adminEmail,
+    subject: sanitizeHeaderValue(`עדכון ניהול ארגונים: ${summary}`),
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="he">
+      <head><meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #555; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; padding: 15px 30px; background: #555; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h1>עדכון ניהול ארגונים</h1></div>
+          <div class="content">
+            <p>שלום,</p>
+            <p>מנהל המערכת <strong>${safeActingAdminEmail}</strong> ${safeSummary}.</p>
+            <p style="text-align: center;">
+              <a href="${dashboardUrl}" class="button">מעבר למסך ניהול הארגונים</a>
+            </p>
+          </div>
+          <div class="footer"><p>© 2026 SafeAI. כל הזכויות שמורות.</p></div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `מנהל המערכת ${actingAdminEmail} ${summary}.\n${dashboardUrl}\n\n© 2026 SafeAI`,
+  };
+
+  try {
+    const info = await withRetry(async () => {
+      const transporter = await createTransporter();
+      return transporter.sendMail(mailOptions);
+    });
+
+    if (process.env.NODE_ENV !== "production") {
+      logger.debug("📧 Org Admin Action Email (DEV MODE):");
+      logger.info("To:", adminEmail);
+      logger.info("Action:", kind);
+    }
+    return info;
+  } catch (error) {
+    logger.error("Failed to send org admin action email:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    // best-effort
+  }
+}
+
 /**
  * Notify the tender's publisher that a new applicant registered
  */
@@ -850,6 +929,7 @@ export async function sendApplicantRegisteredEmail(params: {
   adminEmail: string;
   tenderTitle: string;
   tenderId: string;
+  applicantId?: string | undefined;
   applicant: {
     name: string;
     email: string;
@@ -858,7 +938,7 @@ export async function sendApplicantRegisteredEmail(params: {
     contactMethod?: string | undefined;
   };
 }): Promise<void> {
-  const { adminEmail, tenderTitle, tenderId, applicant } = params;
+  const { adminEmail, tenderTitle, tenderId, applicantId, applicant } = params;
 
   const safeTenderTitle = escapeHtml(tenderTitle);
   const safeName = escapeHtml(applicant.name);
@@ -870,6 +950,11 @@ export async function sendApplicantRegisteredEmail(params: {
   const safeContactMethod = applicant.contactMethod
     ? escapeHtml(applicant.contactMethod)
     : undefined;
+
+  // קישור לצפייה ישירה בהצעה שהוגשה, במסך "המכרזים שלי" של בעל המכרז.
+  const proposalUrl = applicantId
+    ? `${FRONTEND_URL}/tender-board?screen=manage&tenderId=${encodeURIComponent(tenderId)}&applicantId=${encodeURIComponent(applicantId)}`
+    : `${FRONTEND_URL}/tender-board?screen=manage&tenderId=${encodeURIComponent(tenderId)}`;
 
   const mailOptions = {
     from: EMAIL_FROM,
@@ -912,11 +997,18 @@ export async function sendApplicantRegisteredEmail(params: {
           </tr>` : ""}
         </table>
 
+        <p style="text-align: center; margin: 24px 0;">
+          <a href="${proposalUrl}" style="display: inline-block; padding: 12px 28px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            צפייה בהצעה
+          </a>
+        </p>
+
         <p style="color: #7f8c8d; font-size: 12px; margin-top: 24px;">
           נשלח אוטומטית ב־${new Date().toLocaleString("he-IL")}
         </p>
       </div>
     `,
+    text: `משתתף חדש נרשם למכרז: ${tenderTitle}\n\nשם: ${applicant.name}\nאימייל: ${applicant.email}\nפרטים: ${applicant.details}\n${applicant.proposal ? `הצעה: ${applicant.proposal}\n` : ""}${applicant.contactMethod ? `אמצעי קשר: ${applicant.contactMethod}\n` : ""}\nלצפייה בהצעה: ${proposalUrl}\n\n© 2026 SafeAI`,
   };
 
   try {

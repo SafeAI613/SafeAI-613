@@ -30,6 +30,38 @@ const TenderSchema = new Schema(
 
     additionalDetails: { type: String },
 
+    specification: {
+      type: {
+        status: { type: String, enum: ["pending", "generating", "ready", "failed"] },
+        techStackRecommendation: { type: String },
+        openSourceReferences: {
+          type: [
+            {
+              title: { type: String, required: true },
+              url: { type: String, required: true },
+              description: { type: String },
+            },
+          ],
+          default: [],
+        },
+        readingSources: {
+          type: [
+            {
+              title: { type: String, required: true },
+              url: { type: String, required: true },
+              description: { type: String },
+            },
+          ],
+          default: [],
+        },
+        document: { type: String },
+        errorMessage: { type: String },
+        generatedAt: { type: Date },
+        isPublished: { type: Boolean, default: false },
+      },
+      required: false,
+    },
+
     applicants: {
         type: [
             {
@@ -41,7 +73,9 @@ const TenderSchema = new Schema(
             resumeFileKey: { type: String, required: false },
             portfolioLink: { type: String, required: false },
             professionalProfileId: { type: Schema.Types.ObjectId, ref: "ProfessionalProfile", required: false },
-            isViewed: { type: Boolean, default: false }
+            isViewed: { type: Boolean, default: false },
+            userId: { type: String },
+            appliedAt: { type: Date, default: Date.now },
             },
         ],
         default: [],

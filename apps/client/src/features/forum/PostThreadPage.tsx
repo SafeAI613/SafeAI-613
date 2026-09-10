@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
@@ -14,12 +14,23 @@ import {
   incrementPostView,
   deleteComment,
   getUploadUrl,
-  uploadFileToS3,
+  uploadFileViaPresignedPost,
   createComment,
   ratePost,
 } from './api';
+import { validateFileForUpload } from './uploadValidation';
 import type { Post, Comment } from './types';
+import { SEO } from '../../components/SEO';
 import '../../styles/forum.css';
+
+// Builds a meta description of roughly 160 characters, without cutting a
+// word in half - post.content is plain text (rendered unescaped as a React
+// child elsewhere on this page), so no HTML stripping is needed here.
+const buildMetaDescription = (content: string): string => {
+  const trimmed = content.trim();
+  if (trimmed.length <= 160) return trimmed;
+  return trimmed.slice(0, 160).replace(/\s+\S*$/, '') + '...';
+};
 
 export const PostThreadPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -170,12 +181,18 @@ export const PostThreadPage: React.FC = () => {
 
     if (selectedFile) {
       try {
-        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type);
+        const urlResponse = await getUploadUrl(selectedFile.name, selectedFile.type, {
+          fileSize: selectedFile.size,
+          context: 'comment',
+        });
 
-        if (!urlResponse.ok) throw new Error('נכשלה קבלת קישור מאובטח לתגובה');
-        const { uploadUrl, fileUrl } = await urlResponse.json();
+        if (!urlResponse.ok) {
+          const errData = await urlResponse.json().catch(() => null);
+          throw new Error(errData?.error || 'נכשלה קבלת קישור מאובטח לתגובה');
+        }
+        const { url, fields, fileUrl } = await urlResponse.json();
 
-        const awsResponse = await uploadFileToS3(uploadUrl, selectedFile);
+        const awsResponse = await uploadFileViaPresignedPost(url, fields, selectedFile);
 
         if (!awsResponse.ok) throw new Error('העלאת קובץ התגובה ל-S3 נכשלה');
         finalFileUrl = fileUrl;
@@ -215,8 +232,25 @@ export const PostThreadPage: React.FC = () => {
     }
   };
 
+  const handleCommentFileSelect = async (file: File | null) => {
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const error = await validateFileForUpload(file, 'comment');
+    if (error) {
+      alert(error);
+      if (commentFileInputRef.current) commentFileInputRef.current.value = '';
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
   const handleStarClick = async (selectedRating: number) => {
-    if (!post) return;
+    if (!post || !currentUser) return;
     setUserRating(selectedRating);
 
     try {
@@ -272,7 +306,7 @@ export const PostThreadPage: React.FC = () => {
 
     const isCurrentYear = date.getFullYear() === now.getFullYear();
     const monthFormatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' });
-    const monthName = monthFormatter.format(date).replace(/[\u0591-\u05C7]/g, "");
+    const monthName = monthFormatter.format(date).replace(/[֑-ׇ]/g, "");
     const dayLetters = convertToGematriaPipe(date.getDate());
     let hebrewDate = `${dayLetters} ב${monthName}`;
 
@@ -341,20 +375,20 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
     }
 
     let iconClass = 'fa-solid fa-file';
-    let iconColor = '#64748b';
+    let iconColor = 'var(--text-muted)';
 
     if (fileExtension === 'pdf') {
       iconClass = 'fa-solid fa-file-pdf';
-      iconColor = '#ef4444';
+      iconColor = 'var(--color-danger)';
     } else if (['doc', 'docx'].includes(fileExtension)) {
       iconClass = 'fa-solid fa-file-word';
-      iconColor = '#3b82f6';
+      iconColor = 'var(--link-color)';
     } else if (['xls', 'xlsx'].includes(fileExtension)) {
       iconClass = 'fa-solid fa-file-excel';
-      iconColor = '#10b981';
+      iconColor = 'var(--brand-secondary)';
     } else if (['zip', 'rar', '7z'].includes(fileExtension)) {
       iconClass = 'fa-solid fa-file-zipper';
-      iconColor = '#f59e0b';
+      iconColor = 'var(--color-warning)';
     } else if (['ts', 'tsx', 'js', 'jsx', 'html', 'css', 'json'].includes(fileExtension)) {
       iconClass = 'fa-solid fa-file-code';
       iconColor = '#8b5cf6';
@@ -396,8 +430,25 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
   if (loading) return <div className="forum-thread-loading">טוען שרשור...</div>;
   if (!post) return <div className="forum-thread-not-found">הפוסט לא נמצא.</div>;
 
+  const firstImageAttachment = post.attachments?.find((url) =>
+    ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
+      url.split('?')[0].split('.').pop()?.toLowerCase() || ''
+    )
+  );
+  const postKeywords = post.tags
+    ?.map((tag) => (typeof tag === 'string' ? tag : tag.name))
+    .join(', ');
+
   return (
     <div className="forum-thread-page">
+      <SEO
+        title={post.title}
+        description={buildMetaDescription(post.content)}
+        keywords={postKeywords}
+        canonicalUrl={`https://safeai613.com/forum/post/${post._id}`}
+        ogImage={firstImageAttachment}
+        noIndex={!!post.isLocked}
+      />
 
       <button
         onClick={() => navigate('/forum')}
@@ -466,7 +517,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           </div>
         </div>
       </div>
-
+      {currentUser && (     
       <div className="forum-rating-row">
         <span className="forum-rating-label">דירוג הפוסט:</span>
         <div className="forum-stars-row">
@@ -489,6 +540,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           ({post.averageRating || 0}/5 מתוך {post.ratingCount || 0} מדרגים)
         </span>
       </div>
+      )}
 
       {comments.length > 0 && (
         <div className="forum-comments-list">
@@ -550,6 +602,10 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           <i className="fa-solid fa-lock forum-locked-icon"></i>
           <span>שרשור זה ננעל לתגובות חדשות על ידי מנהל המערכת.</span>
         </div>
+      ) : !currentUser ? (
+       <div className="forum-unauthorized-notice">
+        <span>יש <Link to="/login" className="forum-login-link">להתחבר</Link> כדי להגיב כאן</span>
+      </div>
       ) : (
         <div className="forum-comment-form-wrap">
           <div className="forum-comment-form-avatar-col">
@@ -700,7 +756,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 .ProseMirror p.is-editor-empty::before {
                   content: attr(data-placeholder);
                   float: right;
-                  color: #9ca3af;
+                  color: var(--text-muted);
                   font-weight: 300;
                   font-size: 14px;
                   pointer-events: none;
@@ -714,13 +770,13 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               <button
                 type="submit"
                 disabled={commentLoading || isCommentBlocked}
-                title={isCommentBlocked ? 'אין לך הרשאה להגיב לפוסטים' : undefined}
+                title={isCommentBlocked ? "אין לך הרשאה להגיב לפוסטים" : undefined}
                 className="forum-comment-submit-btn"
               >
-                {commentLoading ? 'שומר...' : 'שמור תגובה'}
+                {commentLoading ? "שומר..." : "שמור תגובה"}
               </button>
-
-              <input type="file" ref={commentFileInputRef} className="forum-file-input-hidden" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} />
+              
+              <input type="file" ref={commentFileInputRef} className="forum-file-input-hidden" onChange={(e) => handleCommentFileSelect(e.target.files?.[0] || null)} />
               <button type="button" onClick={() => commentFileInputRef.current?.click()} className="forum-attach-comment-btn">
                 <i className="fa-solid fa-paperclip"></i> צרף קובץ לתגובה
               </button>
