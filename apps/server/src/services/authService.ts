@@ -36,10 +36,6 @@ export async function register(data: {
   role?: string;
   skipEmailVerification?: boolean;
 }) {
-  if (data.email.includes("+")) {
-    throw new Error("משתמש עם אימייל זה כבר קיים במערכת");
-  }
-
   // Check if user already exists
   const existingUser = await User.findOne({ email: data.email.toLowerCase() });
   if (existingUser) {
