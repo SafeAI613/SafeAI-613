@@ -28,7 +28,7 @@ import { getOrganizationById } from "../services/organizationService";
 const router = express.Router();
 
 // חוסם פעולות ניהול לבעל ארגון כל עוד הארגון אינו מאושר (אדמין עוקף)
-async function requireApprovedOrg(
+export async function requireApprovedOrg(
   req: express.Request<{ id: string }>,
   res: express.Response,
   next: express.NextFunction
@@ -60,7 +60,7 @@ router.get("/admin/all", requireAdmin, getAllOrganizationsHandler); // System Ad
 router.get("/my", getMyOrganizationHandler); // Current user's own organization (any status)
 
 // 2. GENERAL ORGANIZATION ROUTES
-router.post("/", createOrganizationHandler); // Admin only
+router.post("/", requireAdmin, createOrganizationHandler); // Admin only
 router.get("/", listOrganizationsHandler);    // Admin רואה הכל, Org Owner רואה את שלו
 
 // 3. PROTECTED DYNAMIC ROUTES (נתיבים עם מזהה דינמי תמיד בסוף)

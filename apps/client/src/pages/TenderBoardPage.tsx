@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { apiCall, API_ENDPOINTS } from '../config/api'
 import Card from '../features/tenders/Card.tsx'
 import TenderDetails from '../features/tenders/TenderDetails.tsx'
 import ApplyForTender from './../features/tenders/ApplyForTender.tsx'
+import ViewMyApplication from '../features/tenders/ViewMyApplication.tsx'
 import CreateTender from '../features/tenders/CreateTender.tsx'
 import ManageMyTenders from '../features/tenders/ManageMyTenders.tsx'
 import type { Applicant, RawTender, Tender, TenderTime } from '../features/tenders/types'
 import '../styles/tender-board-page.css'
 import AiThinkingLoader from '../features/tenders/AiThinkingLoader.tsx'
+import ProfessionalProfileAvatar from '../features/professionalProfile/ProfessionalProfileAvatar.tsx'
 
 const initialTenders: Tender[] = []
 
@@ -34,6 +38,7 @@ const parseTimeToDays = (time?: TenderTime): number => {
 }
 
 export default function TenderBoardPage() {
+  const { t } = useTranslation()
   const [tenders, setTenders] = useState<Tender[]>(initialTenders)
 
   // State עבור סינון לפי סוג מוצר
@@ -52,6 +57,9 @@ export default function TenderBoardPage() {
   const [minBudget, setMinBudget] = useState<string>('')
   const [maxTimeDays, setMaxTimeDays] = useState<string>('')
 
+  // State עבור סינון "מכרזים שהגשתי להם הצעה"
+  const [showOnlyApplied, setShowOnlyApplied] = useState(false)
+
   // State עבור חיפוש חכם עם AI
   const [isSmartSearchOpen, setIsSmartSearchOpen] = useState(false)
   const [smartSearchQuery, setSmartSearchQuery] = useState('')
@@ -60,13 +68,37 @@ export default function TenderBoardPage() {
 
   const [selectedTender, setSelectedTender] = useState<Tender | null>(null)
   const [applyingTender, setApplyingTender] = useState<Tender | null>(null)
+  const [viewingApplication, setViewingApplication] = useState<Applicant | null>(null)
   const [successMessage, setSuccessMessage] = useState('')
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)
+  const [showAlreadyAppliedNotice, setShowAlreadyAppliedNotice] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [activeScreen, setActiveScreen] = useState<'dashboard' | 'create' | 'manage'>('dashboard')
   const [currentUserCode, setCurrentUserCode] = useState('tnd-98234')
   const [refreshKey, setRefreshKey] = useState(0)
+  // ManageMyTenders שומר בפנים את המכרז שנבחר לצפייה/עריכה - לחיצה על "צפיה במכרזים שלי"
+  // בזמן שכבר נמצאים במסך הזה (activeScreen כבר 'manage') לא הייתה משנה את activeScreen,
+  // ולכן לא גרמה ל-re-render שמאפס את הבחירה הפנימית ההיא. שינוי ה-key מכריח mount מחדש
+  // של ManageMyTenders בכל לחיצה על הכפתור, כך שהוא תמיד חוזר למסך רשימת המכרזים.
+  const [manageViewResetKey, setManageViewResetKey] = useState(0)
+
+  // פתיחה ישירה של הצעה ספציפית מקישור שהגיע במייל (screen=manage&tenderId=&applicantId=)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [deepLinkTenderId, setDeepLinkTenderId] = useState<string | null>(null)
+  const [deepLinkApplicantId, setDeepLinkApplicantId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const screen = searchParams.get('screen')
+    const tenderId = searchParams.get('tenderId')
+    if (screen === 'manage' && tenderId) {
+      setActiveScreen('manage')
+      setDeepLinkTenderId(tenderId)
+      setDeepLinkApplicantId(searchParams.get('applicantId'))
+      setSearchParams({}, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!successMessage) return undefined
@@ -79,6 +111,16 @@ export default function TenderBoardPage() {
 
     return () => window.clearTimeout(timer)
   }, [successMessage])
+
+  useEffect(() => {
+    if (!showAlreadyAppliedNotice) return undefined
+
+    const timer = window.setTimeout(() => {
+      setShowAlreadyAppliedNotice(false)
+    }, 3000)
+
+    return () => window.clearTimeout(timer)
+  }, [showAlreadyAppliedNotice])
 
   const normalizeTender = (tender: RawTender): Tender => ({
     id: tender.id ?? tender._id ?? '',
@@ -94,6 +136,9 @@ export default function TenderBoardPage() {
     wantsEmails: tender.wantsEmails,
     additionalDetails: tender.additionalDetails,
     applicants: tender.applicants,
+    applicantsCount: tender.applicantsCount,
+    proposalRange: tender.proposalRange,
+    specification: tender.specification,
   })
 
   useEffect(() => {
@@ -146,7 +191,7 @@ export default function TenderBoardPage() {
       } catch (error) {
         console.error('Failed to load or upload tenders', error)
         if (!isMounted) return
-        setErrorMessage('לא ניתן לטעון את המכרזים כעת. אנא נסה שוב מאוחר יותר.')
+        setErrorMessage(t('tenders.loadTendersFailedError'))
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -171,7 +216,7 @@ export default function TenderBoardPage() {
       console.log(results.map(normalizeTender))
     } catch (error) {
       console.error('Failed to execute smart search', error)
-      setErrorMessage('החיפוש החכם נכשל. אנא נסה שנית.')
+      setErrorMessage(t('tenders.smartSearchFailedError'))
     } finally {
       setIsSmartSearching(false)
     }
@@ -210,9 +255,12 @@ export default function TenderBoardPage() {
         matchTime = tenderTime <= parsedMaxTime
       }
 
-      return matchProduct && matchAi && matchBudget && matchTime
+      // סינון לפי מכרזים שהמשתמש הגיש להם הצעה
+      const matchApplied = !showOnlyApplied || (t.applicants ?? []).some((a) => a.userId === currentUserCode)
+
+      return matchProduct && matchAi && matchBudget && matchTime && matchApplied
     })
-  }, [tenders, smartSearchResults, selectedProductType, selectedAiApplication, minBudget, maxTimeDays])
+  }, [tenders, smartSearchResults, selectedProductType, selectedAiApplication, minBudget, maxTimeDays, showOnlyApplied, currentUserCode])
 
   const handleUpdateTender = (updatedTender: Tender) => {
     setTenders((prevTenders) => prevTenders.map((tender) => (tender.id === updatedTender.id ? updatedTender : tender)))
@@ -256,7 +304,9 @@ export default function TenderBoardPage() {
     const applicantWithId = { ...applicant }
 
     try {
-      const updatedTender = await apiCall<{ tender?: { applicants?: Applicant[] } }>(
+      const updatedTender = await apiCall<{
+        tender?: Pick<Tender, 'applicants' | 'applicantsCount' | 'proposalRange'>
+      }>(
         API_ENDPOINTS.tenders.apply(applyingTender.id),
         {
           method: 'POST',
@@ -270,6 +320,8 @@ export default function TenderBoardPage() {
             ? {
               ...tender,
               applicants: updatedTender.tender?.applicants ?? [...(tender.applicants ?? []), applicantWithId],
+              applicantsCount: updatedTender.tender?.applicantsCount ?? (tender.applicantsCount ?? tender.applicants?.length ?? 0) + 1,
+              proposalRange: updatedTender.tender?.proposalRange ?? tender.proposalRange,
             }
             : tender,
         )
@@ -279,10 +331,18 @@ export default function TenderBoardPage() {
         setSmartSearchResults((prev) => prev ? updateList(prev) : null)
       }
       setApplyingTender(null)
-      setSuccessMessage('הגשת מועמדות בוצעה בהצלחה')
+      setSuccessMessage(t('tenders.applicationSubmittedSuccessMsg'))
     } catch (error) {
+      const apiError = error as Error & { code?: string }
+
+      if (apiError.code === 'ALREADY_APPLIED') {
+        setApplyingTender(null)
+        setShowAlreadyAppliedNotice(true)
+        return
+      }
+
       console.error('Failed to submit application', error)
-      setErrorMessage('הגישה למכרז נכשלה. בדוק את הנתונים ונסה שוב.')
+      setErrorMessage(t('tenders.applicationFailedError'))
     }
   }
 
@@ -293,10 +353,13 @@ export default function TenderBoardPage() {
     if (activeScreen === 'manage') {
       return (
         <ManageMyTenders
+          key={manageViewResetKey}
           currentUserCode={currentUserCode}
           tenders={tenders}
           onUpdateTender={handleUpdateTender}
           onDeleteTender={handleDeleteTender}
+          initialOffersTenderId={deepLinkTenderId}
+          initialHighlightApplicantId={deepLinkApplicantId}
         />
       )
     }
@@ -304,13 +367,13 @@ export default function TenderBoardPage() {
     return (
       <main className="tender-board-page">
         {loading && (
-          <div className="loading-banner">טוען מכרזים מהשרת...</div>
+          <div className="loading-banner">{t('tenders.loadingTendersFromServer')}</div>
         )}
         <section className="dashboard-hero">
           <div>
-            <h1>לוח פרוייקטים</h1>
+            <h1>{t('nav.tenderBoard')}</h1>
             <p className="lead-copy">
-              כאן תוכל לעיין בפרויקטים, להגיש מועמדות ולנהל את הפרויקטים שלך.
+              {t('tenders.dashboardLeadCopy')}
             </p>
           </div>
           <div className="dashboard-actions">
@@ -330,8 +393,19 @@ export default function TenderBoardPage() {
               style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer' }}
             >
               <span>✨</span>
-              <span>חיפוש חכם</span>
+              {isSmartSearchOpen ? <span>סגור חיפוש חכם</span> : <span>{t('tenders.smartSearchToggleBtn')}</span>}
             </button>
+
+            {!isSmartSearchOpen && (
+              <button
+                type="button"
+                className={`applied-filter-toggle${showOnlyApplied ? ' active' : ''}`}
+                onClick={() => setShowOnlyApplied((v) => !v)}
+                aria-pressed={showOnlyApplied}
+              >
+                {showOnlyApplied ? 'ניקוי החיפוש' : 'מכרזים שהגשתי להם הצעה'}
+              </button>
+            )}
 
             {isSmartSearchOpen && (
               <div style={{ display: 'flex', gap: '10px', width: '100%', justifyContent: 'center' }}>
@@ -340,24 +414,35 @@ export default function TenderBoardPage() {
                   value={smartSearchQuery}
                   onChange={(e) => setSmartSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSmartSearch() }}
-                  placeholder='הקלד חיפוש חופשי'
-                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', flex: 1, maxWidth: '400px' }}
+                  placeholder={t('tenders.smartSearchInputPlaceholder')}
+                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', flex: 1, maxWidth: '400px' }}
                 />
-                <button type="button" className="tab-button" onClick={handleSmartSearch} style={{ backgroundColor: '#f1f5f9' }}>
-                  חפש
+                <button type="button" className="tab-button" onClick={handleSmartSearch} style={{ backgroundColor: 'var(--gray-100)' }}>
+                  {t('tenders.searchBtn')}
                 </button>
                 {smartSearchResults !== null && (
                   <button type="button" className="tab-button" onClick={handleClearSmartSearch}>
-                    ניקוי
+                    {t('tenders.showAllBtn')}
                   </button>
                 )}
               </div>
+            )}
+
+            {isSmartSearchOpen && (
+              <button
+                type="button"
+                className={`applied-filter-toggle${showOnlyApplied ? ' active' : ''}`}
+                onClick={() => setShowOnlyApplied((v) => !v)}
+                aria-pressed={showOnlyApplied}
+              >
+                {showOnlyApplied ? 'ניקוי החיפוש' : 'מכרזים שהגשתי להם הצעה'}
+              </button>
             )}
           </div>
 
           {isSmartSearching && (
             <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
-              <AiThinkingLoader color="#16a34a" />
+              <AiThinkingLoader color="#1C7AA6" />
             </div>
           )}
           {errorMessage && (
@@ -368,10 +453,10 @@ export default function TenderBoardPage() {
 
             {/* תיבה 1: סוג מוצר */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <strong>סוג המוצר:</strong>
+              <strong>{t('tenders.productTypeFilterLabel')}</strong>
               <div className="autocomplete">
                 <input
-                  aria-label="חיפוש סוג מוצר"
+                  aria-label={t('tenders.searchProductTypeAriaLabel')}
                   value={productTypeInput}
                   onChange={(e) => {
                     setProductTypeInput(e.target.value)
@@ -379,7 +464,7 @@ export default function TenderBoardPage() {
                   }}
                   onFocus={() => setShowProductSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowProductSuggestions(false), 150)}
-                  placeholder="הקלד או בחר"
+                  placeholder={t('tenders.typeToSearchOrSelectPlaceholder')}
                   className="autocomplete-input"
                 />
 
@@ -393,28 +478,28 @@ export default function TenderBoardPage() {
                         onMouseDown={() => chooseProductType(p)}
                         className="autocomplete-item"
                       >
-                        {p}
+                        {t(`tenders.productTypeOptions.${p}`, { defaultValue: p })}
                       </div>
                     ))}
                     {productTypes.filter((p) => p.toLowerCase().includes(productTypeInput.toLowerCase() || '')).length === 0 && (
-                      <div className="autocomplete-empty" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>לא נמצאו תוצאות</div>
+                      <div className="autocomplete-empty" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{t('tenders.noResultsFoundText')}</div>
                     )}
                   </div>
                 )}
               </div>
               {selectedProductType && (
                 <button type="button" className="tab-button" onClick={() => chooseProductType(null)}>
-                  נקה
+                  {t('tenders.clearBtn')}
                 </button>
               )}
             </div>
 
             {/* תיבה 2: צורת יישום AI */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <strong>יישום AI:</strong>
+              <strong>{t('tenders.aiApplicationFilterLabel')}</strong>
               <div className="autocomplete">
                 <input
-                  aria-label="חיפוש צורת יישום AI"
+                  aria-label={t('tenders.searchAiApplicationAriaLabel')}
                   value={aiApplicationInput}
                   onChange={(e) => {
                     setAiApplicationInput(e.target.value)
@@ -422,7 +507,7 @@ export default function TenderBoardPage() {
                   }}
                   onFocus={() => setShowAiSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowAiSuggestions(false), 150)}
-                  placeholder="הקלד או בחר"
+                  placeholder={t('tenders.typeToSearchOrSelectPlaceholder')}
                   className="autocomplete-input"
                 />
 
@@ -436,25 +521,25 @@ export default function TenderBoardPage() {
                         onMouseDown={() => chooseAiApplication(a)}
                         className="autocomplete-item"
                       >
-                        {a}
+                        {t(`tenders.aiApplicationOptions.${a}`, { defaultValue: a })}
                       </div>
                     ))}
                     {aiApplications.filter((a) => a.toLowerCase().includes(aiApplicationInput.toLowerCase() || '')).length === 0 && (
-                      <div className="autocomplete-empty" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>לא נמצאו תוצאות</div>
+                      <div className="autocomplete-empty" style={{ padding: '12px 16px', color: 'var(--text-muted)' }}>{t('tenders.noResultsFoundText')}</div>
                     )}
                   </div>
                 )}
               </div>
               {selectedAiApplication && (
                 <button type="button" className="tab-button" onClick={() => chooseAiApplication(null)}>
-                  נקה
+                  {t('tenders.clearBtn')}
                 </button>
               )}
             </div>
 
             {/* תיבה 3: חיפוש לפי תקציב מינימלי */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <strong>תקציב מינימלי:</strong>
+              <strong>{t('tenders.minBudgetFilterLabel')}</strong>
               <input
                 type="number"
                 min="0" // חוסם את החצים של האינפוט מלרדת מתחת ל-0
@@ -468,20 +553,20 @@ export default function TenderBoardPage() {
                     setMinBudget(val);
                   }
                 }}
-                placeholder="לדוגמה: 5000"
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '140px' }}
+                placeholder={t('tenders.budgetExamplePlaceholder')}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '140px' }}
               />
             </div>
 
             {/* תיבה 4: חיפוש לפי זמן מקסימלי (בימים) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <strong>זמן מקסימלי (בימים):</strong>
+              <strong>{t('tenders.maxTimeFilterLabel')}</strong>
               <input
                 type="number"
                 value={maxTimeDays}
                 onChange={(e) => setMaxTimeDays(e.target.value)}
-                placeholder="לדוגמה: 30"
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '140px' }}
+                placeholder={t('tenders.timeExamplePlaceholder')}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '140px' }}
               />
             </div>
 
@@ -491,7 +576,7 @@ export default function TenderBoardPage() {
         <section className="dashboard-metrics">
           <div className="metric-card">
             <strong>{visibleTenders.length}</strong>
-            <p>סה"כ מכרזים נמצאו:</p>
+            <p>{t('tenders.totalTendersFoundLabel')}</p>
           </div>
         </section>
 
@@ -507,22 +592,33 @@ export default function TenderBoardPage() {
                 budget={tender.budget}
                 productType={tender.productType}
                 aiApplicationType={tender.aiApplicationType}
-                applicantsCount={tender.applicants?.length ?? 0}
+                applicantsCount={tender.applicantsCount ?? tender.applicants?.length ?? 0}
+                appliedAt={tender.applicants?.find((a) => a.userId === currentUserCode)?.appliedAt}
                 onView={() => setSelectedTender(tender)}
               />
             ))
           ) : (
             <div className="empty-state" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 20px' }}>
-              <h2>אין מכרזים מתאימים</h2>
-              <p>נסו לשנות את סינון הפרמטרים או לבדוק את כל המכרזים.</p>
+              <h2>{t('tenders.noMatchingTendersTitle')}</h2>
+              <p>{t('tenders.noMatchingTendersMessage')}</p>
             </div>
           )}
         </section>
 
         {applyingTender ? (
           <ApplyForTender tender={applyingTender} onSubmit={handleTenderApply} onCancel={() => setApplyingTender(null)} />
+        ) : viewingApplication && selectedTender ? (
+          <ViewMyApplication tender={selectedTender} applicant={viewingApplication} onClose={() => setViewingApplication(null)} />
         ) : (
-          selectedTender && <TenderDetails tender={selectedTender} onClose={() => setSelectedTender(null)} onApply={startApply} />
+          selectedTender && (
+            <TenderDetails
+              tender={selectedTender}
+              onClose={() => setSelectedTender(null)}
+              onApply={startApply}
+              currentUserId={currentUserCode}
+              onViewMyApplication={(applicant) => setViewingApplication(applicant)}
+            />
+          )
         )}
 
         {showSuccessOverlay && successMessage && (
@@ -533,6 +629,15 @@ export default function TenderBoardPage() {
             </div>
           </div>
         )}
+
+        {showAlreadyAppliedNotice && (
+          <div className="success-modal-overlay" role="alert" aria-live="assertive">
+            <div className="success-modal">
+              <div className="success-modal__text">כבר נרשמת למכרז זה בעבר</div>
+              <div className="success-modal__text">הרישום בוטל</div>
+            </div>
+          </div>
+        )}
       </main>
     )
   }
@@ -540,28 +645,60 @@ export default function TenderBoardPage() {
   return (
     <main className="dashboard-shell">
       <section className="dashboard-page-header">
-        <nav className="dashboard-page-nav" aria-label="ניווט דף">
+        <nav className="dashboard-page-nav" aria-label={t('tenders.pageNavAriaLabel')}>
           <button
             type="button"
             className={`dashboard-link ${activeScreen === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveScreen('dashboard')}
           >
-            לוח מכרזים
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M2 3h12v2H2V3zm0 4h12v2H2V7zm0 4h12v2H2v-2z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {t('tenders.tendersBoardTab')}
           </button>
           <button
             type="button"
             className={`dashboard-link ${activeScreen === 'create' ? 'active' : ''}`}
             onClick={() => setActiveScreen('create')}
           >
-            פרסום פרוייקט
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M8 3v10M3 8h10"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            {t('tenders.publishProjectTab')}
           </button>
           <button
             type="button"
             className={`dashboard-link ${activeScreen === 'manage' ? 'active' : ''}`}
-            onClick={() => setActiveScreen('manage')}
+            onClick={() => {
+              setActiveScreen('manage')
+              setManageViewResetKey((k) => k + 1)
+            }}
           >
-            צפיה במכרזים שלי
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+            {t('tenders.viewMyTendersTab')}
           </button>
+
+          <ProfessionalProfileAvatar />
         </nav>
       </section>
 

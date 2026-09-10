@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { AUTH_ERROR_CODE_KEYS } from "../../i18n/authErrorCodes";
 
 interface RegisterFormData {
   email: string;
@@ -29,6 +31,7 @@ interface User {
 }
 
 export default function RegisterForm() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
     password: "",
@@ -42,6 +45,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [agreedToPrivacyPolicy, setAgreedToPrivacyPolicy] = useState(false);
   const navigate = useNavigate();
 
@@ -64,19 +68,26 @@ export default function RegisterForm() {
     // fetchOrganizations();
   }, []);
 
+  const validateEmail = (email: string): string | null => {
+    if (email.includes("+")) {
+      return 'לא ניתן להשתמש בתו "+" בכתובת המייל';
+    }
+    return null;
+  };
+
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
     if (password.length < 8) {
-      errors.push("הסיסמה חייבת להכיל לפחות 8 תווים");
+      errors.push(t("resetPassword.errorMinLength"));
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות אות גדולה אחת");
+      errors.push(t("resetPassword.errorUppercase"));
     }
     if (!/[a-z]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות אות קטנה אחת");
+      errors.push(t("resetPassword.errorLowercase"));
     }
     if (!/[0-9]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות ספרה אחת");
+      errors.push(t("resetPassword.errorDigit"));
     }
     return errors;
   };
@@ -86,10 +97,19 @@ export default function RegisterForm() {
     setLoading(true);
     setError(null);
     setPasswordErrors([]);
+    setEmailError(null);
+
+    // Validate email
+    const emailValidationError = validateEmail(formData.email);
+    if (emailValidationError) {
+      setEmailError(emailValidationError);
+      setLoading(false);
+      return;
+    }
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError("הסיסמאות אינן תואמות");
+      setError(t("resetPassword.errorMatch"));
       setLoading(false);
       return;
     }
@@ -139,9 +159,9 @@ export default function RegisterForm() {
       }
     } catch (err: unknown) {
       console.error("Registration error:", err);
-      const errorMessage =
-        err instanceof Error ? err.message : "שגיאה בהרשמה";
-      setError(errorMessage);
+      const code = (err as { code?: string })?.code;
+      const key = code ? AUTH_ERROR_CODE_KEYS[code] : undefined;
+      setError(key ? t(key) : t("register.errorGeneric"));
     } finally {
       setLoading(false);
     }
@@ -160,16 +180,20 @@ export default function RegisterForm() {
     if (name === "password" && passwordErrors.length > 0) {
       setPasswordErrors([]);
     }
+
+    if (name === "email") {
+      setEmailError(validateEmail(value));
+    }
   };
 
   return (
     <div className="auth-form-container">
       <div className="auth-form-wrapper">
-        <h2 className="auth-title">הרשמה</h2>
+        <h2 className="auth-title">{t("nav.register")}</h2>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">שם מלא *</label>
+            <label htmlFor="name">{t("register.fullNameLabel")}</label>
             <input
               type="text"
               id="name"
@@ -177,12 +201,12 @@ export default function RegisterForm() {
               value={formData.name}
               onChange={handleChange}
               required
-              placeholder="הזן שם מלא"
+              placeholder={t("register.fullNamePlaceholder")}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">אימייל *</label>
+            <label htmlFor="email">{t("register.emailLabel")}</label>
             <input
               type="email"
               id="email"
@@ -193,10 +217,13 @@ export default function RegisterForm() {
               placeholder="your@email.com"
               autoComplete="email"
             />
+            {emailError && (
+              <span style={{ color: "#dc3545", fontSize: "12px" }}>{emailError}</span>
+            )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">סיסמה *</label>
+            <label htmlFor="password">{t("register.passwordLabel")}</label>
             <input
               type="password"
               id="password"
@@ -204,14 +231,14 @@ export default function RegisterForm() {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="הזן סיסמה"
+              placeholder={t("login.passwordPlaceholder")}
               autoComplete="new-password"
             />
             {passwordErrors.length > 0 && (
               <div className="password-requirements">
                 <ul>
                   {passwordErrors.map((err, idx) => (
-                    <li key={idx} style={{ color: "#dc3545", fontSize: "12px" }}>
+                    <li key={idx} style={{ color: "var(--color-danger)", fontSize: "12px" }}>
                       {err}
                     </li>
                   ))}
@@ -221,7 +248,7 @@ export default function RegisterForm() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">אימות סיסמה *</label>
+            <label htmlFor="confirmPassword">{t("resetPassword.confirmPasswordLabel")}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -229,13 +256,13 @@ export default function RegisterForm() {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              placeholder="הזן סיסמה שוב"
+              placeholder={t("resetPassword.confirmPasswordPlaceholder")}
               autoComplete="new-password"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="organizationId">ארגון *</label>
+            <label htmlFor="organizationId">{t("register.organizationLabel")}</label>
             <select
               id="organizationId"
               name="organizationId"
@@ -251,13 +278,13 @@ export default function RegisterForm() {
                 </option>
               ))}
             </select>
-            <small style={{ display: "block", marginTop: "5px", color: "#666" }}>
-              בחר את הארגון שאליו אתה משתייך
+            <small style={{ display: "block", marginTop: "5px", color: "var(--text-muted)" }}>
+              {t("register.organizationHint")}
             </small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="mode">מצב שימוש *</label>
+            <label htmlFor="mode">{t("register.modeLabel")}</label>
             <select
               id="mode"
               name="mode"
@@ -265,13 +292,13 @@ export default function RegisterForm() {
               onChange={handleChange}
               required
             >
-              <option value="BYOK">🔑 BYOK - הבא מפתח משלך</option>
-              <option value="MANAGED">🏢 MANAGED - שימוש במפתחות המערכת</option>
+              <option value="BYOK">{t("register.modeOptionByok")}</option>
+              <option value="MANAGED">{t("register.modeOptionManaged")}</option>
             </select>
-            <small style={{ display: "block", marginTop: "5px", color: "#666" }}>
+            <small style={{ display: "block", marginTop: "5px", color: "var(--text-muted)" }}>
               {formData.mode === "BYOK"
-                ? "תוכל להוסיף מפתחות API משלך לספקים שונים"
-                : "המערכת תנהל את המפתחות עבורך"}
+                ? t("register.modeHintByok")
+                : t("register.modeHintManaged")}
             </small>
           </div>
 
@@ -282,7 +309,7 @@ export default function RegisterForm() {
           )}
 
           <div className="form-group">
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#666", whiteSpace: "nowrap" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
               <input
                 type="checkbox"
                 checked={agreedToPrivacyPolicy}
@@ -294,10 +321,10 @@ export default function RegisterForm() {
                   padding: 0,
                   margin: 0,
                   flexShrink: 0,
-                  border: "1px solid #d1d5db",
+                  border: "1px solid var(--border-default)",
                   borderRadius: "3px",
-                  background: "#ffffff",
-                  accentColor: "#10a37f",
+                  background: "var(--bg-surface)",
+                  accentColor: "var(--brand-secondary)",
                 }}
               />
               <span>
@@ -314,15 +341,15 @@ export default function RegisterForm() {
             className="btn btn-primary btn-full"
             disabled={loading || !agreedToPrivacyPolicy}
           >
-            {loading ? "נרשם..." : "הירשם"}
+            {loading ? t("register.submitLoading") : t("register.submitButton")}
           </button>
         </form>
 
         <div className="auth-footer">
           <p>
-            כבר יש לך חשבון?{" "}
+            {t("register.haveAccountText")}{" "}
             <button className="link-button" onClick={() => navigate("/login")}>
-              התחבר
+              {t("contact.loginButton")}
             </button>
           </p>
         </div>

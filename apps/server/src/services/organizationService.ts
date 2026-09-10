@@ -1,9 +1,15 @@
 import crypto from "crypto";
 import * as repo from "../repositories/organizationRepository";
 import * as userRepo from "../repositories/userRepository";
-import { UsageLog } from "../models";
+import { aggregateUsageStats } from "../repositories/usageRepository";
 import { register } from "./authService";
-import { sendOrgApprovalRequestEmail, sendOrgApprovedEmail, sendOrgStatusEmail, sendInviteEmail } from "../utils/email";
+import {
+  sendOrgApprovalRequestEmail,
+  sendOrgApprovedEmail,
+  sendOrgStatusEmail,
+  sendInviteEmail,
+  sendOrgAdminActionEmail,
+} from "../utils/email";
 import logger from "../logger";
 
 function generateTemporaryPassword(): string {
@@ -209,6 +215,7 @@ export async function createOrganizationMember(
       organizationId: orgId,
       role: data.role || "user",
       skipEmailVerification: true,
+      mustChangePassword: true,
     });
 
     logger.info("Organization member created", { organizationId: orgId, userId: user._id });
@@ -342,7 +349,28 @@ export async function publicRequestOrganization(data: {
   return organization;
 }
 
-export async function approveOrganization(orgId: string) {
+async function notifyOtherAdmins(
+  kind: "approved" | "rejected" | "suspended" | "reactivated",
+  orgName: string,
+  actingAdminEmail?: string,
+) {
+  if (!actingAdminEmail) return;
+  try {
+    const users = await userRepo.getUsers();
+    const otherAdmins = users.filter(
+      (u: any) => u.role === "admin" && u.email !== actingAdminEmail
+    );
+    await Promise.all(
+      otherAdmins.map((admin: any) =>
+        sendOrgAdminActionEmail(admin.email, kind, orgName, actingAdminEmail)
+      )
+    );
+  } catch (error) {
+    logger.error("Failed to notify other admins about org action", { error, kind });
+  }
+}
+
+export async function approveOrganization(orgId: string, actingAdminEmail?: string) {
   const organization = await repo.getOrganizationById(orgId);
   if (!organization) {
     throw new Error("Organization not found");
@@ -369,12 +397,13 @@ export async function approveOrganization(orgId: string) {
       organizationId: orgId,
     });
   }
+  await notifyOtherAdmins("approved", (organization as any).name, actingAdminEmail);
 
   logger.info("Organization approved", { organizationId: orgId });
   return updated;
 }
 
-export async function rejectOrganization(orgId: string) {
+export async function rejectOrganization(orgId: string, actingAdminEmail?: string) {
   const organization = await repo.getOrganizationById(orgId);
   if (!organization) {
     throw new Error("Organization not found");
@@ -401,6 +430,7 @@ export async function rejectOrganization(orgId: string) {
       organizationId: orgId,
     });
   }
+  await notifyOtherAdmins("rejected", (organization as any).name, actingAdminEmail);
 
   logger.info("Organization rejected", { organizationId: orgId });
   return updated;
@@ -423,7 +453,11 @@ export async function listAllOrganizationsWithStats() {
   return repo.getOrganizationsWithUserCount();
 }
 
-export async function setOrganizationActive(orgId: string, isActive: boolean) {
+export async function setOrganizationActive(
+  orgId: string,
+  isActive: boolean,
+  actingAdminEmail?: string,
+) {
   const organization = await repo.getOrganizationById(orgId);
   if (!organization) {
     throw new Error("Organization not found");
@@ -455,6 +489,11 @@ export async function setOrganizationActive(orgId: string, isActive: boolean) {
       organizationId: orgId,
     });
   }
+  await notifyOtherAdmins(
+    isActive ? "reactivated" : "suspended",
+    (organization as any).name,
+    actingAdminEmail,
+  );
 
   logger.info("Organization active state changed", { organizationId: orgId, isActive });
   return updated;
@@ -462,21 +501,13 @@ export async function setOrganizationActive(orgId: string, isActive: boolean) {
 
 export async function getOrganizationUsageSummary(orgId: string) {
   const users = await getOrganizationUsers(orgId);
-  const userIds = users.map((u: any) => u._id);
+  const userIds = users.map((u: any) => u._id.toString());
 
-  const stats = await UsageLog.aggregate([
-    { $match: { userId: { $in: userIds }, success: true } },
-    {
-      $group: {
-        _id: null,
-        totalRequests: { $sum: 1 },
-        totalTokens: { $sum: "$totalTokens" },
-        totalCost: { $sum: "$cost" },
-      },
-    },
-  ]);
+  if (userIds.length === 0) {
+    return { userCount: 0, totalRequests: 0, totalTokens: 0, totalCost: 0 };
+  }
 
-  const summary = stats[0] || { totalRequests: 0, totalTokens: 0, totalCost: 0 };
+  const summary = await aggregateUsageStats(userIds);
   return {
     userCount: users.length,
     totalRequests: summary.totalRequests,
