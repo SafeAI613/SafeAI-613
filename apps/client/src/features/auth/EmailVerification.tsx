@@ -4,26 +4,19 @@ import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { startActivityTracking } from "../../utils/tokenManager";
 import ProfileSelectionModal from "../../components/ProfileSelectionModal";
-
-interface VerifiedUser {
-  _id: string;
-  email: string;
-  name: string;
-  role: string;
-  mode: string;
-  profileId?: string;
-}
+import { useAuth, type AuthUser } from "../../context/authStore";
 
 export default function EmailVerification() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { setUser } = useAuth();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading",
   );
   const [message, setMessage] = useState("");
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<VerifiedUser | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<AuthUser | null>(null);
   const hasVerified = useRef(false);
   const verifyEmail = useCallback(
     async (verificationToken: string) => {
@@ -31,7 +24,7 @@ export default function EmailVerification() {
         const response = await apiCall<{
           success: boolean;
           message: string;
-          user?: VerifiedUser;
+          user?: AuthUser;
           accessToken?: string;
           refreshToken?: string;
         }>(API_ENDPOINTS.auth.verifyEmail(verificationToken), {
@@ -43,15 +36,17 @@ export default function EmailVerification() {
           setMessage(response.message);
 
           if (response.accessToken && response.refreshToken && response.user) {
-            // Log the user in automatically instead of sending them back to /login
+            // Auto-login: the user is already verified and authenticated, no
+            // need to make them log in again manually.
             localStorage.setItem("accessToken", response.accessToken);
             localStorage.setItem("refreshToken", response.refreshToken);
-            localStorage.setItem("user", JSON.stringify(response.user));
-            localStorage.setItem("userRole", response.user.role);
+            setUser(response.user);
             startActivityTracking();
 
             setTimeout(() => {
-              if (!response.user!.profileId) {
+              if (response.user!.mustChangePassword) {
+                navigate("/change-password");
+              } else if (!response.user!.profileId) {
                 setLoggedInUser(response.user!);
                 setShowProfileModal(true);
               } else {
@@ -73,7 +68,7 @@ export default function EmailVerification() {
         setMessage(errorMessage);
       }
     },
-    [navigate, t],
+    [navigate, setUser, t],
   );
 
   useEffect(() => {

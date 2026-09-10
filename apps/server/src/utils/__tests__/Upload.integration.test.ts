@@ -34,19 +34,34 @@ jest.mock('@aws-sdk/s3-presigned-post', () => ({
 }));
 
 import app from '../../index';
+import { generateAccessToken } from '../jwt';
+
+const TOKEN = generateAccessToken({ userId: '507f1f77bcf86cd799439011', email: 'a@b.com', role: 'user' });
 
 const MB = 1024 * 1024;
 const GB = 1024 * MB;
 
 describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', () => {
+  test('מחזיר 401 כשאין טוקן התחברות בכלל', async () => {
+    const res = await request(app)
+      .post('/api/upload/get-url')
+      .send({ fileName: 'image.png', fileType: 'image/png' });
+
+    expect(res.status).toBe(401);
+  });
+
   test('מחזיר 400 אם fileName או fileType חסרים', async () => {
-    const res = await request(app).post('/api/upload/get-url').send({});
+    const res = await request(app)
+      .post('/api/upload/get-url')
+      .set('Authorization', `Bearer ${TOKEN}`)
+      .send({});
     expect(res.status).toBe(400);
   });
 
   test('מחזיר uploadUrl ו-fileUrl כשאין הקשר (מסלול PUT חתום ישן)', async () => {
     const res = await request(app)
       .post('/api/upload/get-url')
+      .set('Authorization', `Bearer ${TOKEN}`)
       .send({ fileName: 'image.png', fileType: 'image/png' });
 
     expect(res.status).toBe(200);
@@ -59,6 +74,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
   test('מחזיר 400 עבור הקשר לא מוכר', async () => {
     const res = await request(app)
       .post('/api/upload/get-url')
+      .set('Authorization', `Bearer ${TOKEN}`)
       .send({ fileName: 'image.png', fileType: 'image/png', context: 'unknownContext' });
 
     expect(res.status).toBe(400);
@@ -68,6 +84,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מחזיר 400 אם fileSize חסר', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'image.png', fileType: 'image/png', context: 'post' });
       expect(res.status).toBe(400);
     });
@@ -75,6 +92,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מחזיר url, fields ו-fileUrl כשהנתונים תקינים (הקשר פוסט)', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'image.png', fileType: 'image/png', fileSize: 1000, context: 'post' });
 
       expect(res.status).toBe(200);
@@ -87,6 +105,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מחזיר 400 עבור קובץ וידאו בהקשר תגובה', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'video.mp4', fileType: 'video/mp4', fileSize: 1000, context: 'comment' });
 
       expect(res.status).toBe(400);
@@ -95,6 +114,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מאפשר קובץ וידאו בהקשר פוסט', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'video.mp4', fileType: 'video/mp4', fileSize: 1000, context: 'post' });
 
       expect(res.status).toBe(200);
@@ -103,6 +123,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מחזיר 400 כשקובץ תמונה חורג מהגודל המרבי המותר', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'image.png', fileType: 'image/png', fileSize: 21 * MB, context: 'post' });
 
       expect(res.status).toBe(400);
@@ -111,6 +132,7 @@ describe('POST /api/upload/get-url - קבלת קישור העלאה חתום', (
     test('מחזיר 400 כשקובץ וידאו חורג מהגודל המרבי המותר', async () => {
       const res = await request(app)
         .post('/api/upload/get-url')
+        .set('Authorization', `Bearer ${TOKEN}`)
         .send({ fileName: 'video.mp4', fileType: 'video/mp4', fileSize: 3 * GB, context: 'post' });
 
       expect(res.status).toBe(400);
