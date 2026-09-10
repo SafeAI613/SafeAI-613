@@ -5,15 +5,21 @@
 import { z } from "zod";
 
 /**
+ * Shared email validation: valid format, and no "+" (blocks plus-addressed
+ * emails, e.g. user+tag@example.com, in every flow that creates a user).
+ */
+const emailSchema = z
+  .string()
+  .email("כתובת אימייל לא תקינה")
+  .refine((email) => !email.includes("+"), {
+    message: 'לא ניתן להשתמש בתו "+" בכתובת המייל',
+  });
+
+/**
  * Registration validation schema
  */
 export const registerSchema = z.object({
-  email: z
-    .string()
-    .email("כתובת אימייל לא תקינה")
-    .refine((email) => !email.includes("+"), {
-      message: 'לא ניתן להשתמש בתו "+" בכתובת המייל',
-    }),
+  email: emailSchema,
   password: z
     .string()
     .min(8, "הסיסמה חייבת להכיל לפחות 8 תווים")
@@ -67,6 +73,15 @@ export const resetPasswordSchema = z.object({
  */
 export const verifyEmailSchema = z.object({
   token: z.string().min(1, "Token is required"),
+});
+
+/**
+ * Admin-side user creation validation schema (POST /api/users).
+ * Only validates the email, the one field this endpoint must guard against
+ * the same plus-addressing bypass as self-registration.
+ */
+export const createUserSchema = z.object({
+  email: emailSchema,
 });
 
 /**
