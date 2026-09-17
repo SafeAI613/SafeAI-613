@@ -9,7 +9,8 @@ import '../../styles/forum.css';
 export const ForumPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(''); 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [minRating, setMinRating] = useState<number>(0); // 0 = ללא סינון לפי דירוג
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
   
@@ -25,11 +26,11 @@ export const ForumPage: React.FC = () => {
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const isAdmin = currentUser?.role === 'admin';
 
-  const fetchPosts = (search: string = '', page: number = 1) => {
+  const fetchPosts = (search: string = '', page: number = 1, ratingFilter: number = minRating) => {
     setLoading(true);
     const userRole = currentUser?.role || 'user';
 
-    fetchPostsFromApi(search, page, userRole)
+    fetchPostsFromApi(search, page, userRole, ratingFilter)
       .then((res) => {
         if (!res.ok) throw new Error('שרת הפורום החזיר שגיאה');
         return res.json();
@@ -57,11 +58,16 @@ export const ForumPage: React.FC = () => {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      fetchPosts(searchQuery, currentPage);
+      fetchPosts(searchQuery, currentPage, minRating);
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, currentPage]);
+  }, [searchQuery, currentPage, minRating]);
+
+  const handleMinRatingChange = (value: number) => {
+    setMinRating(value);
+    setCurrentPage(1);
+  };
 
   // אפקט חכם המושך המלצות ומסנן כפילויות - מעודכן לשימוש ב-postId מהיר
   useEffect(() => {
@@ -259,6 +265,25 @@ export const ForumPage: React.FC = () => {
             className="forum-search-input"
           />
           <i className="fa-solid fa-magnifying-glass forum-search-icon"></i>
+        </div>
+
+        <div className="forum-rating-filter-wrap">
+          <label htmlFor="forum-rating-filter" className="forum-rating-filter-label">
+            סינון לפי דירוג:
+          </label>
+          <select
+            id="forum-rating-filter"
+            value={minRating}
+            onChange={(e) => handleMinRatingChange(Number(e.target.value))}
+            className="forum-rating-filter-select"
+          >
+            <option value={0}>הכל</option>
+            <option value={5}>★★★★★ ומעלה</option>
+            <option value={4}>★★★★ ומעלה</option>
+            <option value={3}>★★★ ומעלה</option>
+            <option value={2}>★★ ומעלה</option>
+            <option value={1}>★ ומעלה</option>
+          </select>
         </div>
       </div>
 

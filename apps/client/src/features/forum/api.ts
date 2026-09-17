@@ -10,16 +10,21 @@ import { authFetch } from '../../utils/apiClient';
 
 // --- פוסטים ---
 
-export function fetchPosts(search: string, page: number, userRole: string): Promise<Response> {
-  const baseUrl = search.trim()
-    ? `${API_BASE_URL}/api/posts/search?query=${search}`
-    : `${API_BASE_URL}/api/posts?page=${page}`;
+export function fetchPosts(search: string, page: number, userRole: string, minRating: number = 0): Promise<Response> {
+  const isSearch = !!search.trim();
+  const params = new URLSearchParams({ userRole: userRole });
 
-  const url = baseUrl.includes('?')
-    ? `${baseUrl}&userRole=${userRole}${!search.trim() ? '' : `&page=${page}`}`
-    : `${baseUrl}?userRole=${userRole}&page=${page}`;
+  if (isSearch) {
+    params.set('query', search);
+  } else {
+    params.set('page', String(page));
+  }
+  if (minRating > 0) {
+    params.set('minRating', String(minRating));
+  }
 
-  return fetch(url);
+  const path = isSearch ? '/api/posts/search' : '/api/posts';
+  return fetch(`${API_BASE_URL}${path}?${params.toString()}`);
 }
 
 export function fetchPostById(id: string): Promise<Response> {
