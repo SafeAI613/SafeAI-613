@@ -475,6 +475,47 @@
   color: var(--color-info);
 }
 
+/* פס הסינון/חיפוש מעל טבלת הפניות של האדמין */
+.requests-filters-card {
+  padding: 16px;
+  background-color: var(--bg-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  margin-top: 16px;
+}
+
+.requests-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.requests-filters-row select,
+.requests-filters-row input[type="date"] {
+  padding: 8px 10px;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  background-color: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.requests-filters-search {
+  flex: 1 1 220px;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-muted);
+  border-radius: 8px;
+  background-color: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.requests-filters-buttons {
+  display: flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
 /* עיצוב המיכל של הטבלה */
 .requests-table-container {
   padding: 24px;

@@ -11,6 +11,45 @@ export const findByUserId = async (userId: string) => {
   return await ContactMessage.find(query).sort({ createdAt: -1 });
 };
 
+export interface ContactRequestFilters {
+  status?: string;
+  requestType?: string;
+  search?: string;
+  fromDate?: string;
+  toDate?: string;
+}
+
+// Escapes regex metacharacters in free-text search input so it's treated as
+// a literal substring match instead of being interpreted as a regex pattern.
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export const findAllWithFilters = async (filters: ContactRequestFilters) => {
+  const query: Record<string, any> = {};
+
+  if (filters.status) query.status = filters.status;
+  if (filters.requestType) query.requestType = filters.requestType;
+
+  if (filters.search?.trim()) {
+    const regex = new RegExp(escapeRegExp(filters.search.trim()), 'i');
+    query.$or = [{ title: regex }, { description: regex }];
+  }
+
+  if (filters.fromDate || filters.toDate) {
+    const createdAt: Record<string, Date> = {};
+    if (filters.fromDate) createdAt.$gte = new Date(filters.fromDate);
+    if (filters.toDate) {
+      const to = new Date(filters.toDate);
+      to.setHours(23, 59, 59, 999);
+      createdAt.$lte = to;
+    }
+    query.createdAt = createdAt;
+  }
+
+  return await ContactMessage.find(query)
+    .populate('userId', 'name email')
+    .sort({ createdAt: -1 });
+};
+
 
 
 export const updateStatus = async (id: string, userId: string, status: string, isAdmin = false) => {

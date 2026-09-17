@@ -19,6 +19,7 @@ type Request = {
   userId?: RequestUser | string;
   title?: string;
   status: string;
+  requestType?: string;
   replies?: Reply[];
   // Set by apps/agents/inquiry-agent's classify_node, once it has looked at a request.
   urgency?: "urgent" | "normal" | "low";
@@ -31,6 +32,8 @@ const URGENCY_BADGE_CLASS: Record<string, string> = {
   low: "badge",
 };
 
+type ContactType = { label: string; value: string };
+
 export default function AdminRequestsList() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,22 @@ export default function AdminRequestsList() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { showAlert } = useAlert();
+
+  const [contactTypes, setContactTypes] = useState<ContactType[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [requestTypeFilter, setRequestTypeFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  // Only the applied values trigger a fetch, so typing in the fields above
+  // doesn't hit the server on every keystroke.
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: "",
+    status: "",
+    requestType: "",
+    fromDate: "",
+    toDate: "",
+  });
 
   const isRequestNew = (req: Request) => {
     const hasAdminReply = req.replies?.some((reply: Reply) => reply.senderRole === "admin");
@@ -61,11 +80,35 @@ export default function AdminRequestsList() {
   };
 
   useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await apiCall<{ data: ContactType[] }>(API_ENDPOINTS.contactTypes);
+        setContactTypes(response.data);
+      } catch (err) {
+        console.error("שגיאה בטעינת סוגי הפניות:", err);
+      }
+    };
+    fetchTypes();
+  }, []);
+
+  useEffect(() => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await apiCall<Request[]>(API_ENDPOINTS.allRequests, { method: "GET" });
+
+        const params = new URLSearchParams();
+        if (appliedFilters.search.trim()) params.set("search", appliedFilters.search.trim());
+        if (appliedFilters.status) params.set("status", appliedFilters.status);
+        if (appliedFilters.requestType) params.set("requestType", appliedFilters.requestType);
+        if (appliedFilters.fromDate) params.set("fromDate", appliedFilters.fromDate);
+        if (appliedFilters.toDate) params.set("toDate", appliedFilters.toDate);
+        const query = params.toString();
+
+        const data = await apiCall<Request[]>(
+          query ? `${API_ENDPOINTS.allRequests}?${query}` : API_ENDPOINTS.allRequests,
+          { method: "GET" },
+        );
         setRequests(data || []);
       } catch (err) {
         console.error("שגיאה בטעינה:", err);
@@ -76,12 +119,70 @@ export default function AdminRequestsList() {
     };
 
     fetchRequests();
-  }, []);
+  }, [appliedFilters]);
+
+  const applyFilters = () => {
+    setAppliedFilters({
+      search: searchText,
+      status: statusFilter,
+      requestType: requestTypeFilter,
+      fromDate,
+      toDate,
+    });
+  };
+
+  const resetFilters = () => {
+    setSearchText("");
+    setStatusFilter("");
+    setRequestTypeFilter("");
+    setFromDate("");
+    setToDate("");
+    setAppliedFilters({ search: "", status: "", requestType: "", fromDate: "", toDate: "" });
+  };
+
+  const filtersBar = (
+    <div className="requests-filters-card">
+      <div className="requests-filters-row">
+        <input
+          className="requests-filters-search"
+          type="text"
+          placeholder={t("requests.searchPlaceholder")}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="">{t("requests.allStatuses")}</option>
+          <option value="open">{t("inquiries.statusOpen")}</option>
+          <option value="closed">{t("requests.closedStatus")}</option>
+        </select>
+
+        <select value={requestTypeFilter} onChange={(e) => setRequestTypeFilter(e.target.value)}>
+          <option value="">{t("requests.allTypes")}</option>
+          {contactTypes.map((ct) => (
+            <option key={ct.value} value={ct.value}>{ct.label}</option>
+          ))}
+        </select>
+
+        <label>{t("inquiries.fromDate")}</label>
+        <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+
+        <label>{t("inquiries.toDate")}</label>
+        <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+
+        <div className="requests-filters-buttons">
+          <button className="btn btn-primary" onClick={applyFilters}>{t("inquiries.filterBtn")}</button>
+          <button className="btn btn-secondary" onClick={resetFilters} type="button">{t("inquiries.resetBtn")}</button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
       <div className="admin-requests-container">
         <h2>{t("requests.adminTitle")}</h2>
+        {filtersBar}
         <p>{t("requests.loadingRequests")}</p>
       </div>
     );
@@ -91,6 +192,7 @@ export default function AdminRequestsList() {
     return (
       <div className="admin-requests-container">
         <h2>{t("requests.adminTitle")}</h2>
+        {filtersBar}
         <p className="error">{error}</p>
       </div>
     );
@@ -99,6 +201,7 @@ export default function AdminRequestsList() {
   return (
     <div className="admin-requests-container">
       <h2>{t("requests.adminTitle")}</h2>
+      {filtersBar}
       {requests.length === 0 ? (
         <p>{t("requests.noRequestsYet")}</p>
       ) : (
