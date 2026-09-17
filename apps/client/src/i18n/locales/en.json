@@ -921,7 +921,20 @@
     "closeRequestBtn": "Close Request",
     "adminSenderLabel": "Admin",
     "meSenderLabel": "Me",
-    "replyPlaceholder": "Write a reply..."
+    "replyPlaceholder": "Write a reply...",
+    "urgencyColumn": "Urgency",
+    "categoryColumn": "Category",
+    "notClassifiedYet": "Not classified yet",
+    "urgency": {
+      "urgent": "Urgent",
+      "normal": "Normal",
+      "low": "Low"
+    },
+    "category": {
+      "bug": "Bug",
+      "feature": "Feature Request",
+      "feedback": "Feedback"
+    }
   },
   "authSection": {
     "registrationSuccessAlert": "Registration successful!\n\nYour API Key:\n{{apiKey}}\n\nSave this key in a safe place!",

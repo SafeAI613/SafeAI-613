@@ -93,6 +93,31 @@ export function requireAdminOrServiceToken(
 }
 
 /**
+ * Same static-secret-or-JWT acceptance as requireAdminOrServiceToken, but
+ * without also requiring the admin role - for routes a regular user and the
+ * inquiry-agent service both call (e.g. closing/replying to a contact
+ * request), where the handler itself already checks ownership-or-admin.
+ * Falls back to plain authenticateToken (not requireAdmin) so a normal
+ * user's own JWT still works unchanged.
+ */
+export function authenticateTokenOrServiceToken(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length).trim() : undefined;
+  const serviceToken = process.env.AGENT_SERVICE_TOKEN;
+
+  if (token && serviceToken && constantTimeEqual(token, serviceToken)) {
+    (req as any).user = { userId: "agent-service", email: "agent-service", role: "admin" };
+    return next();
+  }
+
+  return authenticateToken(req, res, next);
+}
+
+/**
  * Middleware to require user to be active
  * Can be extended to check user.isActive from database
  */

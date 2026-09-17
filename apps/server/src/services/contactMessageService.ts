@@ -1,4 +1,4 @@
-import { ContactMessage } from "../models/ContactMessage"; 
+import { ContactMessage, ContactUrgency, ContactCategory } from "../models/ContactMessage";
 import mongoose from "mongoose";
 import * as repository from "../repositories/contactMessageRepository";
 
@@ -34,7 +34,14 @@ export const addReplyToRequest = async (id: string, senderId: string, text: stri
     senderRole,
     createdAt: new Date()
   };
-  
+
   return await repository.addReplyToRequest(id, reply);
+};
+
+export const updateClassification = async (
+  id: string,
+  classification: { urgency?: ContactUrgency; category?: ContactCategory }
+) => {
+  return await repository.updateClassification(id, classification);
 };
 

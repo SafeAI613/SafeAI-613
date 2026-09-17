@@ -20,7 +20,9 @@ def test_fetch_open_inquiries_calls_expected_url(session_cls):
     client = SafeAIClient(_config())
     result = client.fetch_open_inquiries()
 
-    session.get.assert_called_once_with("http://localhost:5000/api/contact/all")
+    session.get.assert_called_once_with(
+        "http://localhost:5000/api/contact/all", params={"status": "open"}
+    )
     assert result == [{"id": "1", "title": "foo", "description": "bar"}]
 
 
@@ -50,4 +52,17 @@ def test_post_reply_sends_text_payload(session_cls):
     session.post.assert_called_once_with(
         "http://localhost:5000/api/contact/my-requests/1/reply",
         json={"text": "hello"},
+    )
+
+
+@patch("api_client.requests.Session")
+def test_update_classification_sends_category_and_urgency(session_cls):
+    session = session_cls.return_value
+
+    client = SafeAIClient(_config())
+    client.update_classification("1", "bug", "urgent")
+
+    session.patch.assert_called_once_with(
+        "http://localhost:5000/api/contact/my-requests/1/classification",
+        json={"category": "bug", "urgency": "urgent"},
     )
