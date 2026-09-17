@@ -125,7 +125,29 @@
     },
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",
-    "roleUser": "User"
+    "roleUser": "User",
+    "fundingRequests": {
+      "title": "Funding requests from members",
+      "empty": "No funding requests have been submitted yet.",
+      "fetchError": "Failed to fetch funding requests",
+      "resolveFailedFallback": "Failed to resolve the funding request",
+      "approveButton": "Approve",
+      "rejectButton": "Reject",
+      "approveSuccess": "Request approved — the budget was allocated to the user.",
+      "rejectSuccess": "Request rejected.",
+      "tableHeaders": {
+        "requester": "Requester",
+        "amount": "Amount",
+        "note": "Note",
+        "status": "Status",
+        "date": "Date"
+      },
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    }
   },
   "registerSuccess": {
     "title": "\u2705 Registration Completed Successfully!",

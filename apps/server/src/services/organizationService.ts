@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import * as repo from "../repositories/organizationRepository";
 import * as userRepo from "../repositories/userRepository";
+import * as fundingRequestRepo from "../repositories/fundingRequestRepository";
 import { aggregateUsageStats } from "../repositories/usageRepository";
 import { register } from "./authService";
 import {
@@ -314,6 +315,75 @@ export async function allocateBudgetToUser(orgId: string, userId: string, amount
   });
 
   return { organization: updatedOrg, user: updatedUser };
+}
+
+/**
+ * Org admin's approval screen: every FundingRequest submitted by this
+ * organization's members (pending and resolved), newest first.
+ */
+export async function getOrganizationFundingRequests(orgId: string) {
+  return fundingRequestRepo.findByOrganization(orgId);
+}
+
+/**
+ * Approve or reject a member's FundingRequest (org admin / system admin
+ * only - access is checked in the controller the same way as every other
+ * org-admin-scoped endpoint).
+ *
+ * Approving deliberately does NOT reimplement money movement: it calls the
+ * same `allocateBudgetToUser` used by PR #420's direct top-down allocation
+ * flow, which atomically decrements the org's `walletBalance` and
+ * increments the user's `costLimits.monthlyBudget`. If the org wallet no
+ * longer has enough balance, the request is left in `pending` (never
+ * marked approved without the money actually moving) and a clear error is
+ * thrown for the controller to surface as 400.
+ *
+ * Rejecting only flips the status - no money movement.
+ *
+ * The request is atomically "claimed" (pending -> approved/rejected)
+ * before any further work, so two concurrent admin clicks (or a stale UI
+ * retry) can't resolve the same request twice.
+ */
+export async function resolveFundingRequest(
+  orgId: string,
+  requestId: string,
+  decision: "approved" | "rejected",
+) {
+  if (decision === "rejected") {
+    const updated = await fundingRequestRepo.updateStatus(requestId, orgId, "pending", "rejected");
+    if (!updated) {
+      throw new Error("Funding request not found or already resolved");
+    }
+    return { fundingRequest: updated };
+  }
+
+  // decision === "approved"
+  const claimed = await fundingRequestRepo.updateStatus(requestId, orgId, "pending", "approved");
+  if (!claimed) {
+    throw new Error("Funding request not found or already resolved");
+  }
+
+  try {
+    const { organization, user } = await allocateBudgetToUser(
+      orgId,
+      (claimed as any).userId.toString(),
+      (claimed as any).amount,
+    );
+    logger.info("Funding request approved and budget allocated", {
+      organizationId: orgId,
+      requestId,
+      userId: (claimed as any).userId.toString(),
+      amount: (claimed as any).amount,
+    });
+    return { fundingRequest: claimed, organization, user };
+  } catch (error) {
+    // Money movement failed (e.g. insufficient wallet balance, or the
+    // member was removed from the org meanwhile) - roll the claim back to
+    // `pending` rather than leaving it stuck as "approved" with no money
+    // ever having moved.
+    await fundingRequestRepo.updateStatus(requestId, orgId, "approved", "pending");
+    throw error;
+  }
 }
 
 export async function getPendingOrganizationsForAdmin() {

@@ -11,6 +11,8 @@ import {
   removeUserFromOrganizationHandler,
   addUserByEmailToOrganizationHandler,
   allocateBudgetToUserHandler,
+  getOrganizationFundingRequestsHandler,
+  resolveFundingRequestHandler,
   topUpOrganizationWalletHandler,
   getPendingOrganizationsHandler,
   getAllOrganizationsHandler,
@@ -94,5 +96,11 @@ router.patch("/:id/users/:userId/allocate-budget", requireApprovedOrg, allocateB
 
 // Wallet Management (Mock) - blocked until org is approved (admins bypass)
 router.post("/:id/top-up", requireApprovedOrg, topUpOrganizationWalletHandler); // Admin or approved Org Owner
+
+// Org admin's approval screen for members' FundingRequests - blocked until
+// org is approved (admins bypass). Approving reuses allocateBudgetToUser's
+// primitives above (no duplicated money-movement logic).
+router.get("/:id/funding-requests", requireApprovedOrg, getOrganizationFundingRequestsHandler); // Admin or approved Org Owner
+router.patch("/:id/funding-requests/:requestId", requireApprovedOrg, resolveFundingRequestHandler); // Admin or approved Org Owner
 
 export default router;

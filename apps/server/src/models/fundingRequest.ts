@@ -61,8 +61,8 @@ const FundingRequestSchema = new mongoose.Schema(
 
 // A member's own request history is always listed newest-first.
 FundingRequestSchema.index({ userId: 1, createdAt: -1 });
-// Follow-up admin approval screen (out of scope here) will list an org's
-// pending requests this way.
+// The org admin approval screen (organizationService.getOrganizationFundingRequests)
+// lists an org's requests this way.
 FundingRequestSchema.index({ organizationId: 1, status: 1 });
 
 FundingRequestSchema.set("toJSON", {

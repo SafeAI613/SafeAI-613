@@ -13,6 +13,8 @@ import {
   getOrganizationForUser,
   topUpOrganizationWallet,
   allocateBudgetToUser,
+  getOrganizationFundingRequests,
+  resolveFundingRequest,
   getPendingOrganizationsForAdmin,
   listAllOrganizationsWithStats,
   setOrganizationActive,
@@ -503,6 +505,98 @@ export async function allocateBudgetToUserHandler(
       return res.status(404).json({ error: error.message });
     }
     res.status(400).json({ error: error.message || "Failed to allocate budget" });
+  }
+}
+
+/**
+ * List an organization's FundingRequests (pending and resolved), newest
+ * first - the org admin's approval screen (Admin or the org's own owner).
+ */
+export async function getOrganizationFundingRequestsHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const fundingRequests = await getOrganizationFundingRequests(orgId);
+    res.json({ fundingRequests });
+  } catch (error: any) {
+    logger.error("Failed to list organization funding requests", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to retrieve funding requests" });
+  }
+}
+
+/**
+ * Approve or reject a member's FundingRequest (Admin or the org's own
+ * owner only). Approving reuses `allocateBudgetToUser` (PR #420's
+ * primitives) to actually move the money; rejecting only flips the status.
+ * See resolveFundingRequest in organizationService.ts for the full design.
+ */
+export async function resolveFundingRequestHandler(
+  req: Request<{ id: string; requestId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const requestId = req.params.requestId;
+    const { decision } = req.body ?? {};
+
+    if (decision !== "approved" && decision !== "rejected") {
+      return res.status(400).json({ error: "decision must be 'approved' or 'rejected'" });
+    }
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await resolveFundingRequest(orgId, requestId, decision);
+    res.json({
+      success: true,
+      message: decision === "approved" ? "Funding request approved" : "Funding request rejected",
+      fundingRequest: result.fundingRequest,
+      ...(result.user ? { user: sanitizeUser(result.user) } : {}),
+      ...(result.organization ? { walletBalance: (result.organization as any)?.walletBalance } : {}),
+    });
+  } catch (error: any) {
+    logger.error("Failed to resolve funding request", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      requestId: req.params.requestId,
+    });
+    if (
+      error.message === "Funding request not found or already resolved" ||
+      error.message === "Organization not found" ||
+      error.message === "User not found in this organization"
+    ) {
+      return res.status(error.message === "Funding request not found or already resolved" ? 409 : 404).json({
+        error: error.message,
+      });
+    }
+    res.status(400).json({ error: error.message || "Failed to resolve funding request" });
   }
 }
 

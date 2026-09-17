@@ -125,7 +125,29 @@
     },
     "roleOrgOwner": "בעלים",
     "roleAdmin": "מנהל מערכת",
-    "roleUser": "משתמש"
+    "roleUser": "משתמש",
+    "fundingRequests": {
+      "title": "בקשות מימון ממשתמשים",
+      "empty": "עדיין לא הוגשו בקשות מימון.",
+      "fetchError": "שגיאה בטעינת בקשות המימון",
+      "resolveFailedFallback": "טיפול בבקשת המימון נכשל",
+      "approveButton": "אישור",
+      "rejectButton": "דחייה",
+      "approveSuccess": "הבקשה אושרה — התקציב הוקצה למשתמש.",
+      "rejectSuccess": "הבקשה נדחתה.",
+      "tableHeaders": {
+        "requester": "מבקש/ת",
+        "amount": "סכום",
+        "note": "הערה",
+        "status": "סטטוס",
+        "date": "תאריך"
+      },
+      "status": {
+        "pending": "ממתין לאישור",
+        "approved": "אושר",
+        "rejected": "נדחה"
+      }
+    }
   },
   "registerSuccess": {
     "title": "✅ ההרשמה הושלמה בהצלחה!",
