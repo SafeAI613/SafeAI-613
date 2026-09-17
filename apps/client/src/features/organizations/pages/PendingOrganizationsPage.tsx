@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getPendingOrganizations, updateOrganizationStatus } from "../api/organizationApi";
 import { PendingOrganizationsTable } from "../components/PendingOrganizationsTable";
 import { useAlert } from "../../../context/alertStore";
+import { OrganizationDetail } from "../components/OrganizationDetail";
 import "../../../styles/pending-organizations-page.css";
 
 interface Organization {
@@ -20,6 +21,7 @@ export const PendingOrganizationsPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -74,6 +76,14 @@ export const PendingOrganizationsPage = () => {
     }
   };
 
+  if (selectedId) {
+    return (
+      <div className="pending-orgs-container">
+        <OrganizationDetail orgId={selectedId} onBack={() => setSelectedId(null)} />
+      </div>
+    );
+  }
+
   if (loading) return <div className="pending-orgs-loading">{t("pendingOrganizations.loadingOrgs")}</div>;
   if (error) return <div className="pending-orgs-error">{t("statistics.errorLabel")} {error}</div>;
 
@@ -86,6 +96,7 @@ export const PendingOrganizationsPage = () => {
         organizations={organizations}
         onApprove={handleApprove}
         onReject={handleReject}
+        onOpenOrg={setSelectedId}
         busyId={busyId}
       />
     </div>

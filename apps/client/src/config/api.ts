@@ -30,6 +30,8 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `${API_BASE_URL}/organizations/${id}`,
     users: (id: string) => `${API_BASE_URL}/organizations/${id}/users`,
     members: (id: string) => `${API_BASE_URL}/organizations/${id}/members`,
+    allocateBudget: (id: string, userId: string) =>
+      `${API_BASE_URL}/organizations/${id}/users/${userId}/allocate-budget`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
     suspend: (id: string) => `${API_BASE_URL}/organizations/${id}/suspend`,
     activate: (id: string) => `${API_BASE_URL}/organizations/${id}/activate`,
