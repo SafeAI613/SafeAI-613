@@ -106,6 +106,9 @@
     "excelSheetName": "New Users",
     "excelFileNamePrefix": "users",
     "excelFallbackOrgName": "organization",
+    "downloadAllUsersButton": "Download full user list",
+    "allUsersExcelSheetName": "All Users",
+    "allUsersExcelFileNamePrefix": "user-list",
     "tableHeaders": {
       "email": "Email",
       "name": "Name",

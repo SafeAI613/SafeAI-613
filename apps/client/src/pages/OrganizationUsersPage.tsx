@@ -249,6 +249,33 @@ export default function OrganizationUsersPage() {
     setCreatedMembers([]);
   };
 
+  // Exports the full, currently-displayed organization users table (not just
+  // members created in this session) to an .xlsx file. Kept separate from
+  // handleDownloadExcel, which only covers freshly-created member credentials.
+  const handleDownloadAllUsersExcel = () => {
+    const rows = users.map((u) => ({
+      [t("orgUsers.tableHeaders.email")]: u.email,
+      [t("orgUsers.tableHeaders.name")]: u.name || "-",
+      [t("orgUsers.tableHeaders.role")]:
+        u.role === "org_owner"
+          ? t("orgUsers.roleOrgOwner")
+          : u.role === "admin"
+          ? t("orgUsers.roleAdmin")
+          : t("orgUsers.roleUser"),
+      [t("orgUsers.tableHeaders.status")]: u.isActive ? t("orgUsers.active") : t("orgUsers.inactive"),
+      [t("orgUsers.tableHeaders.joinStatus")]: u.lastLogin
+        ? t("orgUsers.joinedLabel")
+        : t("orgUsers.pendingFirstLoginLabel"),
+      [t("orgUsers.tableHeaders.joinedDate")]: new Date(u.createdAt).toLocaleDateString(),
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("orgUsers.allUsersExcelSheetName"));
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const orgName = organization?.name || t("orgUsers.excelFallbackOrgName");
+    XLSX.writeFile(workbook, `${t("orgUsers.allUsersExcelFileNamePrefix")}-${orgName}-${dateStamp}.xlsx`);
+  };
+
   if (loading) {
     return (
       <div className="organization-page">
@@ -419,7 +446,14 @@ export default function OrganizationUsersPage() {
         </div>
       )}
 
-      <h3>{t("orgUsers.usersInOrg")} ({users.length})</h3>
+      <div className="org-users-header">
+        <h3>{t("orgUsers.usersInOrg")} ({users.length})</h3>
+        {users.length > 0 && (
+          <button type="button" className="topup-button" onClick={handleDownloadAllUsersExcel}>
+            {t("orgUsers.downloadAllUsersButton")}
+          </button>
+        )}
+      </div>
 
       {users.length === 0 ? (
         <p>{t("orgUsers.noUsers")}</p>
