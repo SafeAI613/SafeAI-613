@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import AiThinkingLoader from './AiThinkingLoader.tsx'
+import type { TenderContactMethod } from './types'
 
 
 interface TenderFormData {
@@ -17,6 +18,7 @@ interface TenderFormData {
   wantsEmails: boolean
   contactPhone: string
   contactEmail: string
+  preferredContactMethods: TenderContactMethod[]
 }
 
 type ContactFormErrors = Partial<Record<'contactPhone' | 'contactEmail', string>>
@@ -60,6 +62,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
     wantsEmails: false,
     contactPhone: '',
     contactEmail: '',
+    preferredContactMethods: [],
   })
 
   const [formMessage, setFormMessage] = useState<string>('')
@@ -169,6 +172,18 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
     }))
   }
 
+  const toggleContactMethod = (method: TenderContactMethod) => {
+    setFormData((current) => {
+      const isSelected = current.preferredContactMethods.includes(method)
+      return {
+        ...current,
+        preferredContactMethods: isSelected
+          ? current.preferredContactMethods.filter((m) => m !== method)
+          : [...current.preferredContactMethods, method],
+      }
+    })
+  }
+
   const handleAiApplicationSelect = (appType: string) => {
     setFormData((current) => ({
       ...current,
@@ -264,6 +279,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
       additionalDetails: formData.additionalDetails,
       contactPhone: formData.contactPhone.trim() || undefined,
       contactEmail: formData.contactEmail.trim() || undefined,
+      preferredContactMethods: formData.preferredContactMethods,
     }
 
     try {
@@ -286,6 +302,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
         wantsEmails: false,
         contactPhone: '',
         contactEmail: '',
+        preferredContactMethods: [],
       })
     } catch (error) {
       console.error('Failed to create tender', error)
@@ -511,6 +528,32 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
               maxLength={254}
             />
             {contactErrors.contactEmail && <span className="form-error">{contactErrors.contactEmail}</span>}
+          </div>
+
+          <div className="bottom-field">
+            <span>{t('tenders.preferredContactMethodsLabel')}</span>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={formData.preferredContactMethods.includes('phone')}
+                  onChange={() => toggleContactMethod('phone')}
+                  className="toggle-input"
+                />
+                <span className="toggle-pill" />
+                <span className="toggle-text">{t('tenders.contactMethodPhoneOption')}</span>
+              </label>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={formData.preferredContactMethods.includes('email')}
+                  onChange={() => toggleContactMethod('email')}
+                  className="toggle-input"
+                />
+                <span className="toggle-pill" />
+                <span className="toggle-text">{t('tenders.contactMethodEmailOption')}</span>
+              </label>
+            </div>
           </div>
         </div>
 

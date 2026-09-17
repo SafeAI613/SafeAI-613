@@ -28,6 +28,8 @@ const TenderSchema = new Schema(
 
     contactEmail: { type: String },
 
+    preferredContactMethods: { type: [String], enum: ["phone", "email"], default: [] },
+
     agentsRequired: { type: [String], default: [] },
 
     wantsEmails: { type: Boolean, default: false },
