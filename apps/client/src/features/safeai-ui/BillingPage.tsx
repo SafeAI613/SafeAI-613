@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUsageData } from "../../hooks/useUsageData";
 import { useAuth } from "../../context/authStore";
+import { API_ENDPOINTS, apiCall } from "../../config/api";
+import FundingRequestsList, { type FundingRequest } from "./FundingRequestsList";
 
 function ProgressBar({ used, limit }: { used: number; limit: number }) {
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
@@ -13,16 +15,38 @@ function ProgressBar({ used, limit }: { used: number; limit: number }) {
   );
 }
 
-function TopUpModal({ onClose }: { onClose: () => void }) {
+function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequestCreated: () => void }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setError(t("billing.topUpModal.invalidAmountError"));
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await apiCall(API_ENDPOINTS.fundingRequests, {
+        method: "POST",
+        body: JSON.stringify({ amount: numericAmount, note: message.trim() || undefined }),
+      });
+      setSubmitted(true);
+      onRequestCreated();
+    } catch (err) {
+      console.error("Error submitting funding request:", err);
+      setError(t("billing.topUpModal.submitFailedError"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -76,8 +100,14 @@ function TopUpModal({ onClose }: { onClose: () => void }) {
                   style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-default)", fontSize: "15px", resize: "vertical", boxSizing: "border-box" }}
                 />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "10px" }}>
-                {t("billing.topUpModal.submitButton")}
+              {error && <div className="alert alert-error">{error}</div>}
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={submitting}
+                style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "10px" }}
+              >
+                {submitting ? t("billing.topUpModal.submittingButton") : t("billing.topUpModal.submitButton")}
               </button>
             </form>
           </>
@@ -101,6 +131,29 @@ export default function BillingPage() {
   const { user } = useAuth();
   const { limitsStatus, usageStats, loading } = useUsageData(!!user);
   const [showModal, setShowModal] = useState(false);
+  const [fundingRequests, setFundingRequests] = useState<FundingRequest[]>([]);
+  const [fundingRequestsLoading, setFundingRequestsLoading] = useState(true);
+
+  const fetchFundingRequests = useCallback(async (signal?: AbortSignal) => {
+    try {
+      setFundingRequestsLoading(true);
+      const data = await apiCall<{ fundingRequests: FundingRequest[] }>(API_ENDPOINTS.fundingRequests, { signal });
+      setFundingRequests(data?.fundingRequests ?? []);
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        console.error("Error fetching funding requests:", err);
+      }
+    } finally {
+      setFundingRequestsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const controller = new AbortController();
+    fetchFundingRequests(controller.signal);
+    return () => controller.abort();
+  }, [user, fetchFundingRequests]);
 
   if (loading) return <div className="loading-state">{t("billing.loadingData")}</div>;
 
@@ -210,7 +263,15 @@ export default function BillingPage() {
         </p>
       </div>
 
-      {showModal && <TopUpModal onClose={() => setShowModal(false)} />}
+      {/* Funding requests history */}
+      <FundingRequestsList requests={fundingRequests} loading={fundingRequestsLoading} />
+
+      {showModal && (
+        <TopUpModal
+          onClose={() => setShowModal(false)}
+          onRequestCreated={() => fetchFundingRequests()}
+        />
+      )}
     </div>
   );
 }
