@@ -78,6 +78,7 @@
     "addMemberTitle": "הוספת משתמש חדש לארגון",
     "fullNamePlaceholder": "שם מלא",
     "emailPlaceholder": "כתובת אימייל",
+    "emailDomainSuggestionsAriaLabel": "הצעות להשלמת דומיין האימייל",
     "addingButton": "מוסיף...",
     "addMemberButton": "הוסף משתמש",
     "createdMembersMessage": "נוספו {{count}} משתמשים חדשים בסשן הזה. פרטי ההתחברות שיש למסור להם:",

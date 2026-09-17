@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as XLSX from "xlsx";
 import {
@@ -59,6 +59,11 @@ export default function OrganizationUsersPage() {
   const [createdMembers, setCreatedMembers] = useState<
     { name: string; email: string; password: string }[]
   >([]);
+
+  // Autocomplete state for the domain suffix of the new member's email
+  // (e.g. typing "@" suggests completing it to the organization's own domain).
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
   useEffect(() => {
     fetchOrganizationAndUsers();
@@ -149,6 +154,62 @@ export default function OrganizationUsersPage() {
     if (!organization) return;
     const usersData = await getOrganizationUsers(organization._id);
     setUsers(usersData as unknown as User[]);
+  };
+
+  // The organization has no dedicated "domain" field on the server, so we derive
+  // a sensible suggestion from the domains already used by existing org members,
+  // most common first. Falls back to an empty list when the org has no members yet.
+  const orgDomainsByFrequency = useMemo(() => {
+    const domainCounts = new Map<string, number>();
+    for (const user of users) {
+      const atIndex = user.email.indexOf("@");
+      if (atIndex === -1) continue;
+      const domain = user.email.slice(atIndex + 1).trim().toLowerCase();
+      if (!domain) continue;
+      domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
+    }
+    return Array.from(domainCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([domain]) => domain);
+  }, [users]);
+
+  const emailAtIndex = memberEmail.indexOf("@");
+  const emailLocalPart = emailAtIndex === -1 ? memberEmail : memberEmail.slice(0, emailAtIndex);
+  const emailDomainQuery = emailAtIndex === -1 ? null : memberEmail.slice(emailAtIndex + 1);
+
+  const emailDomainSuggestions =
+    emailDomainQuery === null
+      ? []
+      : orgDomainsByFrequency
+          .filter(
+            (domain) =>
+              domain !== emailDomainQuery.toLowerCase() &&
+              domain.startsWith(emailDomainQuery.toLowerCase())
+          )
+          .slice(0, 5);
+
+  const handleSelectDomainSuggestion = (domain: string) => {
+    setMemberEmail(`${emailLocalPart}@${domain}`);
+    setShowEmailSuggestions(false);
+    setActiveSuggestionIndex(-1);
+  };
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showEmailSuggestions || emailDomainSuggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) => (prev + 1) % emailDomainSuggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestionIndex(
+        (prev) => (prev - 1 + emailDomainSuggestions.length) % emailDomainSuggestions.length
+      );
+    } else if (e.key === "Enter" && activeSuggestionIndex > -1) {
+      e.preventDefault();
+      handleSelectDomainSuggestion(emailDomainSuggestions[activeSuggestionIndex]);
+    } else if (e.key === "Escape") {
+      setShowEmailSuggestions(false);
+    }
   };
 
   const handleAddMember = async (e: React.FormEvent) => {
@@ -323,14 +384,50 @@ export default function OrganizationUsersPage() {
           placeholder={t("orgUsers.fullNamePlaceholder")}
           className="org-edit-input"
         />
-        <input
-          type="email"
-          dir="ltr"
-          value={memberEmail}
-          onChange={(e) => setMemberEmail(e.target.value)}
-          placeholder={t("orgUsers.emailPlaceholder")}
-          className="org-edit-input"
-        />
+        <div className="email-autocomplete">
+          <input
+            type="email"
+            dir="ltr"
+            value={memberEmail}
+            onChange={(e) => {
+              setMemberEmail(e.target.value);
+              setShowEmailSuggestions(true);
+              setActiveSuggestionIndex(-1);
+            }}
+            onFocus={() => setShowEmailSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 150)}
+            onKeyDown={handleEmailKeyDown}
+            placeholder={t("orgUsers.emailPlaceholder")}
+            className="org-edit-input"
+            role="combobox"
+            aria-expanded={showEmailSuggestions && emailDomainSuggestions.length > 0}
+            aria-autocomplete="list"
+            aria-controls="email-domain-suggestions-list"
+          />
+          {showEmailSuggestions && emailDomainSuggestions.length > 0 && (
+            <div
+              id="email-domain-suggestions-list"
+              role="listbox"
+              className="email-autocomplete-list"
+              aria-label={t("orgUsers.emailDomainSuggestionsAriaLabel")}
+            >
+              {emailDomainSuggestions.map((domain, index) => (
+                <div
+                  key={domain}
+                  role="option"
+                  aria-selected={index === activeSuggestionIndex}
+                  tabIndex={-1}
+                  className={`email-autocomplete-item${
+                    index === activeSuggestionIndex ? " active" : ""
+                  }`}
+                  onMouseDown={() => handleSelectDomainSuggestion(domain)}
+                >
+                  {emailLocalPart}@{domain}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {addMemberError && <p className="error-text">{addMemberError}</p>}
         <button type="submit" disabled={addingMember} className="topup-button">
           {addingMember ? t("orgUsers.addingButton") : t("orgUsers.addMemberButton")}
