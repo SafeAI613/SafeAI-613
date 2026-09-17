@@ -70,6 +70,28 @@ export async function incrementWalletBalance(orgId: string, amount: number) {
   }
 }
 
+export async function setAllowedProfileIds(orgId: string, profileIds: string[]) {
+  try {
+    const organization = await Organization.findByIdAndUpdate(
+      orgId,
+      { allowedProfileIds: profileIds },
+      { new: true, runValidators: true }
+    ).lean();
+    logger.info("Organization allowed profiles updated in DB", {
+      organizationId: orgId,
+      profileCount: profileIds.length,
+    });
+    return organization;
+  } catch (error: any) {
+    logger.error("Failed to update organization allowed profiles in DB", {
+      error: error.message,
+      stack: error.stack,
+      organizationId: orgId,
+    });
+    throw error;
+  }
+}
+
 /**
  * Atomically decrements walletBalance by `amount`, but only if the current
  * balance is at least `amount` - the `$gte` guard lives in the same query

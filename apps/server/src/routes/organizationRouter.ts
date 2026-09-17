@@ -21,6 +21,8 @@ import {
   approveOrganizationHandler,
   rejectOrganizationHandler,
   getMyOrganizationHandler,
+  getOrganizationProfilesHandler,
+  updateOrganizationProfilesHandler,
 } from "../controllers/organizationController";
 import { authenticateToken, requireAdmin } from "../middleware/auth";
 import { registerRateLimiter } from "../middleware/authRateLimiter";
@@ -80,6 +82,11 @@ router.patch("/:id/reject", requireAdmin, rejectOrganizationHandler);   // Admin
 
 // Organization usage summary + wallet balance
 router.get("/:id/stats", getOrganizationStatsHandler);      // Admin or Org Owner
+
+// AI profiles allowed for the organization - selected by the org admin out
+// of the approved profiles available in the system
+router.get("/:id/profiles", requireApprovedOrg, getOrganizationProfilesHandler);   // Admin or approved Org Owner
+router.patch("/:id/profiles", requireApprovedOrg, updateOrganizationProfilesHandler); // Admin or approved Org Owner
 
 // Management of Users inside Organization (blocked until org is approved, admins bypass)
 router.get("/:id/users", requireApprovedOrg, getOrganizationUsersHandler); // Admin or approved Org Owner

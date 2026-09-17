@@ -21,6 +21,8 @@ import {
   approveOrganization,
   rejectOrganization,
   getMyOrganization,
+  getOrganizationAvailableProfiles,
+  setOrganizationAllowedProfiles,
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
 import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
@@ -564,6 +566,79 @@ export async function activateOrganizationHandler(
       organizationId: req.params.id,
     });
     res.status(400).json({ error: error.message || "Failed to reactivate organization" });
+  }
+}
+
+/**
+ * Get all approved AI profiles available in the system, plus which ones are
+ * currently selected for this organization (Admin or approved Org Owner).
+ */
+export async function getOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { profiles, selectedProfileIds } = await getOrganizationAvailableProfiles(orgId);
+    res.json({ success: true, profiles, selectedProfileIds });
+  } catch (error: any) {
+    logger.error("Failed to get organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization profiles" });
+  }
+}
+
+/**
+ * Set the list of AI profiles selected for this organization out of the
+ * profiles available in the system (Admin or approved Org Owner).
+ */
+export async function updateOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const { profileIds } = req.body;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const updatedOrg = await setOrganizationAllowedProfiles(orgId, profileIds);
+    res.json({
+      success: true,
+      message: "Organization profiles updated successfully",
+      organization: updatedOrg,
+    });
+  } catch (error: any) {
+    logger.error("Failed to update organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(400).json({ error: error.message || "Failed to update organization profiles" });
   }
 }
 

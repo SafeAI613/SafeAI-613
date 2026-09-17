@@ -38,6 +38,12 @@ const OrganizationSchema = new mongoose.Schema(
       },
       allowedDomains: [String], // דומיינים מורשים לרישום אוטומטי
     },
+    // רשימת פרופילי ה-AI המאושרים לשימוש בארגון זה (נבחרת ע"י מנהל הארגון
+    // מתוך הפרופילים המאושרים הזמינים במערכת)
+    allowedProfileIds: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "AIProfile" }],
+      default: [],
+    },
   },
   { timestamps: true }
 );

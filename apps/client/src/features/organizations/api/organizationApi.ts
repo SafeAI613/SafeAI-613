@@ -147,3 +147,29 @@ export const updateOrganizationDetails = async (
     body: JSON.stringify(data),
   });
 };
+
+export interface OrganizationProfile {
+  _id: string;
+  name: string;
+  createdBy: string;
+  creatorEmail: string;
+  selected: boolean;
+}
+
+// רשימת כל פרופילי ה-AI המאושרים במערכת + אילו מהם נבחרו עבור הארגון
+export const getOrganizationProfiles = async (
+  id: string
+): Promise<{ profiles: OrganizationProfile[]; selectedProfileIds: string[] }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.profiles(id), { method: "GET" });
+};
+
+// עדכון רשימת פרופילי ה-AI המורשים לשימוש בארגון
+export const updateOrganizationProfiles = async (
+  id: string,
+  profileIds: string[]
+): Promise<{ success: boolean; organization: AdminOrganization }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.profiles(id), {
+    method: "PATCH",
+    body: JSON.stringify({ profileIds }),
+  });
+};
