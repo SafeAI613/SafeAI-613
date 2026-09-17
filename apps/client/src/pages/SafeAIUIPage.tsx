@@ -91,7 +91,12 @@ export default function SafeAIUIPage() {
   const [newRequestCount, setNewRequestCount] = useState(0);
 
   // Gate for org owners: block management until their org is approved
-  const [orgGate, setOrgGate] = useState<{ loading: boolean; pending: boolean; orgName?: string }>({
+  const [orgGate, setOrgGate] = useState<{
+    loading: boolean;
+    pending: boolean;
+    status?: "pending" | "rejected";
+    orgName?: string;
+  }>({
     loading: initialState.role === "org_owner",
     pending: false,
   });
@@ -114,6 +119,7 @@ export default function SafeAIUIPage() {
         setOrgGate({
           loading: false,
           pending: !!org && org.status !== "approved",
+          status: org?.status === "rejected" ? "rejected" : "pending",
           orgName: org?.name,
         });
       })
@@ -149,7 +155,7 @@ export default function SafeAIUIPage() {
     // Org owners whose org is not yet approved only see the pending screen
     if (userRole === "org_owner") {
       if (orgGate.loading) return <div className="orgs-loading">{t("common.loading")}</div>;
-      if (orgGate.pending) return <PendingApprovalScreen orgName={orgGate.orgName} />;
+      if (orgGate.pending) return <PendingApprovalScreen orgName={orgGate.orgName} status={orgGate.status} />;
     }
     switch (activeSection) {
       case "profiles":

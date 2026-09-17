@@ -25,6 +25,10 @@ const OrganizationSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    logoUrl: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],

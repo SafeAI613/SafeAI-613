@@ -175,15 +175,22 @@ export default function BillingPage() {
       }}>
         <div>
           <p style={{ margin: "0 0 8px", opacity: 0.85, fontSize: "15px" }}>{t("billing.availableMonthlyBalance")}</p>
-          <p style={{ margin: "0 0 4px", fontSize: "48px", fontWeight: 700, letterSpacing: "-1px" }}>
-            ${budget ? budget.remaining.toFixed(2) : "—"}
-          </p>
-          {budget && (
-            <p style={{ margin: 0, opacity: 0.8, fontSize: "14px" }}>
-              {t("billing.outOfMonthlyBudget", { amount: budget.monthlyLimit.toFixed(2) })}
+          {budget ? (
+            <>
+              <p style={{ margin: "0 0 4px", fontSize: "48px", fontWeight: 700, letterSpacing: "-1px" }}>
+                ${budget.remaining.toFixed(2)}
+              </p>
+              <p style={{ margin: 0, opacity: 0.8, fontSize: "14px" }}>
+                {t("billing.outOfMonthlyBudget", { amount: budget.monthlyLimit.toFixed(2) })}
+              </p>
+            </>
+          ) : (
+            <p style={{ margin: 0, opacity: 0.9, fontSize: "16px", maxWidth: "360px" }}>
+              {t("billing.noBudgetByokExplanation")}
             </p>
           )}
         </div>
+        {budget && (
         <button
           onClick={() => setShowModal(true)}
           style={{
@@ -197,6 +204,7 @@ export default function BillingPage() {
         >
           {t("billing.topUpButton")}
         </button>
+        )}
       </div>
 
       {/* Budget breakdown */}

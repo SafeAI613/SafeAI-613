@@ -3,11 +3,14 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
+  addUserByEmailToOrganization,
   allocateBudgetToUser,
   createOrganizationMember,
+  distributeOrganizationBudgetEqually,
   getMyOrganization,
   getOrganizationUsers,
   updateOrganizationDetails,
+  updateOrganizationMember,
 } from "../features/organizations/api/organizationApi";
 import OrganizationFundingRequestsSection from "../features/organizations/components/OrganizationFundingRequestsSection";
 import OrganizationProfilesSection from "../features/organizations/components/OrganizationProfilesSection";
@@ -37,6 +40,7 @@ interface Organization {
   ownerId: OrganizationOwner;
   isActive: boolean;
   walletBalance?: number;
+  logoUrl?: string;
 }
 
 interface OrganizationOwner {
@@ -62,6 +66,9 @@ export default function OrganizationUsersPage() {
   const [editDescription, setEditDescription] = useState("");
   const [isSavingOrg, setIsSavingOrg] = useState(false);
 
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [addingMember, setAddingMember] = useState(false);
@@ -80,6 +87,20 @@ export default function OrganizationUsersPage() {
   const [allocateSubmitting, setAllocateSubmitting] = useState(false);
   const [allocateError, setAllocateError] = useState<string | null>(null);
   const [allocateSuccessUserId, setAllocateSuccessUserId] = useState<string | null>(null);
+
+  const [addByEmailValue, setAddByEmailValue] = useState("");
+  const [addingByEmail, setAddingByEmail] = useState(false);
+  const [addByEmailError, setAddByEmailError] = useState<string | null>(null);
+
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editUserName, setEditUserName] = useState("");
+  const [editUserActive, setEditUserActive] = useState(true);
+  const [editUserSubmitting, setEditUserSubmitting] = useState(false);
+  const [editUserError, setEditUserError] = useState<string | null>(null);
+
+  const [distributing, setDistributing] = useState(false);
+  const [distributeError, setDistributeError] = useState<string | null>(null);
+  const [distributeMessage, setDistributeMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrganizationAndUsers();
@@ -163,6 +184,49 @@ export default function OrganizationUsersPage() {
       showAlert(err instanceof Error ? err.message : t("orgUsers.updateOrgFailedFallback"), { type: "error" });
     } finally {
       setIsSavingOrg(false);
+    }
+  };
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !organization) return;
+
+    try {
+      setUploadingLogo(true);
+      setLogoError(null);
+
+      const { uploadUrl, fileUrl } = await apiCall<{ uploadUrl: string; fileUrl: string }>(
+        API_ENDPOINTS.upload.getUrl,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            context: "orgLogo",
+          }),
+        }
+      );
+
+      const s3Response = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!s3Response.ok) throw new Error(t("orgUsers.logoUploadFailedFallback"));
+
+      const { organization: updatedOrg } = await updateOrganizationDetails(organization._id, {
+        name: organization.name,
+        description: organization.description,
+        logoUrl: fileUrl,
+      });
+      setOrganization(updatedOrg as unknown as Organization);
+    } catch (err: unknown) {
+      console.error("Error uploading organization logo:", err);
+      setLogoError(err instanceof Error ? err.message : t("orgUsers.logoUploadFailedFallback"));
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = "";
     }
   };
 
@@ -299,6 +363,75 @@ export default function OrganizationUsersPage() {
     }
   };
 
+  const handleAddByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization || !addByEmailValue.trim()) return;
+    try {
+      setAddingByEmail(true);
+      setAddByEmailError(null);
+      await addUserByEmailToOrganization(organization._id, addByEmailValue.trim());
+      setAddByEmailValue("");
+      await reloadUsers();
+    } catch (err: unknown) {
+      setAddByEmailError(err instanceof Error ? err.message : t("orgUsers.addByEmailFailedFallback"));
+    } finally {
+      setAddingByEmail(false);
+    }
+  };
+
+  const toggleEditUser = (user: User) => {
+    setEditUserError(null);
+    if (editingUserId === user._id) {
+      setEditingUserId(null);
+      return;
+    }
+    setEditingUserId(user._id);
+    setEditUserName(user.name || "");
+    setEditUserActive(user.isActive);
+  };
+
+  const handleSaveEditUser = async (e: React.FormEvent, userId: string) => {
+    e.preventDefault();
+    if (!organization) return;
+    try {
+      setEditUserSubmitting(true);
+      setEditUserError(null);
+      const result = await updateOrganizationMember(organization._id, userId, {
+        name: editUserName.trim() || undefined,
+        isActive: editUserActive,
+      });
+      setUsers((prev) => prev.map((u) => (u._id === userId ? { ...u, ...result.user } : u)));
+      setEditingUserId(null);
+    } catch (err: unknown) {
+      setEditUserError(err instanceof Error ? err.message : t("orgUsers.editUserFailedFallback"));
+    } finally {
+      setEditUserSubmitting(false);
+    }
+  };
+
+  const handleDistributeBudget = async () => {
+    if (!organization) return;
+    if (!window.confirm(t("orgUsers.distributeConfirm"))) return;
+    try {
+      setDistributing(true);
+      setDistributeError(null);
+      setDistributeMessage(null);
+      const result = await distributeOrganizationBudgetEqually(organization._id);
+      setOrganization((prev) => (prev ? { ...prev, walletBalance: result.walletBalance } : prev));
+      setDistributeMessage(
+        t("orgUsers.distributeSuccess", {
+          count: result.memberCount,
+          amount: result.perMemberAmount.toFixed(2),
+        })
+      );
+      await reloadUsers();
+    } catch (err: unknown) {
+      setDistributeError(err instanceof Error ? err.message : t("orgUsers.distributeFailedFallback"));
+    } finally {
+      setDistributing(false);
+    }
+  };
+
   const handleDownloadExcel = () => {
     const loginUrl = `${window.location.origin}/login`;
     const rows = createdMembers.map((m) => ({
@@ -373,6 +506,13 @@ export default function OrganizationUsersPage() {
     );
   }
 
+  const nonOwnerMembers = users.filter((u) => u.role !== "org_owner");
+  const nonOwnerMemberCount = nonOwnerMembers.length;
+  const totalMemberBudgetUsd = nonOwnerMembers.reduce(
+    (sum, u) => sum + (u.costLimits?.monthlyBudget ?? 0),
+    0
+  );
+
   return (
     <div className="organization-page">
       <h1>{t("orgUsers.title")}</h1>
@@ -380,6 +520,37 @@ export default function OrganizationUsersPage() {
       {organization && (
         <div className="organization-grid">
           <div className="organization-info-card">
+            <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px" }}>
+              {organization.logoUrl ? (
+                <img
+                  src={organization.logoUrl}
+                  alt={organization.name}
+                  style={{ width: "56px", height: "56px", borderRadius: "12px", objectFit: "cover", border: "1px solid var(--border-default)" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "56px", height: "56px", borderRadius: "12px", display: "flex", alignItems: "center",
+                    justifyContent: "center", backgroundColor: "var(--bg-elevated)", fontSize: "22px", fontWeight: 700,
+                    color: "var(--text-muted)", border: "1px solid var(--border-default)",
+                  }}
+                >
+                  {organization.name.charAt(0)}
+                </div>
+              )}
+              <label className="org-edit-button" style={{ cursor: uploadingLogo ? "not-allowed" : "pointer" }}>
+                {uploadingLogo ? t("orgUsers.uploadingLogo") : t("orgUsers.changeLogo")}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleLogoChange}
+                  disabled={uploadingLogo}
+                  style={{ display: "none" }}
+                />
+              </label>
+            </div>
+            {logoError && <p className="error-text">{logoError}</p>}
+
             {isEditingOrg ? (
               <form onSubmit={handleSaveOrg} className="org-edit-form">
                 <input
@@ -431,7 +602,7 @@ export default function OrganizationUsersPage() {
           <div className="wallet-card">
             <h3 className="wallet-title">{t("orgUsers.walletTitle")}</h3>
             <p className="wallet-balance">
-              {t("orgUsers.walletBalanceLabel")} <strong className="wallet-balance-amount">${organization.walletBalance ?? 0}</strong>
+              {t("orgUsers.walletBalanceLabel")} <strong className="wallet-balance-amount">₪{organization.walletBalance ?? 0}</strong>
             </p>
 
             <div className="simulation-warning">
@@ -453,6 +624,25 @@ export default function OrganizationUsersPage() {
                 {isSubmitting ? t("orgUsers.processingButton") : t("orgUsers.topUpButton")}
               </button>
             </form>
+
+            <div style={{ marginTop: "18px", paddingTop: "16px", borderTop: "1px solid var(--border-default)" }}>
+              <p style={{ margin: "0 0 6px" }}>
+                {t("orgUsers.availableToDistribute", { amount: organization.walletBalance ?? 0 })}
+              </p>
+              <p style={{ margin: "0 0 10px" }}>
+                {t("orgUsers.totalHeldByMembers", { amount: totalMemberBudgetUsd.toFixed(2) })}
+              </p>
+              {distributeError && <p className="error-text">{distributeError}</p>}
+              {distributeMessage && <p className="wallet-balance-amount">{distributeMessage}</p>}
+              <button
+                type="button"
+                className="topup-button"
+                onClick={handleDistributeBudget}
+                disabled={distributing || (organization.walletBalance ?? 0) <= 0 || nonOwnerMemberCount === 0}
+              >
+                {distributing ? t("orgUsers.distributing") : t("orgUsers.distributeButton")}
+              </button>
+            </div>
 
             <p style={{ marginTop: "14px" }}>
               <Link to="/organization/invoices">{t("orgUsers.invoicesLinkLabel")}</Link>
@@ -520,6 +710,23 @@ export default function OrganizationUsersPage() {
         {addMemberError && <p className="error-text">{addMemberError}</p>}
         <button type="submit" disabled={addingMember} className="topup-button">
           {addingMember ? t("orgUsers.addingButton") : t("orgUsers.addMemberButton")}
+        </button>
+      </form>
+
+      <h3>{t("orgUsers.addExistingByEmailTitle")}</h3>
+      <form onSubmit={handleAddByEmail} className="org-edit-form">
+        <input
+          type="email"
+          dir="ltr"
+          value={addByEmailValue}
+          onChange={(e) => setAddByEmailValue(e.target.value)}
+          placeholder={t("orgUsers.emailPlaceholder")}
+          className="org-edit-input"
+          required
+        />
+        {addByEmailError && <p className="error-text">{addByEmailError}</p>}
+        <button type="submit" disabled={addingByEmail} className="topup-button">
+          {addingByEmail ? t("orgUsers.addingButton") : t("orgUsers.addExistingByEmailButton")}
         </button>
       </form>
 
@@ -611,7 +818,7 @@ export default function OrganizationUsersPage() {
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td dir="ltr">${user.costLimits?.monthlyBudget ?? 0}</td>
-                <td>
+                <td style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   <button
                     type="button"
                     className="topup-button"
@@ -619,6 +826,15 @@ export default function OrganizationUsersPage() {
                   >
                     {t("orgUsers.allocateBudgetButton")}
                   </button>
+                  {user.role !== "org_owner" && (
+                    <button
+                      type="button"
+                      className="org-edit-button"
+                      onClick={() => toggleEditUser(user)}
+                    >
+                      {t("orgUsers.editButton")}
+                    </button>
+                  )}
                 </td>
               </tr>,
               allocatingUserId === user._id && (
@@ -663,6 +879,47 @@ export default function OrganizationUsersPage() {
                 <tr key={`${user._id}-success`}>
                   <td colSpan={8}>
                     <p className="wallet-balance">{t("orgUsers.allocateBudgetSuccess")}</p>
+                  </td>
+                </tr>
+              ),
+              editingUserId === user._id && (
+                <tr key={`${user._id}-edit`}>
+                  <td colSpan={8}>
+                    <form
+                      onSubmit={(e) => handleSaveEditUser(e, user._id)}
+                      className="org-edit-form"
+                    >
+                      <input
+                        type="text"
+                        dir={i18n.dir()}
+                        value={editUserName}
+                        onChange={(e) => setEditUserName(e.target.value)}
+                        placeholder={t("orgUsers.fullNamePlaceholder")}
+                        className="org-edit-input"
+                      />
+                      <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <input
+                          type="checkbox"
+                          checked={editUserActive}
+                          onChange={(e) => setEditUserActive(e.target.checked)}
+                        />
+                        {t("orgUsers.active")}
+                      </label>
+                      {editUserError && <p className="error-text">{editUserError}</p>}
+                      <div className="org-edit-actions">
+                        <button type="submit" disabled={editUserSubmitting} className="topup-button">
+                          {editUserSubmitting ? t("orgUsers.savingButton") : t("orgUsers.saveButton")}
+                        </button>
+                        <button
+                          type="button"
+                          className="retry-button"
+                          disabled={editUserSubmitting}
+                          onClick={() => setEditingUserId(null)}
+                        >
+                          {t("orgUsers.cancelButton")}
+                        </button>
+                      </div>
+                    </form>
                   </td>
                 </tr>
               ),

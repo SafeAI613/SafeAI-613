@@ -117,7 +117,13 @@ export async function addUserToOrganization(orgId: string, userId: string, role:
       throw new Error("User not found");
     }
 
-    const alreadyInOrg = (user as any).organizationId?.toString() === orgId;
+    const existingOrgId = (user as any).organizationId?.toString();
+    const alreadyInOrg = existingOrgId === orgId;
+    if (existingOrgId && !alreadyInOrg) {
+      // המשתמש כבר משויך לארגון אחר - לא "גונבים" אותו בשקט; הסרה מהארגון
+      // הקודם צריכה להיות פעולה מפורשת ונפרדת (למשל ע"י אותו ארגון).
+      throw new Error("המשתמש כבר משויך לארגון אחר, יש להסיר אותו משם קודם");
+    }
     if (!alreadyInOrg) {
       const maxUsers = (organization as any).settings?.maxUsers ?? 10;
       const currentUserCount = await userRepo.countUsersByOrganization(orgId);
@@ -221,6 +227,12 @@ export async function createOrganizationMember(
       name: data.name,
       organizationId: orgId,
       role: data.role || "user",
+      // Org-created members are billed against a budget the org owner
+      // funds from the org wallet (allocateBudgetToUser / funding requests),
+      // not their own provider key - MANAGED, not the BYOK default, or
+      // their balance never shows up anywhere (usageController only
+      // returns `budget` for MANAGED users).
+      mode: "MANAGED",
       skipEmailVerification: true,
       mustChangePassword: true,
     });
@@ -321,6 +333,94 @@ export async function allocateBudgetToUser(orgId: string, userId: string, amount
   });
 
   return { organization: updatedOrg, user: updatedUser };
+}
+
+/**
+ * Org admin editing an existing member's own profile fields (name,
+ * active/inactive) - not their email, role, organization membership, or
+ * budget, which all go through their own dedicated, safety-checked
+ * endpoints (add/remove/by-email, allocateBudgetToUser). Budget
+ * deliberately isn't editable here: it must move through
+ * allocateBudgetToUser so the org wallet is actually decremented, instead
+ * of letting an owner grant budget nobody paid into the wallet for.
+ */
+export async function updateOrganizationMember(
+  orgId: string,
+  userId: string,
+  data: { name?: string; isActive?: boolean }
+) {
+  const targetUser = await userRepo.getUserById(userId);
+  if (!targetUser || (targetUser as any).organizationId?.toString() !== orgId) {
+    throw new Error("המשתמש לא נמצא בארגון זה");
+  }
+  if ((targetUser as any).role === "org_owner") {
+    throw new Error("לא ניתן לערוך את בעל הארגון דרך מסך זה");
+  }
+
+  const updateData: any = {};
+  if (data.name !== undefined) {
+    if (!data.name.trim()) {
+      throw new Error("שם לא יכול להיות ריק");
+    }
+    updateData.name = data.name.trim();
+  }
+  if (data.isActive !== undefined) {
+    updateData.isActive = data.isActive;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw new Error("אין נתונים לעדכון");
+  }
+
+  const updated = await userRepo.updateUser(userId, updateData);
+  logger.info("Organization member updated", { organizationId: orgId, userId });
+  return updated;
+}
+
+/**
+ * Splits the org's entire wallet balance evenly across its members'
+ * costLimits.monthlyBudget - excluding the owner, who draws on the org
+ * account directly rather than a personal monthly budget. Uses the same
+ * primitives and additive/atomicity conventions as allocateBudgetToUser
+ * (single conditional wallet decrement up front, so two concurrent
+ * distribute-equally clicks can't double-spend the wallet), just applied
+ * to every member at once instead of one.
+ */
+export async function distributeOrganizationBudgetEqually(orgId: string) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const members = (await getOrganizationUsers(orgId)).filter((u: any) => u.role !== "org_owner");
+  if (members.length === 0) {
+    throw new Error("אין משתמשים בארגון לחלוקת התקציב ביניהם");
+  }
+
+  const walletBalance = (organization as any).walletBalance || 0;
+  if (walletBalance <= 0) {
+    throw new Error("אין יתרה בארנק הארגון לחלוקה");
+  }
+
+  const perMemberAmount = walletBalance / members.length;
+
+  const updatedOrg = await repo.decrementWalletBalanceIfSufficient(orgId, walletBalance);
+  if (!updatedOrg) {
+    throw new Error("יתרת הארנק של הארגון אינה מספיקה לחלוקה זו");
+  }
+
+  await Promise.all(
+    members.map((member: any) => userRepo.incrementUserMonthlyBudget(member._id.toString(), perMemberAmount))
+  );
+
+  logger.info("Organization budget distributed equally", {
+    organizationId: orgId,
+    memberCount: members.length,
+    perMemberAmount,
+    walletBalance,
+  });
+
+  return { organization: updatedOrg, memberCount: members.length, perMemberAmount };
 }
 
 /**

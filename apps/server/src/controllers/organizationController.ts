@@ -13,6 +13,8 @@ import {
   getOrganizationForUser,
   topUpOrganizationWallet,
   allocateBudgetToUser,
+  updateOrganizationMember,
+  distributeOrganizationBudgetEqually,
   getOrganizationFundingRequests,
   resolveFundingRequest,
   getPendingOrganizationsForAdmin,
@@ -146,7 +148,7 @@ export async function updateOrganizationHandler(
     // dedicated admin-only routes (approve/reject/suspend/activate/top-up).
     const updateData = isAdmin
       ? req.body
-      : { name: req.body.name, description: req.body.description };
+      : { name: req.body.name, description: req.body.description, logoUrl: req.body.logoUrl };
 
     const updatedOrg = await updateOrganization(orgId, updateData);
     res.json({ success: true, organization: updatedOrg });
@@ -508,6 +510,92 @@ export async function allocateBudgetToUserHandler(
       return res.status(404).json({ error: error.message });
     }
     res.status(400).json({ error: error.message || "Failed to allocate budget" });
+  }
+}
+
+/**
+ * Edit an existing member's own profile fields inside an organization
+ * (name, active/inactive) - Admin or the org's own owner. Not email, role,
+ * organization membership, or budget - see updateOrganizationMember in
+ * organizationService.ts for why budget is excluded.
+ */
+export async function updateOrganizationMemberHandler(
+  req: Request<{ id: string; userId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const { name, isActive } = req.body;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const updated = await updateOrganizationMember(orgId, req.params.userId, { name, isActive });
+    res.json({ success: true, user: sanitizeUser(updated) });
+  } catch (error: any) {
+    logger.error("Failed to update organization member", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      targetUserId: req.params.userId,
+    });
+    if (error.message === "המשתמש לא נמצא בארגון זה") {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message || "Failed to update organization member" });
+  }
+}
+
+/**
+ * Split the org wallet balance equally across its members' monthly
+ * budgets (Admin or the org's own owner). See
+ * organizationService.distributeOrganizationBudgetEqually for the
+ * atomicity/additive conventions this follows (same as allocateBudgetToUser).
+ */
+export async function distributeOrganizationBudgetHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await distributeOrganizationBudgetEqually(orgId);
+    res.json({
+      success: true,
+      message: "Budget distributed equally",
+      walletBalance: (result.organization as any)?.walletBalance,
+      memberCount: result.memberCount,
+      perMemberAmount: result.perMemberAmount,
+    });
+  } catch (error: any) {
+    logger.error("Failed to distribute organization budget equally", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    if (error.message === "Organization not found") {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message || "Failed to distribute organization budget" });
   }
 }
 
