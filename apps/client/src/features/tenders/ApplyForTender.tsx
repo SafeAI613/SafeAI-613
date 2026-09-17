@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import { normalizeProfile } from '../professionalProfile/normalize'
+import ProfessionalProfileModal from '../professionalProfile/ProfessionalProfileModal'
 import type { ProfessionalProfile, RawProfessionalProfile } from '../professionalProfile/types'
 import type { Applicant, Tender } from './types'
 
@@ -27,6 +28,8 @@ const URL_REGEX = /^https?:\/\/.+/i
 const RESUME_MAX_SIZE_BYTES = 5 * 1024 * 1024
 const RESUME_ALLOWED_TYPE = 'application/pdf'
 
+type ApplicationMode = 'profile' | 'manual'
+
 export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
   const { t } = useTranslation()
   const [name, setName] = useState('')
@@ -40,23 +43,34 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
   const [errors, setErrors] = useState<FormErrors>({})
 
   const [profile, setProfile] = useState<ProfessionalProfile | null>(null)
-  const [attachProfile, setAttachProfile] = useState(false)
+  const [applicationMode, setApplicationMode] = useState<ApplicationMode>('manual')
   const [selectedResumeKey, setSelectedResumeKey] = useState('')
+  const [showCreateProfileModal, setShowCreateProfileModal] = useState(false)
 
   useEffect(() => {
     apiCall<RawProfessionalProfile | null>(API_ENDPOINTS.professionalProfile.me)
-      .then((raw) => setProfile(raw ? normalizeProfile(raw) : null))
+      .then((raw) => {
+        const loadedProfile = raw ? normalizeProfile(raw) : null
+        setProfile(loadedProfile)
+        if (loadedProfile) {
+          setApplicationMode('profile')
+        }
+      })
       .catch((error) => console.error('Failed to load professional profile', error))
   }, [])
+
+  const usingProfile = applicationMode === 'profile' && profile !== null
 
   const validateForm = () => {
     const nextErrors: FormErrors = {}
 
-    const trimmedName = name.trim()
-    if (!trimmedName) {
-      nextErrors.name = 'יש להזין שם'
-    } else if (trimmedName.length > INPUT_LIMITS.name) {
-      nextErrors.name = `שם יכול להכיל עד ${INPUT_LIMITS.name} תווים`
+    if (!usingProfile) {
+      const trimmedName = name.trim()
+      if (!trimmedName) {
+        nextErrors.name = 'יש להזין שם'
+      } else if (trimmedName.length > INPUT_LIMITS.name) {
+        nextErrors.name = `שם יכול להכיל עד ${INPUT_LIMITS.name} תווים`
+      }
     }
 
     const trimmedEmail = email.trim()
@@ -68,11 +82,13 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
       nextErrors.email = `אימייל יכול להכיל עד ${INPUT_LIMITS.email} תווים`
     }
 
-    const trimmedDetails = details.trim()
-    if (!trimmedDetails) {
-      nextErrors.details = 'יש להזין פרטים'
-    } else if (trimmedDetails.length > INPUT_LIMITS.details) {
-      nextErrors.details = `פרטים יכולים להכיל עד ${INPUT_LIMITS.details} תווים`
+    if (!usingProfile) {
+      const trimmedDetails = details.trim()
+      if (!trimmedDetails) {
+        nextErrors.details = 'יש להזין פרטים'
+      } else if (trimmedDetails.length > INPUT_LIMITS.details) {
+        nextErrors.details = `פרטים יכולים להכיל עד ${INPUT_LIMITS.details} תווים`
+      }
     }
 
     if (proposal !== undefined && proposal < 0) {
@@ -149,9 +165,9 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
     setIsSubmitting(true)
 
     let resumeFileKey: string | undefined
-    if (attachProfile && selectedResumeKey) {
+    if (usingProfile && selectedResumeKey) {
       resumeFileKey = selectedResumeKey
-    } else if (resumeFile) {
+    } else if (!usingProfile && resumeFile) {
       try {
         resumeFileKey = await uploadResume(resumeFile)
       } catch (error) {
@@ -162,15 +178,19 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
       }
     }
 
+    const effectiveName = usingProfile && profile ? profile.name : name.trim()
+    const effectiveDetails = usingProfile && profile ? (profile.description || profile.experience || '') : details.trim()
+    const effectivePortfolioLink = usingProfile && profile ? (profile.portfolioLink || portfolioLink.trim() || undefined) : (portfolioLink.trim() || undefined)
+
     onSubmit({
-      name: name.trim(),
+      name: effectiveName,
       email: email.trim(),
-      details: details.trim(),
+      details: effectiveDetails,
       proposal: proposal !== undefined ? proposal : undefined,
       contactMethod: contactMethod.trim() || undefined,
       resumeFileKey,
-      portfolioLink: portfolioLink.trim() || undefined,
-      professionalProfileId: attachProfile && profile ? profile.id : undefined,
+      portfolioLink: effectivePortfolioLink,
+      professionalProfileId: usingProfile && profile ? profile.id : undefined,
     })
 
     setIsSubmitting(false)
@@ -193,24 +213,77 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
 
         <form className="modal-section apply-form" onSubmit={handleSubmit}>
           <div className="form-grid">
-            <label className="form-field">
-              <span className="form-label">{t('tenders.nameLabel')}</span>
-              <input
-                className="form-input"
-                type="text"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value)
-                  if (errors.name) {
-                    setErrors((prev) => ({ ...prev, name: undefined }))
-                  }
-                }}
-                placeholder={t('tenders.namePlaceholder')}
-                maxLength={INPUT_LIMITS.name}
-                required
-              />
-              {errors.name && <span className="form-error">{errors.name}</span>}
-            </label>
+            {profile && (
+              <div className="form-field form-full">
+                <div className="profile-attach-box">
+                  <label className="profile-attach-checkbox">
+                    <input
+                      type="radio"
+                      name="applicationMode"
+                      checked={applicationMode === 'profile'}
+                      onChange={() => setApplicationMode('profile')}
+                    />
+                    השתמש בפרופיל המקצועי שלי ({profile.name})
+                  </label>
+                  <label className="profile-attach-checkbox">
+                    <input
+                      type="radio"
+                      name="applicationMode"
+                      checked={applicationMode === 'manual'}
+                      onChange={() => setApplicationMode('manual')}
+                    />
+                    מילוי פרטים ידני
+                  </label>
+
+                  {usingProfile && profile.resumeFiles.length > 0 && (
+                    <select
+                      className="form-input"
+                      value={selectedResumeKey}
+                      onChange={(e) => setSelectedResumeKey(e.target.value)}
+                    >
+                      <option value="">בחר קובץ קורות חיים (אופציונלי)</option>
+                      {profile.resumeFiles.map((file) => (
+                        <option key={file.fileKey} value={file.fileKey}>
+                          {file.fileName}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!profile && (
+              <div className="form-field form-full">
+                <div className="profile-attach-box no-profile-banner">
+                  <p>עדיין אין לך פרופיל מקצועי. יצירת פרופיל תאפשר לך להגיש מועמדות מהר יותר בפעם הבאה.</p>
+                  <button type="button" className="secondary-button" onClick={() => setShowCreateProfileModal(true)}>
+                    צור פרופיל מקצועי
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!usingProfile && (
+              <label className="form-field">
+                <span className="form-label">{t('tenders.nameLabel')}</span>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value)
+                    if (errors.name) {
+                      setErrors((prev) => ({ ...prev, name: undefined }))
+                    }
+                  }}
+                  placeholder={t('tenders.namePlaceholder')}
+                  maxLength={INPUT_LIMITS.name}
+                  required
+                />
+                {errors.name && <span className="form-error">{errors.name}</span>}
+              </label>
+            )}
 
             <label className="form-field">
               <span className="form-label">{t('tenders.emailLabel')}</span>
@@ -231,24 +304,26 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
               {errors.email && <span className="form-error">{errors.email}</span>}
             </label>
 
-            <label className="form-field form-full">
-              <span className="form-label">{t('tenders.detailsLabel')}</span>
-              <textarea
-                className="form-textarea"
-                value={details}
-                onChange={(e) => {
-                  setDetails(e.target.value)
-                  if (errors.details) {
-                    setErrors((prev) => ({ ...prev, details: undefined }))
-                  }
-                }}
-                placeholder={t('tenders.detailsPlaceholder')}
-                maxLength={INPUT_LIMITS.details}
-                required
-                rows={5}
-              />
-              {errors.details && <span className="form-error">{errors.details}</span>}
-            </label>
+            {!usingProfile && (
+              <label className="form-field form-full">
+                <span className="form-label">{t('tenders.detailsLabel')}</span>
+                <textarea
+                  className="form-textarea"
+                  value={details}
+                  onChange={(e) => {
+                    setDetails(e.target.value)
+                    if (errors.details) {
+                      setErrors((prev) => ({ ...prev, details: undefined }))
+                    }
+                  }}
+                  placeholder={t('tenders.detailsPlaceholder')}
+                  maxLength={INPUT_LIMITS.details}
+                  required
+                  rows={5}
+                />
+                {errors.details && <span className="form-error">{errors.details}</span>}
+              </label>
+            )}
 
             <label className="form-field">
               <span className="form-label">{t('tenders.proposalLabel')}</span>
@@ -289,40 +364,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
               {errors.contactMethod && <span className="form-error">{errors.contactMethod}</span>}
             </label>
 
-            {profile && (
-              <div className="form-field form-full">
-                <div className="profile-attach-box">
-                  <label className="profile-attach-checkbox">
-                    צרף את הפרופיל המקצועי שלי
-                    <input
-                      type="checkbox"
-                      checked={attachProfile}
-                      onChange={(e) => {
-                        setAttachProfile(e.target.checked)
-                        setSelectedResumeKey('')
-                      }}
-                    />
-                  </label>
-
-                  {attachProfile && profile.resumeFiles.length > 0 && (
-                    <select
-                      className="form-input"
-                      value={selectedResumeKey}
-                      onChange={(e) => setSelectedResumeKey(e.target.value)}
-                    >
-                      <option value="">בחר קובץ קורות חיים (אופציונלי)</option>
-                      {profile.resumeFiles.map((file) => (
-                        <option key={file.fileKey} value={file.fileKey}>
-                          {file.fileName}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {!attachProfile && (
+            {!usingProfile && (
               <label className="form-field">
                 <span className="form-label">קורות חיים (PDF, עד 5MB)</span>
                 <input
@@ -335,23 +377,25 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
               </label>
             )}
 
-            <label className="form-field">
-              <span className="form-label">קישור לתיק עבודות</span>
-              <input
-                className="form-input"
-                type="url"
-                value={portfolioLink}
-                onChange={(e) => {
-                  setPortfolioLink(e.target.value)
-                  if (errors.portfolioLink) {
-                    setErrors((prev) => ({ ...prev, portfolioLink: undefined }))
-                  }
-                }}
-                placeholder="https://..."
-                maxLength={INPUT_LIMITS.portfolioLink}
-              />
-              {errors.portfolioLink && <span className="form-error">{errors.portfolioLink}</span>}
-            </label>
+            {!usingProfile && (
+              <label className="form-field">
+                <span className="form-label">קישור לתיק עבודות</span>
+                <input
+                  className="form-input"
+                  type="url"
+                  value={portfolioLink}
+                  onChange={(e) => {
+                    setPortfolioLink(e.target.value)
+                    if (errors.portfolioLink) {
+                      setErrors((prev) => ({ ...prev, portfolioLink: undefined }))
+                    }
+                  }}
+                  placeholder="https://..."
+                  maxLength={INPUT_LIMITS.portfolioLink}
+                />
+                {errors.portfolioLink && <span className="form-error">{errors.portfolioLink}</span>}
+              </label>
+            )}
           </div>
 
           <div className="modal-actions mt-18 actions-row">
@@ -364,6 +408,18 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
           </div>
         </form>
       </div>
+
+      {showCreateProfileModal && (
+        <ProfessionalProfileModal
+          profile={null}
+          onClose={() => setShowCreateProfileModal(false)}
+          onSaved={(savedProfile) => {
+            setProfile(savedProfile)
+            setApplicationMode('profile')
+            setShowCreateProfileModal(false)
+          }}
+        />
+      )}
     </div>
   )
 }

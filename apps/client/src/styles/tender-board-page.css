@@ -1075,10 +1075,17 @@
   color: var(--text-secondary);
 }
 
-.apply-form .profile-attach-checkbox input[type='checkbox'] {
+.apply-form .profile-attach-checkbox input[type='checkbox'],
+.apply-form .profile-attach-checkbox input[type='radio'] {
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+.apply-form .no-profile-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
 }
 
 .apply-form .resume-file-list {
