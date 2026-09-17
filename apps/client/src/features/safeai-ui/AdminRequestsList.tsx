@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAlert } from "../../context/alertStore";
 
 type Reply = {
   senderRole: string;
@@ -28,6 +29,7 @@ export default function AdminRequestsList() {
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const isRequestNew = (req: Request) => {
     const hasAdminReply = req.replies?.some((reply: Reply) => reply.senderRole === "admin");
@@ -43,7 +45,7 @@ export default function AdminRequestsList() {
       setRequests((prev) => prev.filter((req) => req._id !== id));
     } catch (err) {
       console.error("שגיאה במחיקת הפנייה:", err);
-      alert(t("requests.deleteFailedAlert"));
+      showAlert(t("requests.deleteFailedAlert"), { type: "error" });
     } finally {
       setDeletingRequestId(null);
     }

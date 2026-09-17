@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import i18n from "../../i18n";
 
 
 export interface Prompt {
@@ -43,14 +42,16 @@ export const filterManagementSlice = createSlice({
                 state.groupPrompts[index] = updatedPrompt;
             }
         },
+        // Note: this reducer used to call the browser `alert()` directly as a side
+        // effect, based on whether the prompt was active before the toggle. Reducers
+        // must stay pure (no UI side effects), so that decision now lives in the
+        // calling component (GroupPromptsPage), which already knows the prompt's
+        // status before dispatching and shows the matching popup via useAlert().
         changePromptStatus: (state, action: PayloadAction<number>) => {
             const id = action.payload;
             const prompt = state.groupPrompts.find(p => p.id === id);
             if (prompt && prompt.Status === "active") {
                 prompt.Status = "not active";
-                alert(i18n.t("filterManagement.pauseSuccessAlert"));
-            } else {
-                alert(i18n.t("filterManagement.pauseFailedAlert"));
             }
         },
         removePrompt: (state, action: PayloadAction<number>) => {

@@ -30,8 +30,11 @@ export const API_ENDPOINTS = {
     detail: (id: string) => `${API_BASE_URL}/organizations/${id}`,
     users: (id: string) => `${API_BASE_URL}/organizations/${id}/users`,
     members: (id: string) => `${API_BASE_URL}/organizations/${id}/members`,
+    allocateBudget: (id: string, userId: string) =>
+      `${API_BASE_URL}/organizations/${id}/users/${userId}/allocate-budget`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
     invoices: (id: string) => `${API_BASE_URL}/organizations/${id}/invoices`,
+    profiles: (id: string) => `${API_BASE_URL}/organizations/${id}/profiles`,
     suspend: (id: string) => `${API_BASE_URL}/organizations/${id}/suspend`,
     activate: (id: string) => `${API_BASE_URL}/organizations/${id}/activate`,
     approve: (id: string) => `${API_BASE_URL}/organizations/${id}/approve`,
@@ -53,6 +56,8 @@ export const API_ENDPOINTS = {
     limits: `${API_BASE_URL}/usage/limits`,
     costs: `${API_BASE_URL}/usage/costs`,
   },
+  // A regular org member's own funding requests (asking for more monthly budget)
+  fundingRequests: `${API_BASE_URL}/users/me/funding-requests`,
   // Public statistics endpoint (no auth — landing page counts)
   publicStats: `${API_BASE_URL}/public-stats`,
   // Admin statistics endpoints

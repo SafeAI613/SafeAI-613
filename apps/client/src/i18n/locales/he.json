@@ -78,6 +78,7 @@
     "addMemberTitle": "הוספת משתמש חדש לארגון",
     "fullNamePlaceholder": "שם מלא",
     "emailPlaceholder": "כתובת אימייל",
+    "emailDomainSuggestionsAriaLabel": "הצעות להשלמת דומיין האימייל",
     "addingButton": "מוסיף...",
     "addMemberButton": "הוסף משתמש",
     "createdMembersMessage": "נוספו {{count}} משתמשים חדשים בסשן הזה. פרטי ההתחברות שיש למסור להם:",
@@ -93,6 +94,10 @@
     "updateOrgFailedFallback": "נכשל עדכון פרטי הארגון",
     "addMemberFieldsRequired": "יש למלא שם וכתובת אימייל",
     "addMemberFailedFallback": "הוספת המשתמש נכשלה",
+    "allocateBudgetButton": "הקצאת כספים",
+    "allocateBudgetSubmit": "הקצה",
+    "allocateBudgetSuccess": "התקציב הוקצה בהצלחה",
+    "allocateBudgetFailedFallback": "הקצאת התקציב נכשלה",
     "excelHeaderName": "שם",
     "excelHeaderEmail": "אימייל",
     "excelHeaderPassword": "סיסמה זמנית",
@@ -102,6 +107,9 @@
     "excelSheetName": "משתמשים חדשים",
     "excelFileNamePrefix": "משתמשי",
     "excelFallbackOrgName": "ארגון",
+    "downloadAllUsersButton": "הורדת רשימת כל המשתמשים",
+    "allUsersExcelSheetName": "כל המשתמשים",
+    "allUsersExcelFileNamePrefix": "רשימת-משתמשים",
     "tableHeaders": {
       "email": "אימייל",
       "name": "שם",
@@ -111,7 +119,9 @@
       "joined": "הצטרף",
       "joinStatus": "סטטוס הצטרפות",
       "joinedDate": "תאריך הצטרפות",
-      "password": "סיסמה זמנית"
+      "password": "סיסמה זמנית",
+      "monthlyBudget": "תקציב חודשי",
+      "actions": "פעולות"
     },
     "roleOrgOwner": "בעלים",
     "roleAdmin": "מנהל מערכת",
@@ -135,6 +145,16 @@
     "statusPending": "ממתין",
     "statusCompleted": "שולם",
     "statusFailed": "נכשל"
+    "profilesTitle": "פרופילי AI מורשים לארגון",
+    "profilesDescription": "בחר/י אילו פרופילי AI מאושרים במערכת יהיו זמינים לשימוש בארגון שלך.",
+    "profilesLoading": "טוען פרופילים...",
+    "profilesFetchErrorFallback": "שגיאה בטעינת רשימת הפרופילים",
+    "profilesEmpty": "לא נמצאו פרופילי AI מאושרים במערכת.",
+    "profilesCreatedByLabel": "נוצר על ידי:",
+    "profilesSaveButton": "שמירת בחירה",
+    "profilesSavingButton": "שומר...",
+    "profilesSaveSuccess": "רשימת הפרופילים המורשים עודכנה בהצלחה.",
+    "profilesSaveFailedFallback": "עדכון רשימת הפרופילים נכשל"
   },
   "registerSuccess": {
     "title": "✅ ההרשמה הושלמה בהצלחה!",
@@ -792,7 +812,8 @@
     "pendingStatus": "ממתין",
     "approveButton": "אישור",
     "rejectButton": "דחייה",
-    "processingButton": "מעבד..."
+    "processingButton": "מעבד...",
+    "viewDetailsButton": "צפייה בפרטים"
   },
   "weekDays": {
     "sunday": "ראשון",
@@ -1291,16 +1312,31 @@
     "recentCostTitle": "עלות ב-7 ימים אחרונים",
     "recentCostDescription": "עלות מצטברת של כל הבקשות שבוצעו ב-7 הימים האחרונים.",
     "topUpModal": {
-      "title": "טעינת יתרה",
-      "description": "מערכת התשלומים בפיתוח. מלא את הפרטים ונחזור אליך בהקדם לביצוע הטעינה.",
+      "title": "בקשת הגדלת תקציב",
+      "description": "הבקשה תישלח למנהל הארגון שלך לאישור. לאחר האישור, התקציב החודשי שלך יעודכן בהתאם.",
       "emailLabel": "אימייל",
-      "amountLabel": "סכום לטעינה (USD)",
+      "amountLabel": "סכום מבוקש (USD)",
       "amountPlaceholder": "לדוגמה: 20",
       "notesLabel": "הערות (אופציונלי)",
       "notesPlaceholder": "כל מידע נוסף שתרצה להוסיף...",
-      "submitButton": "שלח בקשה לטעינה",
+      "submitButton": "שלח בקשה",
+      "submittingButton": "שולח...",
+      "invalidAmountError": "יש להזין סכום חיובי תקין.",
+      "submitFailedError": "שליחת הבקשה נכשלה. נסה שוב מאוחר יותר.",
       "successTitle": "הבקשה נשלחה!",
-      "successMessage": "קיבלנו את בקשת הטעינה שלך. נציג יצור איתך קשר בקרוב לסיום התהליך."
+      "successMessage": "בקשתך להגדלת התקציב נשלחה למנהל הארגון וממתינה לאישור."
+    },
+    "fundingRequests": {
+      "title": "היסטוריית בקשות תקציב",
+      "empty": "עדיין לא שלחת בקשות להגדלת תקציב.",
+      "amountColumn": "סכום מבוקש",
+      "statusColumn": "סטטוס",
+      "dateColumn": "תאריך",
+      "status": {
+        "pending": "ממתין לאישור",
+        "approved": "אושר",
+        "rejected": "נדחה"
+      }
     }
   }
 }

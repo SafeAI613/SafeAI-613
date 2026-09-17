@@ -1,6 +1,8 @@
 import crypto from "crypto";
+import mongoose from "mongoose";
 import * as repo from "../repositories/organizationRepository";
 import * as userRepo from "../repositories/userRepository";
+import * as profileRepo from "../repositories/profileRepository";
 import { aggregateUsageStats } from "../repositories/usageRepository";
 import { register } from "./authService";
 import {
@@ -11,6 +13,10 @@ import {
   sendOrgAdminActionEmail,
 } from "../utils/email";
 import logger from "../logger";
+
+export class ValidationError extends Error {
+  statusCode = 400;
+}
 
 function generateTemporaryPassword(): string {
   return crypto.randomBytes(9).toString("base64").replace(/[^a-zA-Z0-9]/g, "");
@@ -260,6 +266,62 @@ export async function topUpOrganizationWallet(orgId: string, amount: number) {
   }
 }
 
+/**
+ * Allocate (add) dollars from the organization's wallet to a member's
+ * personal monthly budget (costLimits.monthlyBudget).
+ *
+ * Additive by design, not "set to X": an org admin allocating funds is
+ * giving the user *more* spending room on top of whatever they already
+ * have this month, the same way topUpOrganizationWallet adds to the org
+ * wallet instead of overwriting it. A "set to X" semantic would silently
+ * erase any unspent budget the admin never intended to claw back.
+ *
+ * Money-movement safety: the wallet decrement
+ * (repo.decrementWalletBalanceIfSufficient) is a single atomic,
+ * conditional update - the `walletBalance >= amount` check and the `$inc`
+ * happen in the same Mongo query - so two concurrent allocations can never
+ * together overdraw the wallet. There is, however, no cross-collection
+ * transaction wrapping the wallet decrement and the user's budget
+ * increment together: if the process crashes in between, the wallet is
+ * debited without the user being credited. The rest of this codebase's
+ * money-moving code (paymeService.ts) has the same limitation - it isn't
+ * running Mongo as a replica set / doesn't use sessions - so this follows
+ * existing precedent rather than introducing a new one. A future fix would
+ * wrap both writes in a Mongoose session transaction once that's available.
+ */
+export async function allocateBudgetToUser(orgId: string, userId: string, amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Amount must be a positive number");
+  }
+
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const targetUser = await userRepo.getUserById(userId);
+  if (!targetUser || (targetUser as any).organizationId?.toString() !== orgId) {
+    throw new Error("User not found in this organization");
+  }
+
+  const updatedOrg = await repo.decrementWalletBalanceIfSufficient(orgId, amount);
+  if (!updatedOrg) {
+    throw new Error("יתרת הארנק של הארגון אינה מספיקה להקצאה זו");
+  }
+
+  const updatedUser = await userRepo.incrementUserMonthlyBudget(userId, amount);
+
+  logger.info("Budget allocated from organization wallet to user", {
+    organizationId: orgId,
+    userId,
+    amount,
+    newWalletBalance: (updatedOrg as any)?.walletBalance,
+    newUserMonthlyBudget: (updatedUser as any)?.costLimits?.monthlyBudget,
+  });
+
+  return { organization: updatedOrg, user: updatedUser };
+}
+
 export async function getPendingOrganizationsForAdmin() {
   return repo.getPendingOrganizations();
 }
@@ -496,6 +558,76 @@ export async function setOrganizationActive(
   );
 
   logger.info("Organization active state changed", { organizationId: orgId, isActive });
+  return updated;
+}
+
+/**
+ * List every approved AI profile available in the system, marking which
+ * ones the given organization currently has selected. Used by the org
+ * admin's "select profiles" screen.
+ */
+export async function getOrganizationAvailableProfiles(orgId: string) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const allowedProfileIds = new Set(
+    ((organization as any).allowedProfileIds || []).map((id: any) => id.toString())
+  );
+
+  const profiles = await profileRepo.getProfiles();
+
+  return {
+    profiles: profiles.map((profile: any) => ({
+      ...profile,
+      selected: allowedProfileIds.has(profile._id.toString()),
+    })),
+    selectedProfileIds: Array.from(allowedProfileIds),
+  };
+}
+
+/**
+ * Set the list of AI profiles an organization admin has chosen for their
+ * organization, out of the profiles available in the system. Every id must
+ * be a real, existing, approved AIProfile - otherwise the whole update is
+ * rejected (no partial application of an invalid selection).
+ */
+export async function setOrganizationAllowedProfiles(orgId: string, profileIds: unknown) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  if (!Array.isArray(profileIds)) {
+    throw new ValidationError("profileIds must be an array of profile ids");
+  }
+
+  const uniqueIds = Array.from(new Set(profileIds.map((id) => String(id))));
+
+  const invalidFormatId = uniqueIds.find((id) => !mongoose.Types.ObjectId.isValid(id));
+  if (invalidFormatId) {
+    throw new ValidationError(`Invalid profile id: ${invalidFormatId}`);
+  }
+
+  if (uniqueIds.length > 0) {
+    const approvedProfiles = await profileRepo.getApprovedProfilesByIds(uniqueIds);
+    const approvedIds = new Set(approvedProfiles.map((p: any) => p._id.toString()));
+    const unknownIds = uniqueIds.filter((id) => !approvedIds.has(id));
+    if (unknownIds.length > 0) {
+      throw new ValidationError(
+        `One or more profile ids are invalid or not approved: ${unknownIds.join(", ")}`
+      );
+    }
+  }
+
+  const updated = await repo.setAllowedProfileIds(orgId, uniqueIds);
+
+  logger.info("Organization allowed profiles set", {
+    organizationId: orgId,
+    profileIds: uniqueIds,
+  });
+
   return updated;
 }
 

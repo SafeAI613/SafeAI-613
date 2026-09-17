@@ -10,6 +10,7 @@ import {
   createOrganizationMemberHandler,
   removeUserFromOrganizationHandler,
   addUserByEmailToOrganizationHandler,
+  allocateBudgetToUserHandler,
   topUpOrganizationWalletHandler,
   getPendingOrganizationsHandler,
   getAllOrganizationsHandler,
@@ -21,6 +22,8 @@ import {
   approveOrganizationHandler,
   rejectOrganizationHandler,
   getMyOrganizationHandler,
+  getOrganizationProfilesHandler,
+  updateOrganizationProfilesHandler,
 } from "../controllers/organizationController";
 import { authenticateToken, requireAdmin } from "../middleware/auth";
 import { registerRateLimiter } from "../middleware/authRateLimiter";
@@ -84,6 +87,10 @@ router.get("/:id/stats", getOrganizationStatsHandler);      // Admin or Org Owne
 // Organization "invoices" (billing history) - wallet top-up transactions,
 // there is no separate invoicing system (see paymeService.getOrganizationInvoices)
 router.get("/:id/invoices", getOrganizationInvoicesHandler); // Admin or Org Owner
+// AI profiles allowed for the organization - selected by the org admin out
+// of the approved profiles available in the system
+router.get("/:id/profiles", requireApprovedOrg, getOrganizationProfilesHandler);   // Admin or approved Org Owner
+router.patch("/:id/profiles", requireApprovedOrg, updateOrganizationProfilesHandler); // Admin or approved Org Owner
 
 // Management of Users inside Organization (blocked until org is approved, admins bypass)
 router.get("/:id/users", requireApprovedOrg, getOrganizationUsersHandler); // Admin or approved Org Owner
@@ -91,6 +98,10 @@ router.post("/:id/users", requireApprovedOrg, addUserToOrganizationHandler); // 
 router.post("/:id/members", requireApprovedOrg, createOrganizationMemberHandler); // Admin or approved Org Owner - creates a brand-new user + temp password
 router.delete("/users/:userId", removeUserFromOrganizationHandler); // Admin or Org Owner
 router.post("/:id/users/by-email", requireApprovedOrg, addUserByEmailToOrganizationHandler); // Admin or approved Org Owner
+
+// Allocate (add) dollars from the org wallet into a member's own monthly
+// budget - blocked until org is approved (admins bypass)
+router.patch("/:id/users/:userId/allocate-budget", requireApprovedOrg, allocateBudgetToUserHandler); // Admin or approved Org Owner
 
 // Wallet Management (Mock) - blocked until org is approved (admins bypass)
 router.post("/:id/top-up", requireApprovedOrg, topUpOrganizationWalletHandler); // Admin or approved Org Owner

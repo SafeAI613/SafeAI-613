@@ -12,6 +12,7 @@ import {
   addUserToOrganizationByEmail,
   getOrganizationForUser,
   topUpOrganizationWallet,
+  allocateBudgetToUser,
   getPendingOrganizationsForAdmin,
   listAllOrganizationsWithStats,
   setOrganizationActive,
@@ -20,6 +21,8 @@ import {
   approveOrganization,
   rejectOrganization,
   getMyOrganization,
+  getOrganizationAvailableProfiles,
+  setOrganizationAllowedProfiles,
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
 import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
@@ -453,6 +456,60 @@ export async function topUpOrganizationWalletHandler(
 }
 
 /**
+ * Allocate (add) dollars from the organization's wallet to a member's
+ * personal monthly budget (Admin or the org's own owner only). Additive:
+ * see allocateBudgetToUser in organizationService.ts for the design
+ * rationale.
+ */
+export async function allocateBudgetToUserHandler(
+  req: Request<{ id: string; userId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const targetUserId = req.params.userId;
+    const { amount } = req.body;
+
+    if (amount === undefined || typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: "A valid positive amount is required" });
+    }
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await allocateBudgetToUser(orgId, targetUserId, amount);
+    res.json({
+      success: true,
+      message: "Budget allocated successfully",
+      walletBalance: (result.organization as any)?.walletBalance,
+      user: sanitizeUser(result.user),
+    });
+  } catch (error: any) {
+    logger.error("Failed to allocate budget to user", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      targetUserId: req.params.userId,
+    });
+    if (
+      error.message === "Organization not found" ||
+      error.message === "User not found in this organization"
+    ) {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message || "Failed to allocate budget" });
+  }
+}
+
+/**
  * List ALL organizations with user counts + wallet balance (Admin only)
  */
 export async function getAllOrganizationsHandler(req: Request, res: Response) {
@@ -510,6 +567,79 @@ export async function activateOrganizationHandler(
       organizationId: req.params.id,
     });
     res.status(400).json({ error: error.message || "Failed to reactivate organization" });
+  }
+}
+
+/**
+ * Get all approved AI profiles available in the system, plus which ones are
+ * currently selected for this organization (Admin or approved Org Owner).
+ */
+export async function getOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { profiles, selectedProfileIds } = await getOrganizationAvailableProfiles(orgId);
+    res.json({ success: true, profiles, selectedProfileIds });
+  } catch (error: any) {
+    logger.error("Failed to get organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization profiles" });
+  }
+}
+
+/**
+ * Set the list of AI profiles selected for this organization out of the
+ * profiles available in the system (Admin or approved Org Owner).
+ */
+export async function updateOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const { profileIds } = req.body;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const updatedOrg = await setOrganizationAllowedProfiles(orgId, profileIds);
+    res.json({
+      success: true,
+      message: "Organization profiles updated successfully",
+      organization: updatedOrg,
+    });
+  } catch (error: any) {
+    logger.error("Failed to update organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(400).json({ error: error.message || "Failed to update organization profiles" });
   }
 }
 

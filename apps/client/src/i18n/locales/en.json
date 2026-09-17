@@ -78,6 +78,7 @@
     "addMemberTitle": "Add a new user to the organization",
     "fullNamePlaceholder": "Full name",
     "emailPlaceholder": "Email address",
+    "emailDomainSuggestionsAriaLabel": "Email domain suggestions",
     "addingButton": "Adding...",
     "addMemberButton": "Add user",
     "createdMembersMessage": "{{count}} new users were added in this session. Login details to share with them:",
@@ -93,6 +94,10 @@
     "updateOrgFailedFallback": "Failed to update organization details",
     "addMemberFieldsRequired": "Please fill in name and email address",
     "addMemberFailedFallback": "Adding the user failed",
+    "allocateBudgetButton": "Allocate funds",
+    "allocateBudgetSubmit": "Allocate",
+    "allocateBudgetSuccess": "Budget allocated successfully",
+    "allocateBudgetFailedFallback": "Failed to allocate the budget",
     "excelHeaderName": "Name",
     "excelHeaderEmail": "Email",
     "excelHeaderPassword": "Temporary password",
@@ -102,6 +107,9 @@
     "excelSheetName": "New Users",
     "excelFileNamePrefix": "users",
     "excelFallbackOrgName": "organization",
+    "downloadAllUsersButton": "Download full user list",
+    "allUsersExcelSheetName": "All Users",
+    "allUsersExcelFileNamePrefix": "user-list",
     "tableHeaders": {
       "email": "Email",
       "name": "Name",
@@ -111,7 +119,9 @@
       "joined": "Joined",
       "joinStatus": "Join status",
       "joinedDate": "Join date",
-      "password": "Temporary password"
+      "password": "Temporary password",
+      "monthlyBudget": "Monthly budget",
+      "actions": "Actions"
     },
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",
@@ -135,6 +145,16 @@
     "statusPending": "Pending",
     "statusCompleted": "Paid",
     "statusFailed": "Failed"
+    "profilesTitle": "Allowed AI Profiles",
+    "profilesDescription": "Choose which of the approved AI profiles available in the system your organization is allowed to use.",
+    "profilesLoading": "Loading profiles...",
+    "profilesFetchErrorFallback": "Failed to load the list of profiles",
+    "profilesEmpty": "No approved AI profiles were found in the system.",
+    "profilesCreatedByLabel": "Created by:",
+    "profilesSaveButton": "Save selection",
+    "profilesSavingButton": "Saving...",
+    "profilesSaveSuccess": "The allowed profiles list was updated successfully.",
+    "profilesSaveFailedFallback": "Failed to update the profiles list"
   },
   "registerSuccess": {
     "title": "\u2705 Registration Completed Successfully!",
@@ -792,7 +812,8 @@
     "pendingStatus": "Pending",
     "approveButton": "Approve",
     "rejectButton": "Reject",
-    "processingButton": "Processing..."
+    "processingButton": "Processing...",
+    "viewDetailsButton": "View Details"
   },
   "weekDays": {
     "sunday": "Sunday",
@@ -1291,16 +1312,31 @@
     "recentCostTitle": "Cost in the last 7 days",
     "recentCostDescription": "Cumulative cost of all requests made in the last 7 days.",
     "topUpModal": {
-      "title": "Top up balance",
-      "description": "The payment system is under development. Fill in the details and we'll get back to you shortly to complete the top-up.",
+      "title": "Request more budget",
+      "description": "Your request will be sent to your organization's admin for approval. Once approved, your monthly budget will be updated accordingly.",
       "emailLabel": "Email",
-      "amountLabel": "Amount to top up (USD)",
+      "amountLabel": "Requested amount (USD)",
       "amountPlaceholder": "e.g. 20",
       "notesLabel": "Notes (optional)",
       "notesPlaceholder": "Any additional information you'd like to add...",
-      "submitButton": "Submit top-up request",
+      "submitButton": "Submit request",
+      "submittingButton": "Submitting...",
+      "invalidAmountError": "Please enter a valid positive amount.",
+      "submitFailedError": "Failed to submit the request. Please try again later.",
       "successTitle": "Request sent!",
-      "successMessage": "We've received your top-up request. A representative will contact you shortly to complete the process."
+      "successMessage": "Your budget request was sent to your organization's admin and is awaiting approval."
+    },
+    "fundingRequests": {
+      "title": "Funding request history",
+      "empty": "You haven't submitted any funding requests yet.",
+      "amountColumn": "Requested amount",
+      "statusColumn": "Status",
+      "dateColumn": "Date",
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
     }
   }
 }
