@@ -773,7 +773,8 @@
     "pendingStatus": "ממתין",
     "approveButton": "אישור",
     "rejectButton": "דחייה",
-    "processingButton": "מעבד..."
+    "processingButton": "מעבד...",
+    "viewDetailsButton": "צפייה בפרטים"
   },
   "weekDays": {
     "sunday": "ראשון",

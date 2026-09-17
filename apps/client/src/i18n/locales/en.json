@@ -773,7 +773,8 @@
     "pendingStatus": "Pending",
     "approveButton": "Approve",
     "rejectButton": "Reject",
-    "processingButton": "Processing..."
+    "processingButton": "Processing...",
+    "viewDetailsButton": "View Details"
   },
   "weekDays": {
     "sunday": "Sunday",
