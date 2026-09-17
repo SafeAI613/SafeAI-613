@@ -42,6 +42,11 @@ export interface OrganizationUser {
   mode?: string;
   createdAt: string;
   lastLogin?: string;
+  costLimits?: {
+    monthlyBudget: number;
+    currentMonthSpent: number;
+    lastResetDate?: string;
+  };
 }
 
 export interface OrganizationUsageSummary {
@@ -117,6 +122,19 @@ export const createOrganizationMember = async (
 // הארגון של המשתמש הנוכחי (בכל סטטוס)
 export const getMyOrganization = async (): Promise<{ organization: AdminOrganization | null }> => {
   return apiCall(API_ENDPOINTS.adminOrganizations.my, { method: "GET" });
+};
+
+// הקצאת דולרים מהארנק הארגוני לתקציב החודשי האישי של משתמש (תוספתית - ראו
+// allocateBudgetToUser ב-organizationService.ts בשרת להסבר הבחירה)
+export const allocateBudgetToUser = async (
+  orgId: string,
+  userId: string,
+  amount: number
+): Promise<{ success: boolean; message?: string; walletBalance: number; user: OrganizationUser }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.allocateBudget(orgId, userId), {
+    method: "PATCH",
+    body: JSON.stringify({ amount }),
+  });
 };
 
 // עדכון שם/תיאור הארגון

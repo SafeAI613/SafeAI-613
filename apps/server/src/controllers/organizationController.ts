@@ -12,6 +12,7 @@ import {
   addUserToOrganizationByEmail,
   getOrganizationForUser,
   topUpOrganizationWallet,
+  allocateBudgetToUser,
   getPendingOrganizationsForAdmin,
   listAllOrganizationsWithStats,
   setOrganizationActive,
@@ -448,6 +449,60 @@ export async function topUpOrganizationWalletHandler(
       organizationId: req.params.id,
     });
     res.status(500).json({ error: "Failed to top up wallet", details: error.message });
+  }
+}
+
+/**
+ * Allocate (add) dollars from the organization's wallet to a member's
+ * personal monthly budget (Admin or the org's own owner only). Additive:
+ * see allocateBudgetToUser in organizationService.ts for the design
+ * rationale.
+ */
+export async function allocateBudgetToUserHandler(
+  req: Request<{ id: string; userId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const targetUserId = req.params.userId;
+    const { amount } = req.body;
+
+    if (amount === undefined || typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: "A valid positive amount is required" });
+    }
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await allocateBudgetToUser(orgId, targetUserId, amount);
+    res.json({
+      success: true,
+      message: "Budget allocated successfully",
+      walletBalance: (result.organization as any)?.walletBalance,
+      user: sanitizeUser(result.user),
+    });
+  } catch (error: any) {
+    logger.error("Failed to allocate budget to user", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      targetUserId: req.params.userId,
+    });
+    if (
+      error.message === "Organization not found" ||
+      error.message === "User not found in this organization"
+    ) {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message || "Failed to allocate budget" });
   }
 }
 

@@ -70,6 +70,38 @@ export async function incrementWalletBalance(orgId: string, amount: number) {
   }
 }
 
+/**
+ * Atomically decrements walletBalance by `amount`, but only if the current
+ * balance is at least `amount` - the `$gte` guard lives in the same query
+ * as the `$inc`, so two concurrent allocations can never together push the
+ * balance negative. Returns null (instead of throwing) when the balance is
+ * insufficient or the organization doesn't exist, so the caller can turn
+ * that into a clear 400 "insufficient balance" response.
+ */
+export async function decrementWalletBalanceIfSufficient(orgId: string, amount: number) {
+  try {
+    const organization = await Organization.findOneAndUpdate(
+      { _id: orgId, walletBalance: { $gte: amount } },
+      { $inc: { walletBalance: -amount } },
+      { new: true, runValidators: true }
+    ).lean();
+    logger.info("Organization wallet balance decremented in DB", {
+      organizationId: orgId,
+      amount,
+      insufficientOrMissing: !organization,
+    });
+    return organization;
+  } catch (error: any) {
+    logger.error("Failed to decrement organization wallet balance in DB", {
+      error: error.message,
+      stack: error.stack,
+      organizationId: orgId,
+      amount,
+    });
+    throw error;
+  }
+}
+
 export async function deleteOrganization(orgId: string) {
   try {
     const organization = await Organization.findByIdAndDelete(orgId).lean();
