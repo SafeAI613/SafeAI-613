@@ -24,6 +24,12 @@ const TenderSchema = new Schema(
 
     isActive: { type: Boolean, default: true },
 
+    contactPhone: { type: String },
+
+    contactEmail: { type: String },
+
+    preferredContactMethods: { type: [String], enum: ["phone", "email"], default: [] },
+
     agentsRequired: { type: [String], default: [] },
 
     wantsEmails: { type: Boolean, default: false },

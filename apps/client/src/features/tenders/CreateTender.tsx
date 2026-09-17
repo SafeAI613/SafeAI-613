@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import AiThinkingLoader from './AiThinkingLoader.tsx'
+import type { TenderContactMethod } from './types'
 
 
 interface TenderFormData {
@@ -15,7 +16,15 @@ interface TenderFormData {
   budget: number
   additionalDetails: string
   wantsEmails: boolean
+  contactPhone: string
+  contactEmail: string
+  preferredContactMethods: TenderContactMethod[]
 }
+
+type ContactFormErrors = Partial<Record<'contactPhone' | 'contactEmail', string>>
+
+const PHONE_REGEX = /^[0-9+\-\s()]{7,20}$/
+const CONTACT_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface SmartCreateResponse {
   success: boolean
@@ -51,12 +60,16 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
     budget: 0,
     additionalDetails: '',
     wantsEmails: false,
+    contactPhone: '',
+    contactEmail: '',
+    preferredContactMethods: [],
   })
 
   const [formMessage, setFormMessage] = useState<string>('')
   const [createSuccessMessage, setCreateSuccessMessage] = useState<string>('')
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [contactErrors, setContactErrors] = useState<ContactFormErrors>({})
 
   const [productTypeOptions, setProductTypeOptions] = useState<string[]>([])
   const [aiApplicationOptions, setAiApplicationOptions] = useState<string[]>([])
@@ -159,6 +172,18 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
     }))
   }
 
+  const toggleContactMethod = (method: TenderContactMethod) => {
+    setFormData((current) => {
+      const isSelected = current.preferredContactMethods.includes(method)
+      return {
+        ...current,
+        preferredContactMethods: isSelected
+          ? current.preferredContactMethods.filter((m) => m !== method)
+          : [...current.preferredContactMethods, method],
+      }
+    })
+  }
+
   const handleAiApplicationSelect = (appType: string) => {
     setFormData((current) => ({
       ...current,
@@ -208,10 +233,31 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
     }
   }
 
+  const validateContactFields = () => {
+    const nextErrors: ContactFormErrors = {}
+
+    const trimmedPhone = formData.contactPhone.trim()
+    if (trimmedPhone && !PHONE_REGEX.test(trimmedPhone)) {
+      nextErrors.contactPhone = 'יש להזין מספר טלפון תקין'
+    }
+
+    const trimmedEmail = formData.contactEmail.trim()
+    if (trimmedEmail && !CONTACT_EMAIL_REGEX.test(trimmedEmail)) {
+      nextErrors.contactEmail = 'יש להזין כתובת אימייל תקינה'
+    }
+
+    setContactErrors(nextErrors)
+    return nextErrors
+  }
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setFormMessage('')
     setErrorMessage('')
+
+    const nextContactErrors = validateContactFields()
+    if (Object.keys(nextContactErrors).length > 0) return
+
     await clickedAddTender()
   }
 
@@ -231,6 +277,9 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
           : [],
       wantsEmails: formData.wantsEmails,
       additionalDetails: formData.additionalDetails,
+      contactPhone: formData.contactPhone.trim() || undefined,
+      contactEmail: formData.contactEmail.trim() || undefined,
+      preferredContactMethods: formData.preferredContactMethods,
     }
 
     try {
@@ -251,6 +300,9 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
         budget: 0,
         additionalDetails: '',
         wantsEmails: false,
+        contactPhone: '',
+        contactEmail: '',
+        preferredContactMethods: [],
       })
     } catch (error) {
       console.error('Failed to create tender', error)
@@ -435,6 +487,74 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
               )}
             </div>
           )}
+        </div>
+
+        <div className="bottom-row" style={{ marginTop: '24px' }}>
+          <div className="bottom-field">
+            <label htmlFor="contactPhone">{t('tenders.contactPhoneLabel')}</label>
+            <input
+              id="contactPhone"
+              name="contactPhone"
+              type="tel"
+              value={formData.contactPhone}
+              onChange={(e) => {
+                handleInputChange(e)
+                if (contactErrors.contactPhone) {
+                  setContactErrors((prev) => ({ ...prev, contactPhone: undefined }))
+                }
+              }}
+              placeholder={t('tenders.contactPhonePlaceholder')}
+              className="input"
+              maxLength={20}
+            />
+            {contactErrors.contactPhone && <span className="form-error">{contactErrors.contactPhone}</span>}
+          </div>
+
+          <div className="bottom-field">
+            <label htmlFor="contactEmail">{t('tenders.contactEmailLabel')}</label>
+            <input
+              id="contactEmail"
+              name="contactEmail"
+              type="email"
+              value={formData.contactEmail}
+              onChange={(e) => {
+                handleInputChange(e)
+                if (contactErrors.contactEmail) {
+                  setContactErrors((prev) => ({ ...prev, contactEmail: undefined }))
+                }
+              }}
+              placeholder={t('tenders.contactEmailPlaceholder')}
+              className="input"
+              maxLength={254}
+            />
+            {contactErrors.contactEmail && <span className="form-error">{contactErrors.contactEmail}</span>}
+          </div>
+
+          <div className="bottom-field">
+            <span>{t('tenders.preferredContactMethodsLabel')}</span>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={formData.preferredContactMethods.includes('phone')}
+                  onChange={() => toggleContactMethod('phone')}
+                  className="toggle-input"
+                />
+                <span className="toggle-pill" />
+                <span className="toggle-text">{t('tenders.contactMethodPhoneOption')}</span>
+              </label>
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={formData.preferredContactMethods.includes('email')}
+                  onChange={() => toggleContactMethod('email')}
+                  className="toggle-input"
+                />
+                <span className="toggle-pill" />
+                <span className="toggle-text">{t('tenders.contactMethodEmailOption')}</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div className="bottom-row" style={{ marginTop: '24px' }}>

@@ -1,5 +1,7 @@
 export type TenderTimeUnit = 'שעות' | 'ימים' | 'שבועות' | 'חודשים' | 'שנים'
 
+export type TenderContactMethod = 'phone' | 'email'
+
 export interface TenderTime {
   value: number
   unit: TenderTimeUnit
@@ -61,6 +63,9 @@ export interface Tender {
   productType?: string
   aiApplicationType?: string
   isActive?: boolean
+  contactPhone?: string
+  contactEmail?: string
+  preferredContactMethods?: TenderContactMethod[]
   agentsRequired?: string[]
   wantsEmails?: boolean
   additionalDetails?: string
@@ -82,6 +87,9 @@ export interface RawTender {
   productType?: string
   aiApplicationType?: string
   isActive?: boolean
+  contactPhone?: string
+  contactEmail?: string
+  preferredContactMethods?: TenderContactMethod[]
   agentsRequired?: string[]
   wantsEmails?: boolean
   additionalDetails?: string
