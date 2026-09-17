@@ -7,7 +7,8 @@
     "all": "הכל",
     "edit": "ערוך",
     "delete": "מחק",
-    "close": "סגור"
+    "close": "סגור",
+    "saving": "שומר..."
   },
   "nav": {
     "why": "למה?",
@@ -922,6 +923,25 @@
     "adminSenderLabel": "אדמין",
     "meSenderLabel": "אני",
     "replyPlaceholder": "כתוב תגובה..."
+  },
+  "contactTypesManagement": {
+    "title": "ניהול סוגי פנייה",
+    "loading": "טוען סוגי פנייה...",
+    "errorLoading": "שגיאה בטעינת סוגי הפנייה",
+    "newTypeButton": "סוג פנייה חדש",
+    "noTypesFound": "אין סוגי פנייה מוגדרים עדיין.",
+    "newTitle": "סוג פנייה חדש",
+    "editTitle": "עריכת סוג פנייה",
+    "labelField": "שם תצוגה",
+    "valueField": "ערך (מזהה)",
+    "activeField": "פעיל",
+    "activeYes": "פעיל",
+    "activeNo": "לא פעיל",
+    "toggleError": "שגיאה בעדכון סטטוס סוג הפנייה",
+    "createErrorPrefix": "שגיאה ביצירת סוג פנייה: {{message}}",
+    "updateErrorPrefix": "שגיאה בעדכון סוג פנייה: {{message}}",
+    "deleteErrorPrefix": "שגיאה במחיקת סוג פנייה: {{message}}",
+    "deleteConfirm": "האם למחוק את סוג הפנייה \"{{label}}\"?"
   },
   "authSection": {
     "registrationSuccessAlert": "הרשמה הצליחה!\n\nמפתח ה-API שלך:\n{{apiKey}}\n\nשמור מפתח זה במקום בטוח!",
