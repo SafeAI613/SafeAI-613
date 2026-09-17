@@ -20,6 +20,10 @@ import {
   approveOrganizationHandler,
   rejectOrganizationHandler,
   getMyOrganizationHandler,
+  updateOrganizationMemberHandler,
+  distributeOrganizationBudgetHandler,
+  getOrganizationTransactionsHandler,
+  requestBudgetTopUpHandler,
 } from "../controllers/organizationController";
 import { authenticateToken, requireAdmin } from "../middleware/auth";
 import { registerRateLimiter } from "../middleware/authRateLimiter";
@@ -58,6 +62,7 @@ router.use(authenticateToken);
 router.get("/pending", requireAdmin, getPendingOrganizationsHandler); // System Admin only
 router.get("/admin/all", requireAdmin, getAllOrganizationsHandler); // System Admin only - full list with stats
 router.get("/my", getMyOrganizationHandler); // Current user's own organization (any status)
+router.post("/request-topup", requestBudgetTopUpHandler); // Any org member, for their own org owner
 
 // 2. GENERAL ORGANIZATION ROUTES
 router.post("/", requireAdmin, createOrganizationHandler); // Admin only
@@ -86,8 +91,11 @@ router.post("/:id/users", requireApprovedOrg, addUserToOrganizationHandler); // 
 router.post("/:id/members", requireApprovedOrg, createOrganizationMemberHandler); // Admin or approved Org Owner - creates a brand-new user + temp password
 router.delete("/users/:userId", removeUserFromOrganizationHandler); // Admin or Org Owner
 router.post("/:id/users/by-email", requireApprovedOrg, addUserByEmailToOrganizationHandler); // Admin or approved Org Owner
+router.patch("/:id/users/:userId", requireApprovedOrg, updateOrganizationMemberHandler); // Admin or approved Org Owner - edit name/isActive/monthlyBudget
+router.post("/:id/users/distribute-budget", requireApprovedOrg, distributeOrganizationBudgetHandler); // Admin or approved Org Owner - split wallet equally
 
 // Wallet Management (Mock) - blocked until org is approved (admins bypass)
 router.post("/:id/top-up", requireApprovedOrg, topUpOrganizationWalletHandler); // Admin or approved Org Owner
+router.get("/:id/wallet/transactions", requireApprovedOrg, getOrganizationTransactionsHandler); // Admin or approved Org Owner - top-up history ("invoices")
 
 export default router;

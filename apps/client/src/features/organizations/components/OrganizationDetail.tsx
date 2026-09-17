@@ -153,7 +153,9 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
         </div>
         <div className="org-card">
           <div className="org-card-label">{t("organizations.walletBalanceLabel")}</div>
-          <div className="org-card-value">${(stats?.walletBalance ?? org.walletBalance ?? 0).toFixed(2)}</div>
+          {/* Wallet is charged in ILS via PayMe (see server utils/currency.ts) -
+              totalCost/costs below are genuinely USD (LLM provider billing). */}
+          <div className="org-card-value">₪{(stats?.walletBalance ?? org.walletBalance ?? 0).toFixed(2)}</div>
         </div>
         <div className="org-card">
           <div className="org-card-label">{t("organizations.totalRequestsCard")}</div>

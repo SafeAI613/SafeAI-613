@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useUsageData } from "../../hooks/useUsageData";
 import { useAuth } from "../../context/authStore";
+import { requestBudgetTopUp } from "../organizations/api/organizationApi";
 
 function ProgressBar({ used, limit }: { used: number; limit: number }) {
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
@@ -17,12 +18,24 @@ function TopUpModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!amount || Number(amount) <= 0) return;
+    try {
+      setSubmitting(true);
+      setError(null);
+      await requestBudgetTopUp(Number(amount), message.trim() || undefined);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("billing.topUpModal.errorFallback"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -76,8 +89,9 @@ function TopUpModal({ onClose }: { onClose: () => void }) {
                   style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-default)", fontSize: "15px", resize: "vertical", boxSizing: "border-box" }}
                 />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "10px" }}>
-                {t("billing.topUpModal.submitButton")}
+              {error && <div className="alert alert-danger">{error}</div>}
+              <button type="submit" className="btn btn-primary" disabled={submitting} style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "10px" }}>
+                {submitting ? t("billing.topUpModal.sendingButton") : t("billing.topUpModal.submitButton")}
               </button>
             </form>
           </>
@@ -122,15 +136,22 @@ export default function BillingPage() {
       }}>
         <div>
           <p style={{ margin: "0 0 8px", opacity: 0.85, fontSize: "15px" }}>{t("billing.availableMonthlyBalance")}</p>
-          <p style={{ margin: "0 0 4px", fontSize: "48px", fontWeight: 700, letterSpacing: "-1px" }}>
-            ${budget ? budget.remaining.toFixed(2) : "—"}
-          </p>
-          {budget && (
-            <p style={{ margin: 0, opacity: 0.8, fontSize: "14px" }}>
-              {t("billing.outOfMonthlyBudget", { amount: budget.monthlyLimit.toFixed(2) })}
+          {budget ? (
+            <>
+              <p style={{ margin: "0 0 4px", fontSize: "48px", fontWeight: 700, letterSpacing: "-1px" }}>
+                ${budget.remaining.toFixed(2)}
+              </p>
+              <p style={{ margin: 0, opacity: 0.8, fontSize: "14px" }}>
+                {t("billing.outOfMonthlyBudget", { amount: budget.monthlyLimit.toFixed(2) })}
+              </p>
+            </>
+          ) : (
+            <p style={{ margin: 0, opacity: 0.85, fontSize: "16px", maxWidth: "360px" }}>
+              {t("billing.noBudgetByokExplanation")}
             </p>
           )}
         </div>
+        {budget && (
         <button
           onClick={() => setShowModal(true)}
           style={{
@@ -144,6 +165,7 @@ export default function BillingPage() {
         >
           {t("billing.topUpButton")}
         </button>
+        )}
       </div>
 
       {/* Budget breakdown */}

@@ -6,9 +6,20 @@ import {
   getMyOrganization,
   getOrganizationUsers,
   updateOrganizationDetails,
+  addUserByEmailToOrganization,
+  updateOrganizationMember,
+  distributeOrganizationBudgetEqually,
+  getOrganizationTransactions,
+  type WalletTransaction,
 } from "../features/organizations/api/organizationApi";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import "../styles/organization-wallet.css";
+
+// Display-only estimate for the "available to distribute" indicators below -
+// must match the authoritative conversion the server applies in
+// organizationService.distributeOrganizationBudgetEqually (utils/currency.ts).
+// The wallet itself is charged in ILS via PayMe; per-user budgets are USD.
+const ILS_TO_USD_RATE = 3.7;
 
 interface User {
   _id: string;
@@ -19,6 +30,10 @@ interface User {
   createdAt: string;
   mode: string;
   lastLogin?: string;
+  costLimits?: {
+    monthlyBudget: number;
+    currentMonthSpent: number;
+  };
 }
 
 interface Organization {
@@ -27,7 +42,8 @@ interface Organization {
   description: string;
   ownerId: OrganizationOwner;
   isActive: boolean;
-  walletBalance?: number;
+  walletBalance?: number; // ILS
+  logoUrl?: string;
 }
 
 interface OrganizationOwner {
@@ -52,6 +68,9 @@ export default function OrganizationUsersPage() {
   const [editDescription, setEditDescription] = useState("");
   const [isSavingOrg, setIsSavingOrg] = useState(false);
 
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [addingMember, setAddingMember] = useState(false);
@@ -59,6 +78,25 @@ export default function OrganizationUsersPage() {
   const [createdMembers, setCreatedMembers] = useState<
     { name: string; email: string; password: string }[]
   >([]);
+
+  const [addByEmailValue, setAddByEmailValue] = useState("");
+  const [addingByEmail, setAddingByEmail] = useState(false);
+  const [addByEmailError, setAddByEmailError] = useState<string | null>(null);
+
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserName, setEditUserName] = useState("");
+  const [editUserActive, setEditUserActive] = useState(true);
+  const [editUserBudget, setEditUserBudget] = useState<number | "">("");
+  const [savingUser, setSavingUser] = useState(false);
+  const [editUserError, setEditUserError] = useState<string | null>(null);
+
+  const [distributing, setDistributing] = useState(false);
+  const [distributeError, setDistributeError] = useState<string | null>(null);
+  const [distributeMessage, setDistributeMessage] = useState<string | null>(null);
+
+  const [showInvoices, setShowInvoices] = useState(false);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
 
   useEffect(() => {
     fetchOrganizationAndUsers();
@@ -145,6 +183,49 @@ export default function OrganizationUsersPage() {
     }
   };
 
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !organization) return;
+
+    try {
+      setUploadingLogo(true);
+      setLogoError(null);
+
+      const { uploadUrl, fileUrl } = await apiCall<{ uploadUrl: string; fileUrl: string }>(
+        API_ENDPOINTS.upload.getUrl,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            context: "orgLogo",
+          }),
+        }
+      );
+
+      const s3Response = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!s3Response.ok) throw new Error(t("orgUsers.logoUploadFailedFallback"));
+
+      const { organization: updatedOrg } = await updateOrganizationDetails(organization._id, {
+        name: organization.name,
+        description: organization.description,
+        logoUrl: fileUrl,
+      });
+      setOrganization(updatedOrg as unknown as Organization);
+    } catch (err: unknown) {
+      console.error("Error uploading organization logo:", err);
+      setLogoError(err instanceof Error ? err.message : t("orgUsers.logoUploadFailedFallback"));
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = "";
+    }
+  };
+
   const reloadUsers = async () => {
     if (!organization) return;
     const usersData = await getOrganizationUsers(organization._id);
@@ -179,6 +260,87 @@ export default function OrganizationUsersPage() {
       setAddMemberError(err instanceof Error ? err.message : t("orgUsers.addMemberFailedFallback"));
     } finally {
       setAddingMember(false);
+    }
+  };
+
+  const handleAddByEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization || !addByEmailValue.trim()) return;
+    try {
+      setAddingByEmail(true);
+      setAddByEmailError(null);
+      await addUserByEmailToOrganization(organization._id, addByEmailValue.trim());
+      setAddByEmailValue("");
+      await reloadUsers();
+    } catch (err: unknown) {
+      setAddByEmailError(err instanceof Error ? err.message : t("orgUsers.addByEmailFailedFallback"));
+    } finally {
+      setAddingByEmail(false);
+    }
+  };
+
+  const openEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditUserName(user.name || "");
+    setEditUserActive(user.isActive);
+    setEditUserBudget(user.costLimits?.monthlyBudget ?? "");
+    setEditUserError(null);
+  };
+
+  const handleSaveEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!organization || !editingUser) return;
+    try {
+      setSavingUser(true);
+      setEditUserError(null);
+      await updateOrganizationMember(organization._id, editingUser._id, {
+        name: editUserName.trim() || undefined,
+        isActive: editUserActive,
+        monthlyBudget: editUserBudget === "" ? undefined : Number(editUserBudget),
+      });
+      setEditingUser(null);
+      await reloadUsers();
+    } catch (err: unknown) {
+      setEditUserError(err instanceof Error ? err.message : t("orgUsers.editUserFailedFallback"));
+    } finally {
+      setSavingUser(false);
+    }
+  };
+
+  const handleDistribute = async () => {
+    if (!organization) return;
+    if (!confirm(t("orgUsers.distributeConfirm"))) return;
+    try {
+      setDistributing(true);
+      setDistributeError(null);
+      setDistributeMessage(null);
+      const result = await distributeOrganizationBudgetEqually(organization._id);
+      setOrganization((prev) => (prev ? { ...prev, walletBalance: result.organization.walletBalance } : prev));
+      setDistributeMessage(
+        t("orgUsers.distributeSuccess", { count: result.userCount, amount: result.perUserUsd.toFixed(2) })
+      );
+      await reloadUsers();
+    } catch (err: unknown) {
+      setDistributeError(err instanceof Error ? err.message : t("orgUsers.distributeFailedFallback"));
+    } finally {
+      setDistributing(false);
+    }
+  };
+
+  const toggleInvoices = async () => {
+    if (!organization) return;
+    const next = !showInvoices;
+    setShowInvoices(next);
+    if (next && transactions.length === 0) {
+      try {
+        setLoadingTransactions(true);
+        const { transactions: data } = await getOrganizationTransactions(organization._id);
+        setTransactions(data);
+      } catch (err) {
+        console.error("Error fetching invoices:", err);
+      } finally {
+        setLoadingTransactions(false);
+      }
     }
   };
 
@@ -229,6 +391,12 @@ export default function OrganizationUsersPage() {
     );
   }
 
+  const walletBalanceIls = organization?.walletBalance ?? 0;
+  const availableToDistributeUsd = walletBalanceIls / ILS_TO_USD_RATE;
+  const nonOwnerUsers = users.filter((u) => u.role !== "org_owner");
+  const totalHeldByUsersUsd = nonOwnerUsers.reduce((sum, u) => sum + (u.costLimits?.monthlyBudget ?? 0), 0);
+  const totalAvailableEverywhereUsd = totalHeldByUsersUsd + availableToDistributeUsd;
+
   return (
     <div className="organization-page">
       <h1>{t("orgUsers.title")}</h1>
@@ -236,6 +404,37 @@ export default function OrganizationUsersPage() {
       {organization && (
         <div className="organization-grid">
           <div className="organization-info-card">
+            <div className="org-logo-row" style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px" }}>
+              {organization.logoUrl ? (
+                <img
+                  src={organization.logoUrl}
+                  alt={organization.name}
+                  style={{ width: "56px", height: "56px", borderRadius: "12px", objectFit: "cover", border: "1px solid var(--border-default)" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "56px", height: "56px", borderRadius: "12px", display: "flex", alignItems: "center",
+                    justifyContent: "center", backgroundColor: "var(--bg-elevated)", fontSize: "22px", fontWeight: 700,
+                    color: "var(--text-muted)", border: "1px solid var(--border-default)",
+                  }}
+                >
+                  {organization.name.charAt(0)}
+                </div>
+              )}
+              <label className="org-edit-button" style={{ cursor: uploadingLogo ? "not-allowed" : "pointer" }}>
+                {uploadingLogo ? t("orgUsers.uploadingLogo") : t("orgUsers.changeLogo")}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleLogoChange}
+                  disabled={uploadingLogo}
+                  style={{ display: "none" }}
+                />
+              </label>
+            </div>
+            {logoError && <p className="error-text">{logoError}</p>}
+
             {isEditingOrg ? (
               <form onSubmit={handleSaveOrg} className="org-edit-form">
                 <input
@@ -287,7 +486,7 @@ export default function OrganizationUsersPage() {
           <div className="wallet-card">
             <h3 className="wallet-title">{t("orgUsers.walletTitle")}</h3>
             <p className="wallet-balance">
-              {t("orgUsers.walletBalanceLabel")} <strong className="wallet-balance-amount">${organization.walletBalance ?? 0}</strong>
+              {t("orgUsers.walletBalanceLabel")} <strong className="wallet-balance-amount">₪{walletBalanceIls}</strong>
             </p>
 
             <div className="simulation-warning">
@@ -309,7 +508,57 @@ export default function OrganizationUsersPage() {
                 {isSubmitting ? t("orgUsers.processingButton") : t("orgUsers.topUpButton")}
               </button>
             </form>
+
+            <div className="org-edit-form" style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--border-default)" }}>
+              <h4 style={{ margin: 0 }}>{t("orgUsers.distributionTitle")}</h4>
+              <p style={{ margin: 0 }}>{t("orgUsers.availableToDistribute", { amount: availableToDistributeUsd.toFixed(2) })}</p>
+              <p style={{ margin: 0 }}>{t("orgUsers.totalHeldEverywhere", { amount: totalAvailableEverywhereUsd.toFixed(2) })}</p>
+              {distributeError && <p className="error-text">{distributeError}</p>}
+              {distributeMessage && <p className="wallet-balance-amount">{distributeMessage}</p>}
+              <button
+                type="button"
+                className="topup-button"
+                onClick={handleDistribute}
+                disabled={distributing || walletBalanceIls <= 0 || nonOwnerUsers.length === 0}
+              >
+                {distributing ? t("orgUsers.distributing") : t("orgUsers.distributeButton")}
+              </button>
+            </div>
+
+            <button type="button" className="retry-button" style={{ marginTop: "14px" }} onClick={toggleInvoices}>
+              {showInvoices ? t("orgUsers.hideInvoices") : t("orgUsers.viewInvoices")}
+            </button>
           </div>
+        </div>
+      )}
+
+      {showInvoices && (
+        <div className="organization-info-card" style={{ marginBottom: "24px" }}>
+          <h3>{t("orgUsers.invoicesTitle")}</h3>
+          {loadingTransactions ? (
+            <p>{t("orgUsers.loading")}</p>
+          ) : transactions.length === 0 ? (
+            <p>{t("orgUsers.noInvoices")}</p>
+          ) : (
+            <table className="organization-table">
+              <thead>
+                <tr>
+                  <th>{t("orgUsers.invoiceDate")}</th>
+                  <th>{t("orgUsers.invoiceAmount")}</th>
+                  <th>{t("orgUsers.invoiceStatus")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((tx) => (
+                  <tr key={tx._id}>
+                    <td>{new Date(tx.requestedAt).toLocaleDateString()}</td>
+                    <td>₪{tx.amount}</td>
+                    <td>{t(`orgUsers.invoiceStatus_${tx.status}`)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -334,6 +583,23 @@ export default function OrganizationUsersPage() {
         {addMemberError && <p className="error-text">{addMemberError}</p>}
         <button type="submit" disabled={addingMember} className="topup-button">
           {addingMember ? t("orgUsers.addingButton") : t("orgUsers.addMemberButton")}
+        </button>
+      </form>
+
+      <h3>{t("orgUsers.addExistingByEmailTitle")}</h3>
+      <form onSubmit={handleAddByEmail} className="org-edit-form">
+        <input
+          type="email"
+          dir="ltr"
+          value={addByEmailValue}
+          onChange={(e) => setAddByEmailValue(e.target.value)}
+          placeholder={t("orgUsers.emailPlaceholder")}
+          className="org-edit-input"
+          required
+        />
+        {addByEmailError && <p className="error-text">{addByEmailError}</p>}
+        <button type="submit" disabled={addingByEmail} className="topup-button">
+          {addingByEmail ? t("orgUsers.addingButton") : t("orgUsers.addExistingByEmailButton")}
         </button>
       </form>
 
@@ -382,6 +648,8 @@ export default function OrganizationUsersPage() {
               <th>{t("orgUsers.tableHeaders.status")}</th>
               <th>{t("orgUsers.tableHeaders.joinStatus")}</th>
               <th>{t("orgUsers.tableHeaders.joinedDate")}</th>
+              <th>{t("orgUsers.tableHeaders.budget")}</th>
+              <th>{t("orgUsers.tableHeaders.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -415,10 +683,66 @@ export default function OrganizationUsersPage() {
                   </span>
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td>
+                  {user.costLimits
+                    ? `$${user.costLimits.currentMonthSpent.toFixed(2)} / $${user.costLimits.monthlyBudget.toFixed(2)}`
+                    : "-"}
+                </td>
+                <td>
+                  {user.role !== "org_owner" && (
+                    <button className="org-edit-button" onClick={() => openEditUser(user)}>
+                      {t("orgUsers.editButton")}
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {editingUser && (
+        <div
+          style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
+          onClick={() => setEditingUser(null)}
+        >
+          <div className="organization-info-card" style={{ maxWidth: "420px", width: "90%" }} onClick={(e) => e.stopPropagation()}>
+            <h3>{t("orgUsers.editUserTitle", { email: editingUser.email })}</h3>
+            <form onSubmit={handleSaveEditUser} className="org-edit-form">
+              <input
+                type="text"
+                dir={i18n.dir()}
+                value={editUserName}
+                onChange={(e) => setEditUserName(e.target.value)}
+                placeholder={t("orgUsers.fullNamePlaceholder")}
+                className="org-edit-input"
+              />
+              <label style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <input type="checkbox" checked={editUserActive} onChange={(e) => setEditUserActive(e.target.checked)} />
+                {t("orgUsers.active")}
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                dir="ltr"
+                value={editUserBudget}
+                onChange={(e) => setEditUserBudget(e.target.value !== "" ? Number(e.target.value) : "")}
+                placeholder={t("orgUsers.monthlyBudgetPlaceholder")}
+                className="org-edit-input"
+              />
+              {editUserError && <p className="error-text">{editUserError}</p>}
+              <div className="org-edit-actions">
+                <button type="submit" disabled={savingUser} className="topup-button">
+                  {savingUser ? t("orgUsers.savingButton") : t("orgUsers.saveButton")}
+                </button>
+                <button type="button" className="retry-button" disabled={savingUser} onClick={() => setEditingUser(null)}>
+                  {t("orgUsers.cancelButton")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -29,6 +29,8 @@ export const API_ENDPOINTS = {
     all: `${API_BASE_URL}/organizations/admin/all`,
     detail: (id: string) => `${API_BASE_URL}/organizations/${id}`,
     users: (id: string) => `${API_BASE_URL}/organizations/${id}/users`,
+    userByEmail: (id: string) => `${API_BASE_URL}/organizations/${id}/users/by-email`,
+    member: (id: string, userId: string) => `${API_BASE_URL}/organizations/${id}/users/${userId}`,
     members: (id: string) => `${API_BASE_URL}/organizations/${id}/members`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
     suspend: (id: string) => `${API_BASE_URL}/organizations/${id}/suspend`,
@@ -37,6 +39,9 @@ export const API_ENDPOINTS = {
     reject: (id: string) => `${API_BASE_URL}/organizations/${id}/reject`,
     publicRequest: `${API_BASE_URL}/organizations/public-request`,
     my: `${API_BASE_URL}/organizations/my`,
+    distributeBudget: (id: string) => `${API_BASE_URL}/organizations/${id}/users/distribute-budget`,
+    transactions: (id: string) => `${API_BASE_URL}/organizations/${id}/wallet/transactions`,
+    requestTopUp: `${API_BASE_URL}/organizations/request-topup`,
   },
   // Proxy key endpoints (user's own proxy key)
   proxyKey: {

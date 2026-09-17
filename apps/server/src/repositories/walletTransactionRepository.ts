@@ -34,6 +34,17 @@ export async function findByRequestId(requestId: string) {
   return WalletTransaction.findOne({ requestId }).lean();
 }
 
+/**
+ * Wallet top-up history for an organization ("invoices" screen) - newest
+ * first, matching the schema's own { organizationId, requestedAt } index.
+ */
+export async function listByOrganization(organizationId: string, limit = 100) {
+  return WalletTransaction.find({ organizationId })
+    .sort({ requestedAt: -1 })
+    .limit(limit)
+    .lean();
+}
+
 export async function findByRequestIdAndOrganization(requestId: string, organizationId: string) {
   return WalletTransaction.findOne({ requestId, organizationId }).lean();
 }

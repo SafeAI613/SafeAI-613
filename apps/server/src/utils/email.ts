@@ -747,12 +747,18 @@ export async function sendOrgApprovedEmail(
 }
 
 const ORG_STATUS_EMAIL_COPY = {
+  // No dashboard/login button on rejection - the request was turned down,
+  // not the account suspended, so there is no "back to your organization"
+  // screen to send them to (logging in just shows the pending-approval
+  // screen, which is confusing at best). suspended/reactivated keep the
+  // button since those owners have a real, still-approved organization.
   rejected: {
     subject: (orgName: string) => `הבקשה לפתיחת הארגון "${orgName}" נדחתה`,
     heading: "הבקשה שלך נדחתה",
     color: "#d9534f",
     message: (orgName: string) =>
       `הבקשה לפתיחת הארגון <strong>${orgName}</strong> נבדקה ולא אושרה על ידי מנהל המערכת.`,
+    showButton: false,
   },
   suspended: {
     subject: (orgName: string) => `הארגון "${orgName}" הושעה`,
@@ -760,6 +766,7 @@ const ORG_STATUS_EMAIL_COPY = {
     color: "#d9534f",
     message: (orgName: string) =>
       `הארגון <strong>${orgName}</strong> הושעה על ידי מנהל המערכת, וגישת המשתמשים אליו חסומה זמנית.`,
+    showButton: true,
   },
   reactivated: {
     subject: (orgName: string) => `הארגון "${orgName}" הופעל מחדש`,
@@ -767,6 +774,7 @@ const ORG_STATUS_EMAIL_COPY = {
     color: "#10a37f",
     message: (orgName: string) =>
       `הארגון <strong>${orgName}</strong> הופעל מחדש וחזר לפעילות מלאה.`,
+    showButton: true,
   },
 } as const;
 
@@ -811,16 +819,20 @@ export async function sendOrgStatusEmail(
           <div class="content">
             <p>שלום ${safeName},</p>
             <p>${copy.message(safeOrgName)}</p>
-            <p style="text-align: center;">
+            ${
+              copy.showButton
+                ? `<p style="text-align: center;">
               <a href="${dashboardUrl}" class="button">מעבר למסך הארגון</a>
-            </p>
+            </p>`
+                : ""
+            }
           </div>
           <div class="footer"><p>© 2026 SafeAI. כל הזכויות שמורות.</p></div>
         </div>
       </body>
       </html>
     `,
-    text: `שלום ${name || "מנהל הארגון"},\n${copy.message(orgName).replace(/<[^>]+>/g, "")}\n${dashboardUrl}\n\n© 2026 SafeAI`,
+    text: `שלום ${name || "מנהל הארגון"},\n${copy.message(orgName).replace(/<[^>]+>/g, "")}${copy.showButton ? `\n${dashboardUrl}` : ""}\n\n© 2026 SafeAI`,
   };
 
   try {
@@ -919,6 +931,76 @@ export async function sendOrgAdminActionEmail(
       error: error instanceof Error ? error.message : String(error),
     });
     // best-effort
+  }
+}
+
+/**
+ * Notify the org owner that one of their organization's members requested
+ * a monthly-budget top-up. Best-effort, same convention as the other
+ * organization notification emails above.
+ */
+export async function sendBudgetTopUpRequestEmail(
+  ownerEmail: string,
+  orgName: string,
+  requesterName: string,
+  requesterEmail: string,
+  amount: number,
+  note?: string,
+) {
+  const dashboardUrl = `${FRONTEND_URL}/safeai-ui`;
+  const safeOrgName = escapeHtml(orgName);
+  const safeRequesterName = escapeHtml(requesterName);
+  const safeRequesterEmail = escapeHtml(requesterEmail);
+  const safeNote = note ? escapeHtml(note) : "";
+
+  const mailOptions = {
+    from: EMAIL_FROM,
+    to: ownerEmail,
+    subject: sanitizeHeaderValue(`בקשת תוספת תקציב מ-${requesterName} (${orgName})`),
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="he">
+      <head><meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #667eea; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .info-box { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-right: 4px solid #667eea; }
+          .button { display: inline-block; padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header"><h1>בקשת תוספת תקציב</h1></div>
+          <div class="content">
+            <p>שלום,</p>
+            <p>המשתמש/ת <strong>${safeRequesterName}</strong> (${safeRequesterEmail}) בארגון <strong>${safeOrgName}</strong> ביקש/ה תוספת של <strong>$${amount.toFixed(2)}</strong> לתקציב החודשי.</p>
+            ${safeNote ? `<div class="info-box"><p>${safeNote}</p></div>` : ""}
+            <p style="text-align: center;">
+              <a href="${dashboardUrl}" class="button">מעבר לניהול הארגון</a>
+            </p>
+          </div>
+          <div class="footer"><p>© 2026 SafeAI. כל הזכויות שמורות.</p></div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `${requesterName} (${requesterEmail}) בארגון ${orgName} ביקש/ה תוספת של $${amount.toFixed(2)} לתקציב החודשי.\n${safeNote ? note + "\n" : ""}${dashboardUrl}\n\n© 2026 SafeAI`,
+  };
+
+  try {
+    await withRetry(async () => {
+      const transporter = await createTransporter();
+      return transporter.sendMail(mailOptions);
+    });
+    return true;
+  } catch (error) {
+    logger.error("Failed to send budget top-up request email:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return false;
   }
 }
 

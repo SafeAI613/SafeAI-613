@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import * as repo from "../repositories/organizationRepository";
 import * as userRepo from "../repositories/userRepository";
+import * as walletTransactionRepo from "../repositories/walletTransactionRepository";
 import { aggregateUsageStats } from "../repositories/usageRepository";
 import { register } from "./authService";
 import {
@@ -9,7 +10,9 @@ import {
   sendOrgStatusEmail,
   sendInviteEmail,
   sendOrgAdminActionEmail,
+  sendBudgetTopUpRequestEmail,
 } from "../utils/email";
+import { ilsToUsd } from "../utils/currency";
 import logger from "../logger";
 
 function generateTemporaryPassword(): string {
@@ -110,7 +113,13 @@ export async function addUserToOrganization(orgId: string, userId: string, role:
       throw new Error("User not found");
     }
 
-    const alreadyInOrg = (user as any).organizationId?.toString() === orgId;
+    const existingOrgId = (user as any).organizationId?.toString();
+    const alreadyInOrg = existingOrgId === orgId;
+    if (existingOrgId && !alreadyInOrg) {
+      // המשתמש כבר משויך לארגון אחר - לא "גונבים" אותו בשקט, מסירים
+      // אותו מהארגון הקודם צריך להיות פעולה מפורשת ונפרדת.
+      throw new Error("המשתמש כבר משויך לארגון אחר, יש להסיר אותו משם קודם");
+    }
     if (!alreadyInOrg) {
       const maxUsers = (organization as any).settings?.maxUsers ?? 10;
       const currentUserCount = await userRepo.countUsersByOrganization(orgId);
@@ -214,6 +223,11 @@ export async function createOrganizationMember(
       name: data.name,
       organizationId: orgId,
       role: data.role || "user",
+      // Org-created members are billed against a budget the org owner
+      // allocates (see updateOrganizationMember/distributeOrganizationBudgetEqually)
+      // rather than bringing their own provider key - MANAGED, not the
+      // BYOK default, or their balance/budget would never show up anywhere.
+      mode: "MANAGED",
       skipEmailVerification: true,
       mustChangePassword: true,
     });
@@ -514,4 +528,136 @@ export async function getOrganizationUsageSummary(orgId: string) {
     totalTokens: summary.totalTokens,
     totalCost: summary.totalCost,
   };
+}
+
+/**
+ * Org owner (or admin) editing a member's own profile fields - not their
+ * email, role, or organization membership, which go through their own
+ * dedicated endpoints (add/remove/by-email).
+ */
+export async function updateOrganizationMember(
+  orgId: string,
+  userId: string,
+  data: { name?: string; isActive?: boolean; monthlyBudget?: number }
+) {
+  const user = await userRepo.getUserById(userId);
+  if (!user || (user as any).organizationId?.toString() !== orgId) {
+    throw new Error("המשתמש לא נמצא בארגון זה");
+  }
+
+  const updateData: any = {};
+  if (data.name !== undefined) {
+    if (!data.name.trim()) {
+      throw new Error("שם לא יכול להיות ריק");
+    }
+    updateData.name = data.name.trim();
+  }
+  if (data.isActive !== undefined) {
+    updateData.isActive = data.isActive;
+  }
+  if (data.monthlyBudget !== undefined) {
+    if (typeof data.monthlyBudget !== "number" || !Number.isFinite(data.monthlyBudget) || data.monthlyBudget < 0) {
+      throw new Error("תקציב חודשי לא תקין");
+    }
+    updateData["costLimits.monthlyBudget"] = data.monthlyBudget;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw new Error("אין נתונים לעדכון");
+  }
+
+  const updated = await userRepo.updateUser(userId, { $set: updateData });
+  logger.info("Organization member updated", { organizationId: orgId, userId });
+  return updated;
+}
+
+/**
+ * Splits the org's wallet balance (charged in ILS via PayMe, see
+ * utils/currency.ts) evenly across the organization's members - excluding
+ * the owner, who draws on the org account directly rather than a personal
+ * monthly budget - adding it to each member's costLimits.monthlyBudget
+ * (USD) and zeroing the wallet once it's been handed out.
+ */
+export async function distributeOrganizationBudgetEqually(orgId: string) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const walletBalanceIls = (organization as any).walletBalance || 0;
+  if (walletBalanceIls <= 0) {
+    throw new Error("אין יתרה בארנק הארגון לחלוקה");
+  }
+
+  const users = (await getOrganizationUsers(orgId)).filter((u: any) => u.role !== "org_owner");
+  if (users.length === 0) {
+    throw new Error("אין משתמשים בארגון לחלוקת התקציב ביניהם");
+  }
+
+  const availableUsd = ilsToUsd(walletBalanceIls);
+  const perUserUsd = availableUsd / users.length;
+
+  await Promise.all(
+    users.map((u: any) =>
+      userRepo.updateUser(u._id.toString(), {
+        $inc: { "costLimits.monthlyBudget": perUserUsd },
+      })
+    )
+  );
+
+  const updatedOrg = await repo.updateOrganization(orgId, { walletBalance: 0 });
+
+  logger.info("Organization budget distributed equally", {
+    organizationId: orgId,
+    userCount: users.length,
+    perUserUsd,
+    walletBalanceIls,
+  });
+
+  return { organization: updatedOrg, userCount: users.length, perUserUsd };
+}
+
+/**
+ * Wallet top-up history for the "invoices" screen.
+ */
+export async function getOrganizationTransactions(orgId: string) {
+  return walletTransactionRepo.listByOrganization(orgId);
+}
+
+/**
+ * Self-service: an org member (not the owner) asks their org owner for a
+ * bigger monthly budget. No automatic balance change - just a best-effort
+ * notification, same as every other org email in this file; the owner
+ * grants it (or not) via updateOrganizationMember.
+ */
+export async function requestBudgetTopUp(userId: string, amount: number, note?: string) {
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    throw new Error("סכום לא תקין");
+  }
+
+  const user = await userRepo.getUserById(userId);
+  if (!user || !(user as any).organizationId) {
+    throw new Error("המשתמש אינו משויך לארגון");
+  }
+
+  const organization = await repo.getOrganizationById((user as any).organizationId.toString());
+  if (!organization) {
+    throw new Error("הארגון לא נמצא");
+  }
+
+  const owner = organization.ownerId as any;
+  if (!owner?.email) {
+    throw new Error("לא נמצא בעל ארגון להתראה");
+  }
+
+  const sent = await sendBudgetTopUpRequestEmail(
+    owner.email,
+    (organization as any).name,
+    (user as any).name || (user as any).email,
+    (user as any).email,
+    amount,
+    note
+  );
+
+  return { sent };
 }

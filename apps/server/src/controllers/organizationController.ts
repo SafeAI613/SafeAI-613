@@ -20,6 +20,10 @@ import {
   approveOrganization,
   rejectOrganization,
   getMyOrganization,
+  updateOrganizationMember,
+  distributeOrganizationBudgetEqually,
+  getOrganizationTransactions,
+  requestBudgetTopUp,
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
 import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
@@ -140,7 +144,7 @@ export async function updateOrganizationHandler(
     // dedicated admin-only routes (approve/reject/suspend/activate/top-up).
     const updateData = isAdmin
       ? req.body
-      : { name: req.body.name, description: req.body.description };
+      : { name: req.body.name, description: req.body.description, logoUrl: req.body.logoUrl };
 
     const updatedOrg = await updateOrganization(orgId, updateData);
     res.json({ success: true, organization: updatedOrg });
@@ -542,6 +546,137 @@ export async function getOrganizationStatsHandler(
       organizationId: req.params.id,
     });
     res.status(500).json({ error: "Failed to fetch organization stats" });
+  }
+}
+
+/**
+ * Edit a member's own profile fields inside an organization (name,
+ * active/inactive, monthly budget) - Admin or Org Owner. Not email, role,
+ * or organization membership - those go through the add/remove/by-email
+ * routes.
+ */
+export async function updateOrganizationMemberHandler(
+  req: Request<{ id: string; userId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const { name, isActive, monthlyBudget } = req.body;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const updated = await updateOrganizationMember(orgId, req.params.userId, {
+      name,
+      isActive,
+      monthlyBudget,
+    });
+    res.json({ success: true, user: sanitizeUser(updated) });
+  } catch (error: any) {
+    logger.error("Failed to update organization member", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      targetUserId: req.params.userId,
+    });
+    res.status(400).json({ error: error.message || "Failed to update organization member" });
+  }
+}
+
+/**
+ * Split the org wallet balance equally across its members' monthly
+ * budgets (Admin or Org Owner). See organizationService.distributeOrganizationBudgetEqually
+ * for the ILS-wallet -> USD-budget conversion this performs.
+ */
+export async function distributeOrganizationBudgetHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await distributeOrganizationBudgetEqually(orgId);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    logger.error("Failed to distribute organization budget", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(400).json({ error: error.message || "Failed to distribute organization budget" });
+  }
+}
+
+/**
+ * Wallet top-up history ("invoices") for an organization - Admin or Org Owner.
+ */
+export async function getOrganizationTransactionsHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const transactions = await getOrganizationTransactions(orgId);
+    res.json({ transactions });
+  } catch (error: any) {
+    logger.error("Failed to get organization transactions", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization transactions" });
+  }
+}
+
+/**
+ * Self-service: any authenticated org member asks their own org owner for
+ * a bigger monthly budget (billing page "request top-up" button).
+ */
+export async function requestBudgetTopUpHandler(req: Request, res: Response) {
+  try {
+    const user = (req as any).user;
+    const { amount, note } = req.body;
+
+    const result = await requestBudgetTopUp(user.userId, amount, note);
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    logger.error("Failed to request budget top-up", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+    });
+    res.status(400).json({ error: error.message || "Failed to request budget top-up" });
   }
 }
 

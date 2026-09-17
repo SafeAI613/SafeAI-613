@@ -21,9 +21,16 @@ const OrganizationSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Wallet balance charged via PayMe - genuinely ILS, never USD (see
+    // utils/currency.ts for the conversion used when this money funds
+    // per-user USD budgets).
     walletBalance: {
       type: Number,
       default: 0,
+    },
+    logoUrl: {
+      type: String,
+      default: "",
     },
     status: {
       type: String,
