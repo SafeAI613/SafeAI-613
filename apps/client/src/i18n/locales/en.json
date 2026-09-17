@@ -1283,16 +1283,31 @@
     "recentCostTitle": "Cost in the last 7 days",
     "recentCostDescription": "Cumulative cost of all requests made in the last 7 days.",
     "topUpModal": {
-      "title": "Top up balance",
-      "description": "The payment system is under development. Fill in the details and we'll get back to you shortly to complete the top-up.",
+      "title": "Request more budget",
+      "description": "Your request will be sent to your organization's admin for approval. Once approved, your monthly budget will be updated accordingly.",
       "emailLabel": "Email",
-      "amountLabel": "Amount to top up (USD)",
+      "amountLabel": "Requested amount (USD)",
       "amountPlaceholder": "e.g. 20",
       "notesLabel": "Notes (optional)",
       "notesPlaceholder": "Any additional information you'd like to add...",
-      "submitButton": "Submit top-up request",
+      "submitButton": "Submit request",
+      "submittingButton": "Submitting...",
+      "invalidAmountError": "Please enter a valid positive amount.",
+      "submitFailedError": "Failed to submit the request. Please try again later.",
       "successTitle": "Request sent!",
-      "successMessage": "We've received your top-up request. A representative will contact you shortly to complete the process."
+      "successMessage": "Your budget request was sent to your organization's admin and is awaiting approval."
+    },
+    "fundingRequests": {
+      "title": "Funding request history",
+      "empty": "You haven't submitted any funding requests yet.",
+      "amountColumn": "Requested amount",
+      "statusColumn": "Status",
+      "dateColumn": "Date",
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ import userRouter from "./routes/userRouter";
 import providerKeyRouter from "./routes/providerKeyRouter";
 import authRouter from "./routes/authRouter";
 import usageRouter from "./routes/usageRouter";
+import fundingRequestRouter from "./routes/fundingRequestRouter";
 import adminStatsRouter from "./routes/adminStatsRouter";
 import publicStatsRouter from "./routes/publicStatsRouter";
 import proxyKeyRouter from "./routes/proxyKeyRouter";
@@ -84,6 +85,9 @@ app.use("/public-stats", publicStatsRouter); // Landing page counts — no auth,
 import { updateOwnProfileHandler } from "./controllers/userController";
 app.patch("/users/:id", authenticateToken, updateOwnProfileHandler);
 app.use("/usage", usageRouter); // Already has authenticateToken inside
+// Mounted before the admin-gated "/users" router below so a regular member
+// can reach their own funding requests without requireAdmin shadowing it.
+app.use("/users/me/funding-requests", fundingRequestRouter); // Already has authenticateToken inside
 
 
 // ===== JWT Protected Routes (Admin Panel & Management) =====
