@@ -37,7 +37,8 @@
   line-height: 1.6;
 }
 
-.org-info-header {
+.org-info-header,
+.org-users-header {
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -102,6 +102,9 @@
     "excelSheetName": "משתמשים חדשים",
     "excelFileNamePrefix": "משתמשי",
     "excelFallbackOrgName": "ארגון",
+    "downloadAllUsersButton": "הורדת רשימת כל המשתמשים",
+    "allUsersExcelSheetName": "כל המשתמשים",
+    "allUsersExcelFileNamePrefix": "רשימת-משתמשים",
     "tableHeaders": {
       "email": "אימייל",
       "name": "שם",
