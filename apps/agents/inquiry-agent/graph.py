@@ -23,7 +23,7 @@ def build_graph(config: Config, client: SafeAIClient):
     builder = StateGraph(GraphState)
 
     builder.add_node("fetch_node", partial(fetch_node, client=client))
-    builder.add_node("classify_node", partial(classify_node, agent_config=config))
+    builder.add_node("classify_node", partial(classify_node, agent_config=config, client=client))
     builder.add_node("present_node", present_node)
     # GATE 1 (selection_gate): HITL interrupt before draft_node - admin selects
     # which inquiry IDs go into state["selected_ids"] before resuming.

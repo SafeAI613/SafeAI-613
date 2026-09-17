@@ -609,6 +609,102 @@ ${data.description}
 }
 
 /**
+ * Notify a contact request's owner that an admin (or the inquiry-agent,
+ * after an admin approved and sent the draft) replied to their request.
+ * Best-effort by convention (like sendWelcomeEmail/sendOrgStatusEmail) -
+ * the caller already saved the reply, so a mail failure here must not
+ * surface as a failed request. Still throws on failure so the caller's
+ * own try/catch can log it; it just must not be awaited outside one.
+ */
+export async function sendContactReplyEmail(data: {
+  userEmail: string;
+  userName: string;
+  title: string;
+  replyText: string;
+}) {
+  const safeUserName = escapeHtml(data.userName);
+  const safeTitle = escapeHtml(data.title);
+  const safeReplyText = escapeHtml(data.replyText);
+
+  const mailOptions = {
+    from: EMAIL_FROM,
+    to: sanitizeHeaderValue(data.userEmail),
+    subject: `התקבלה תשובה לפנייתך: ${sanitizeHeaderValue(data.title)}`,
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="he">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10a37f 0%, #0d8f6f 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+          .info-box { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-right: 4px solid #10a37f; }
+          .label { font-weight: 600; color: #10a37f; margin-bottom: 5px; }
+          .value { color: #374151; }
+          .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>💬 התקבלה תשובה לפנייתך</h1>
+          </div>
+          <div class="content">
+            <p>שלום ${safeUserName},</p>
+            <p>קיבלת תשובה לפנייה שפתחת אצלנו:</p>
+            <div class="info-box">
+              <div class="label">כותרת הפנייה:</div>
+              <div class="value">${safeTitle}</div>
+            </div>
+            <div class="info-box">
+              <div class="label">תשובת הצוות:</div>
+              <div class="value" style="white-space: pre-wrap;">${safeReplyText}</div>
+            </div>
+            <p>ניתן לצפות בפנייה המלאה ולהגיב באזור האישי באתר.</p>
+          </div>
+          <div class="footer">
+            <p>© 2026 SafeAI. כל הזכויות שמורות.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+שלום ${data.userName},
+
+קיבלת תשובה לפנייה "${data.title}":
+
+${data.replyText}
+
+---
+© 2026 SafeAI
+    `,
+  };
+
+  try {
+    const info = await withRetry(async () => {
+      const transporter = await createTransporter();
+      return transporter.sendMail(mailOptions);
+    });
+
+    logger.info("Contact reply notification email sent", {
+      messageId: info.messageId,
+      to: data.userEmail,
+    });
+
+    return info;
+  } catch (error) {
+    logger.error("Failed to send contact reply notification email:", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new Error("Failed to send contact reply notification email");
+  }
+}
+
+/**
  * Notify a system admin that a new organization is awaiting approval
  */
 export async function sendOrgApprovalRequestEmail(

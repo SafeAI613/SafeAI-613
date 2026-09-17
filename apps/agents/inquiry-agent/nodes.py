@@ -14,12 +14,20 @@ def fetch_node(state: GraphState, client: SafeAIClient) -> GraphState:
     return state
 
 
-def classify_node(state: GraphState, agent_config: Config) -> GraphState:
+def classify_node(state: GraphState, agent_config: Config, client: SafeAIClient) -> GraphState:
     inquiries = state.get("inquiries", [])
     print(f"מסווג {len(inquiries)} פניות...")
     classified = {}
     for inquiry in inquiries:
-        classified[inquiry["id"]] = classify_inquiry(inquiry["description"], agent_config)
+        result = classify_inquiry(inquiry["description"], agent_config)
+        classified[inquiry["id"]] = result
+        # Best-effort: persists onto the ContactMessage itself so the admin's own
+        # request list shows the same classification (see api_client.update_classification).
+        # Must not break `list`/`process` just because this one write failed.
+        try:
+            client.update_classification(inquiry["id"], result["category"], result["urgency"])
+        except Exception as exc:  # noqa: BLE001 - deliberately broad, see comment above
+            print(f"אזהרה: נכשל לשמור סיווג עבור פנייה {inquiry['id']}: {exc}")
     state["classified"] = classified
     return state
 

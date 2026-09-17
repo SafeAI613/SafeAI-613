@@ -98,10 +98,22 @@ the gitignored `evals/output/` directory.
 
 ## Backend dependency (tracked separately, not part of this agent's code)
 
-The SafeAI-613 server exists and is already running, but the agent still lacks
-a real service account: `SAFEAI_AGENT_API_TOKEN` is currently a personal admin
-JWT used for testing, not a dedicated service-account token. This agent still
-depends on the server exposing/adding:
-- `urgency` and `category` fields on inquiries (not yet on `ContactMessage`)
-- a real service/admin auth mechanism for this agent to call the API
-- an email notification sent once an admin reply is finalized
+The server now provides everything this agent needs:
+- `urgency` and `category` fields on `ContactMessage`, set via
+  `PATCH /contact/my-requests/:id/classification` - `classify_node` calls this
+  (through `SafeAIClient.update_classification`) right after classifying each
+  inquiry, so the admin's own request list shows the same classification this
+  agent used to sort and pick drafts, not just this process's in-memory state.
+- A real service-account auth mechanism: set `SAFEAI_AGENT_API_TOKEN` to the
+  server's `AGENT_SERVICE_TOKEN` value (see `apps/server/.env.example`), a
+  static, independently-rotatable shared secret - not a personal admin JWT,
+  which expires every 15 minutes and ties the agent to one human's session.
+  `requireAdminOrServiceToken`/`authenticateTokenOrServiceToken`
+  (`apps/server/src/middleware/auth.ts`) accept either this token or a normal
+  admin JWT on every route this agent calls.
+- `GET /contact/all` now accepts `?status=open` server-side; `fetch_open_inquiries`
+  sends it but still also filters client-side, so this agent keeps working
+  unchanged against an older server deployment that hasn't picked up that change.
+- An email notification sent to the request's owner once an admin (or this
+  agent, after approval) posts a reply (`sendContactReplyEmail`, triggered from
+  `addReply` in `contactMessageController.ts`).

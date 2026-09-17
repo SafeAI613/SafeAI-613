@@ -20,6 +20,15 @@ type Request = {
   title?: string;
   status: string;
   replies?: Reply[];
+  // Set by apps/agents/inquiry-agent's classify_node, once it has looked at a request.
+  urgency?: "urgent" | "normal" | "low";
+  category?: "bug" | "feature" | "feedback";
+};
+
+const URGENCY_BADGE_CLASS: Record<string, string> = {
+  urgent: "badge badge-danger",
+  normal: "badge badge-info",
+  low: "badge",
 };
 
 export default function AdminRequestsList() {
@@ -101,6 +110,8 @@ export default function AdminRequestsList() {
               <th>{t("requests.emailColumn")}</th>
               <th>{t("requests.subjectColumn")}</th>
               <th>{t("requests.statusColumn")}</th>
+              <th>{t("requests.urgencyColumn")}</th>
+              <th>{t("requests.categoryColumn")}</th>
               <th>{t("common.delete")}</th>
             </tr>
           </thead>
@@ -128,6 +139,18 @@ export default function AdminRequestsList() {
                   <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
                     {req.status === "closed" ? t("requests.closedStatus") : t("inquiries.statusOpen")}
                     {newBadge && <span className="request-new-badge">{t("requests.newBadge")}</span>}
+                  </td>
+                  <td>
+                    {req.urgency ? (
+                      <span className={URGENCY_BADGE_CLASS[req.urgency] || "badge"}>
+                        {t(`requests.urgency.${req.urgency}`)}
+                      </span>
+                    ) : (
+                      <span className="badge">{t("requests.notClassifiedYet")}</span>
+                    )}
+                  </td>
+                  <td>
+                    {req.category ? t(`requests.category.${req.category}`) : "—"}
                   </td>
                   <td>
                     <button

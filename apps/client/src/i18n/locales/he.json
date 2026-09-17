@@ -986,7 +986,20 @@
     "closeRequestBtn": "סגור פנייה",
     "adminSenderLabel": "אדמין",
     "meSenderLabel": "אני",
-    "replyPlaceholder": "כתוב תגובה..."
+    "replyPlaceholder": "כתוב תגובה...",
+    "urgencyColumn": "דחיפות",
+    "categoryColumn": "נושא",
+    "notClassifiedYet": "טרם סווג",
+    "urgency": {
+      "urgent": "דחוף",
+      "normal": "רגיל",
+      "low": "נמוך"
+    },
+    "category": {
+      "bug": "באג",
+      "feature": "בקשת פיצ'ר",
+      "feedback": "משוב"
+    }
   },
   "contactTypesManagement": {
     "title": "ניהול סוגי פנייה",
