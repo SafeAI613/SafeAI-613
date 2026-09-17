@@ -15,6 +15,12 @@ export const getRequestsByUserId = async (userId: string) => {
   return await repository.findByUserId(userId);
 };
 
+export type ContactRequestFilters = repository.ContactRequestFilters;
+
+export const getAllRequests = async (filters: ContactRequestFilters) => {
+  return await repository.findAllWithFilters(filters);
+};
+
 export const getRequestById = async (id: string) => {
   return await ContactMessage.findById(id);
 };

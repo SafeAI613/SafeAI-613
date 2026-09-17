@@ -921,7 +921,10 @@
     "closeRequestBtn": "Close Request",
     "adminSenderLabel": "Admin",
     "meSenderLabel": "Me",
-    "replyPlaceholder": "Write a reply..."
+    "replyPlaceholder": "Write a reply...",
+    "searchPlaceholder": "Search by title or description...",
+    "allStatuses": "All Statuses",
+    "allTypes": "All Request Types"
   },
   "authSection": {
     "registrationSuccessAlert": "Registration successful!\n\nYour API Key:\n{{apiKey}}\n\nSave this key in a safe place!",

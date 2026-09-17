@@ -1,6 +1,5 @@
 import { Response } from 'express';
 import * as contactMessageService from '../services/contactMessageService';
-import { ContactMessage } from '../models/ContactMessage';
 import * as s3Service from '../services/s3Service';
 
 // The bucket is private - the `url` saved on a ContactMessage's attachment is
@@ -138,11 +137,17 @@ export const addReply = async (req: any, res: Response) => {
 
 export const getAllRequests = async (req: any, res: Response) => {
   try {
-    // הוספת populate כדי לקבל את פרטי המשתמש השולח
-    const allRequests = await ContactMessage.find()
-      .populate('userId', 'name email') 
-      .sort({ createdAt: -1 });
-      
+    const { status, requestType, search, fromDate, toDate } = req.query;
+
+    const filters: contactMessageService.ContactRequestFilters = {};
+    if (typeof status === "string") filters.status = status;
+    if (typeof requestType === "string") filters.requestType = requestType;
+    if (typeof search === "string") filters.search = search;
+    if (typeof fromDate === "string") filters.fromDate = fromDate;
+    if (typeof toDate === "string") filters.toDate = toDate;
+
+    const allRequests = await contactMessageService.getAllRequests(filters);
+
     res.status(200).json(allRequests);
   } catch (error) {
     res.status(500).json({ message: "שגיאה בטעינת כל הפניות" });
