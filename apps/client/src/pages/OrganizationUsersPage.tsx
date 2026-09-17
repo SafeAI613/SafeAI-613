@@ -9,6 +9,7 @@ import {
   getOrganizationUsers,
   updateOrganizationDetails,
 } from "../features/organizations/api/organizationApi";
+import OrganizationFundingRequestsSection from "../features/organizations/components/OrganizationFundingRequestsSection";
 import OrganizationProfilesSection from "../features/organizations/components/OrganizationProfilesSection";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { useAlert } from "../context/alertStore";
@@ -668,6 +669,26 @@ export default function OrganizationUsersPage() {
             ])}
           </tbody>
         </table>
+      )}
+
+      {organization && (
+        <OrganizationFundingRequestsSection
+          organizationId={organization._id}
+          onApproved={({ walletBalance, user }) => {
+            if (walletBalance !== undefined) {
+              setOrganization((prev) => (prev ? { ...prev, walletBalance } : prev));
+            }
+            if (user) {
+              setUsers((prev) =>
+                prev.map((u) =>
+                  u._id === user._id
+                    ? { ...u, costLimits: { ...u.costLimits, ...user.costLimits } as User["costLimits"] }
+                    : u
+                )
+              );
+            }
+          }}
+        />
       )}
     </div>
   );

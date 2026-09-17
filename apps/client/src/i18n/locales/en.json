@@ -126,6 +126,28 @@
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",
     "roleUser": "User",
+    "fundingRequests": {
+      "title": "Funding requests from members",
+      "empty": "No funding requests have been submitted yet.",
+      "fetchError": "Failed to fetch funding requests",
+      "resolveFailedFallback": "Failed to resolve the funding request",
+      "approveButton": "Approve",
+      "rejectButton": "Reject",
+      "approveSuccess": "Request approved — the budget was allocated to the user.",
+      "rejectSuccess": "Request rejected.",
+      "tableHeaders": {
+        "requester": "Requester",
+        "amount": "Amount",
+        "note": "Note",
+        "status": "Status",
+        "date": "Date"
+      },
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
     "invoicesLinkLabel": "View invoices"
   },
   "orgInvoices": {
@@ -144,7 +166,7 @@
     },
     "statusPending": "Pending",
     "statusCompleted": "Paid",
-    "statusFailed": "Failed"
+    "statusFailed": "Failed",
     "profilesTitle": "Allowed AI Profiles",
     "profilesDescription": "Choose which of the approved AI profiles available in the system your organization is allowed to use.",
     "profilesLoading": "Loading profiles...",

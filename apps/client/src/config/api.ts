@@ -32,6 +32,9 @@ export const API_ENDPOINTS = {
     members: (id: string) => `${API_BASE_URL}/organizations/${id}/members`,
     allocateBudget: (id: string, userId: string) =>
       `${API_BASE_URL}/organizations/${id}/users/${userId}/allocate-budget`,
+    fundingRequests: (id: string) => `${API_BASE_URL}/organizations/${id}/funding-requests`,
+    resolveFundingRequest: (id: string, requestId: string) =>
+      `${API_BASE_URL}/organizations/${id}/funding-requests/${requestId}`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
     invoices: (id: string) => `${API_BASE_URL}/organizations/${id}/invoices`,
     profiles: (id: string) => `${API_BASE_URL}/organizations/${id}/profiles`,

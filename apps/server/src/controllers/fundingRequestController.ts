@@ -3,7 +3,8 @@
  *
  * A regular org member's own funding requests: create one asking for more
  * monthly budget, and list their own request history/status. Approving or
- * rejecting a request is out of scope here (a follow-up, admin-facing task).
+ * rejecting a request is the org admin's approval screen, handled by
+ * resolveFundingRequestHandler in organizationController.ts instead.
  */
 
 import { Request, Response } from "express";

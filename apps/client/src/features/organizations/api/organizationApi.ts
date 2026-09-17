@@ -151,6 +151,48 @@ export const allocateBudgetToUser = async (
   });
 };
 
+export interface OrganizationFundingRequest {
+  _id: string;
+  organizationId: string;
+  userId: {
+    _id: string;
+    name?: string;
+    email?: string;
+  };
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// רשימת בקשות המימון של חברי הארגון (ממתינות + טופלו), חדש לישן
+export const getOrganizationFundingRequests = async (
+  orgId: string
+): Promise<{ fundingRequests: OrganizationFundingRequest[] }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.fundingRequests(orgId), { method: "GET" });
+};
+
+// אישור/דחייה של בקשת מימון - אישור מבצע בפועל הקצאת תקציב (ראו
+// resolveFundingRequest ב-organizationService.ts בשרת, המשתמש באותה לוגיקת
+// הקצאה כמו allocateBudgetToUser)
+export const resolveFundingRequest = async (
+  orgId: string,
+  requestId: string,
+  decision: "approved" | "rejected"
+): Promise<{
+  success: boolean;
+  message?: string;
+  fundingRequest: OrganizationFundingRequest;
+  walletBalance?: number;
+  user?: OrganizationUser;
+}> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.resolveFundingRequest(orgId, requestId), {
+    method: "PATCH",
+    body: JSON.stringify({ decision }),
+  });
+};
+
 // עדכון שם/תיאור הארגון
 export const updateOrganizationDetails = async (
   id: string,
