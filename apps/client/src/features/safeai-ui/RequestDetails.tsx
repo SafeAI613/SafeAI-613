@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiCall } from "../../config/api";
+import { useAlert } from "../../context/alertStore";
 import "../../styles/safeai-ui.css";
 
 interface RequestData {
@@ -13,6 +14,7 @@ export default function RequestDetails() {
     const { id } = useParams<{ id: string }>();
     const [request, setRequest] = useState<RequestData | null>(null);
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
     const [replyText, setReplyText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -40,7 +42,7 @@ export default function RequestDetails() {
             navigate(-1); // נווט חזרה לרשימת הפניות לאחר סגירה
         } catch (error) {
             console.error("שגיאה בסגירת הפנייה:", error);
-            alert("שגיאה בסגירת הפנייה. נסי שוב מאוחר יותר.");
+            showAlert("שגיאה בסגירת הפנייה. נסי שוב מאוחר יותר.", { type: "error" });
         } finally {
             setIsClosing(false);
             setShowCloseConfirm(false);

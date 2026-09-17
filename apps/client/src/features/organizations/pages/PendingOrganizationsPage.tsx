@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getPendingOrganizations, updateOrganizationStatus } from "../api/organizationApi";
 import { PendingOrganizationsTable } from "../components/PendingOrganizationsTable";
+import { useAlert } from "../../../context/alertStore";
 import "../../../styles/pending-organizations-page.css";
 
 interface Organization {
@@ -14,6 +15,7 @@ interface Organization {
 
 export const PendingOrganizationsPage = () => {
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +48,10 @@ export const PendingOrganizationsPage = () => {
       setBusyId(id);
       await updateOrganizationStatus(id, "approved");
       setOrganizations((prev) => prev.filter((o) => o._id !== id));
-      alert(t("pendingOrganizations.approveSuccess"));
+      showAlert(t("pendingOrganizations.approveSuccess"), { type: "success" });
     } catch (err: unknown) {
       console.error(err);
-      alert(t("pendingOrganizations.updateErrorPrefix", { message: err instanceof Error ? err.message : t("pendingOrganizations.actionFailedDefault") }));
+      showAlert(t("pendingOrganizations.updateErrorPrefix", { message: err instanceof Error ? err.message : t("pendingOrganizations.actionFailedDefault") }), { type: "error" });
     } finally {
       setBusyId(null);
     }
@@ -63,10 +65,10 @@ export const PendingOrganizationsPage = () => {
       setBusyId(id);
       await updateOrganizationStatus(id, "rejected");
       setOrganizations((prev) => prev.filter((o) => o._id !== id));
-      alert(t("pendingOrganizations.rejectSuccess"));
+      showAlert(t("pendingOrganizations.rejectSuccess"), { type: "success" });
     } catch (err: unknown) {
       console.error(err);
-      alert(t("pendingOrganizations.updateErrorPrefix", { message: err instanceof Error ? err.message : t("pendingOrganizations.actionFailedDefault") }));
+      showAlert(t("pendingOrganizations.updateErrorPrefix", { message: err instanceof Error ? err.message : t("pendingOrganizations.actionFailedDefault") }), { type: "error" });
     } finally {
       setBusyId(null);
     }

@@ -2,6 +2,7 @@ import React, { useState, type ChangeEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { updateTask, type Task } from './tasksSlice';
+import { useAlert } from '../../context/alertStore';
 
 interface RootState {
     tasks: {
@@ -13,6 +14,7 @@ const UpdateTask: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
     const numericId = Number(id);
 
     const task = useSelector((state: RootState) =>
@@ -38,11 +40,11 @@ const [isCompleted, setIsCompleted] = useState(task?.isCompleted || false);
 
     const submit = () => {
         if (!title || !desc || !date) {
-            alert('Please fill all required fields');
+            showAlert('Please fill all required fields', { type: 'error' });
             return;
         }
         dispatch(updateTask({ id: numericId, title, desc, date, img, isCompleted }));
-        alert('Task updated successfully');
+        showAlert('Task updated successfully', { type: 'success' });
         navigate("/tasks");
     };
 

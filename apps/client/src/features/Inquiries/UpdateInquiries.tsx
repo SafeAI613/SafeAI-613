@@ -5,8 +5,10 @@ import type { RootState } from "../../app/store";
 import type { AppDispatch } from "../../app/store";
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useAlert } from "../../context/alertStore";
 
 const UpdateInquiries: React.FC = () => {
+  const { showAlert } = useAlert();
   const currentInquiry = useSelector(
     (state: RootState) => state.inquiries.currentInquiry
   ) as Inquiry | null;
@@ -31,7 +33,7 @@ const UpdateInquiries: React.FC = () => {
     if (!currentInquiry) return;
 
     if (!name.trim() || !subject.trim() || !message.trim()) {
-      alert(t("inquiries.requiredFieldsAlert"));
+      showAlert(t("inquiries.requiredFieldsAlert"), { type: "error" });
       return;
     }
 

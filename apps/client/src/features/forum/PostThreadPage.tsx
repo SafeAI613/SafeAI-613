@@ -21,6 +21,7 @@ import {
 import { validateFileForUpload } from './uploadValidation';
 import type { Post, Comment } from './types';
 import { SEO } from '../../components/SEO';
+import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
 
 // Builds a meta description of roughly 160 characters, without cutting a
@@ -36,6 +37,7 @@ export const PostThreadPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showAlert } = useAlert();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,11 +163,11 @@ export const PostThreadPage: React.FC = () => {
         setComments((prev) => prev.filter((comment) => comment._id !== commentId));
       } else {
         const errData = await response.json();
-        alert(errData.message || 'שגיאה במחיקת התגובה');
+        showAlert(errData.message || 'שגיאה במחיקת התגובה', { type: 'error' });
       }
     } catch (err) {
       console.error('Error deleting comment:', err);
-      alert('שגיאה בתקשורת עם השרת');
+      showAlert('שגיאה בתקשורת עם השרת', { type: 'error' });
     }
   };
 
@@ -199,7 +201,7 @@ export const PostThreadPage: React.FC = () => {
 
       } catch (error) {
         console.error('Error uploading comment file to S3:', error);
-        alert('נכשלה העלאת הקובץ המצורף לתגובה. אנו נסה שוב.');
+        showAlert('נכשלה העלאת הקובץ המצורף לתגובה. אנו נסה שוב.', { type: 'error' });
         setCommentLoading(false);
         return;
       }
@@ -223,7 +225,7 @@ export const PostThreadPage: React.FC = () => {
         navigate('/forum');
       } else {
         const errData = await response.json();
-        alert(`שגיאת שרת: ${errData.message || 'לא ניתן לשמור תגובה'}`);
+        showAlert(`שגיאת שרת: ${errData.message || 'לא ניתן לשמור תגובה'}`, { type: 'error' });
       }
     } catch (err) {
       console.error('Error submitting comment:', err);
@@ -240,7 +242,7 @@ export const PostThreadPage: React.FC = () => {
 
     const error = await validateFileForUpload(file, 'comment');
     if (error) {
-      alert(error);
+      showAlert(error, { type: 'error' });
       if (commentFileInputRef.current) commentFileInputRef.current.value = '';
       setSelectedFile(null);
       return;

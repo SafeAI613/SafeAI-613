@@ -3,6 +3,7 @@ import "./styles/design-system.css";
 import './App.css'
 import AppRouter from './router/AppRouter'
 import { AuthProvider } from './context/AuthContext'
+import { AlertProvider } from './context/AlertContext'
 import { initializeTokenManager, cleanupTokenManager } from './utils/tokenManager'
 import { useLanguageDirection } from './i18n/useLanguageDirection'
 
@@ -21,9 +22,11 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <AppRouter />
-    </AuthProvider>
+    <AlertProvider>
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
+    </AlertProvider>
   );
 }
 
