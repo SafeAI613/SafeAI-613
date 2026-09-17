@@ -189,3 +189,37 @@ export async function processWalletTopUpWebhook(body: PaymeSaleCallbackBody): Pr
 export async function getWalletTopUpStatus(requestId: string, organizationId: string) {
   return walletTransactionRepo.findByRequestIdAndOrganization(requestId, organizationId);
 }
+
+export interface OrganizationInvoice {
+  id: string;
+  date: Date;
+  amount: number;
+  currency: string;
+  status: "pending" | "completed" | "failed";
+  reference: string;
+}
+
+/**
+ * Org-admin "invoices" (billing history) list. There is no separate
+ * invoicing/billing system in this codebase - each WalletTransaction
+ * record (a PayMe wallet top-up attempt) IS treated as an invoice, since
+ * it's the closest real financial record we have (see SCRUM-256/257).
+ *
+ * `date` prefers completedAt (when the charge actually settled) and falls
+ * back to requestedAt for transactions still pending/failed before
+ * completion. `reference` prefers PayMe's own transaction id, falling
+ * back to our internal requestId when PayMe never assigned one (e.g. the
+ * sale was never generated).
+ */
+export async function getOrganizationInvoices(organizationId: string): Promise<OrganizationInvoice[]> {
+  const transactions = await walletTransactionRepo.findByOrganization(organizationId);
+
+  return transactions.map((transaction) => ({
+    id: transaction._id.toString(),
+    date: transaction.completedAt || transaction.requestedAt,
+    amount: transaction.amount,
+    currency: transaction.currency,
+    status: transaction.status,
+    reference: transaction.payMeTransactionId || transaction.requestId,
+  }));
+}

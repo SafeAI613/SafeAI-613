@@ -115,7 +115,26 @@
     },
     "roleOrgOwner": "בעלים",
     "roleAdmin": "מנהל מערכת",
-    "roleUser": "משתמש"
+    "roleUser": "משתמש",
+    "invoicesLinkLabel": "צפייה בחשבוניות"
+  },
+  "orgInvoices": {
+    "pageTitle": "חשבוניות הארגון",
+    "pageSubtitle": "היסטוריית טעינות הארנק של הארגון, מוצגת כרשימת חשבוניות.",
+    "backToDashboard": "חזרה ללוח הארגון",
+    "loading": "טוען...",
+    "errorTitle": "שגיאה בטעינת החשבוניות:",
+    "retryButton": "ניסיון חוזר",
+    "noInvoices": "לא נמצאו חשבוניות עבור ארגון זה.",
+    "tableHeaders": {
+      "date": "תאריך",
+      "amount": "סכום",
+      "status": "סטטוס",
+      "reference": "מספר אסמכתא"
+    },
+    "statusPending": "ממתין",
+    "statusCompleted": "שולם",
+    "statusFailed": "נכשל"
   },
   "registerSuccess": {
     "title": "✅ ההרשמה הושלמה בהצלחה!",

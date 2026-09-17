@@ -23,6 +23,7 @@ import {
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
 import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
+import { getOrganizationInvoices } from "../services/paymeService";
 import logger from "../logger";
 
 /**
@@ -542,6 +543,43 @@ export async function getOrganizationStatsHandler(
       organizationId: req.params.id,
     });
     res.status(500).json({ error: "Failed to fetch organization stats" });
+  }
+}
+
+/**
+ * Get an organization's "invoices" (billing history) - Admin or Org Owner.
+ *
+ * There is no separate invoicing system in this codebase; each
+ * WalletTransaction (a PayMe wallet top-up attempt) is exposed here as an
+ * invoice, since it's the closest real financial record the org has.
+ */
+export async function getOrganizationInvoicesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const invoices = await getOrganizationInvoices(orgId);
+    res.json({ invoices });
+  } catch (error: any) {
+    logger.error("Failed to get organization invoices", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization invoices" });
   }
 }
 
