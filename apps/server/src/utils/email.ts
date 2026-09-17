@@ -753,6 +753,9 @@ const ORG_STATUS_EMAIL_COPY = {
     color: "#d9534f",
     message: (orgName: string) =>
       `הבקשה לפתיחת הארגון <strong>${orgName}</strong> נבדקה ולא אושרה על ידי מנהל המערכת.`,
+    // The organization was never approved, so there is no org screen to send
+    // the admin to - the "enter system" button is omitted for this status.
+    showButton: false,
   },
   suspended: {
     subject: (orgName: string) => `הארגון "${orgName}" הושעה`,
@@ -760,6 +763,7 @@ const ORG_STATUS_EMAIL_COPY = {
     color: "#d9534f",
     message: (orgName: string) =>
       `הארגון <strong>${orgName}</strong> הושעה על ידי מנהל המערכת, וגישת המשתמשים אליו חסומה זמנית.`,
+    showButton: true,
   },
   reactivated: {
     subject: (orgName: string) => `הארגון "${orgName}" הופעל מחדש`,
@@ -767,6 +771,7 @@ const ORG_STATUS_EMAIL_COPY = {
     color: "#10a37f",
     message: (orgName: string) =>
       `הארגון <strong>${orgName}</strong> הופעל מחדש וחזר לפעילות מלאה.`,
+    showButton: true,
   },
 } as const;
 
@@ -811,16 +816,16 @@ export async function sendOrgStatusEmail(
           <div class="content">
             <p>שלום ${safeName},</p>
             <p>${copy.message(safeOrgName)}</p>
-            <p style="text-align: center;">
+            ${copy.showButton ? `<p style="text-align: center;">
               <a href="${dashboardUrl}" class="button">מעבר למסך הארגון</a>
-            </p>
+            </p>` : ""}
           </div>
           <div class="footer"><p>© 2026 SafeAI. כל הזכויות שמורות.</p></div>
         </div>
       </body>
       </html>
     `,
-    text: `שלום ${name || "מנהל הארגון"},\n${copy.message(orgName).replace(/<[^>]+>/g, "")}\n${dashboardUrl}\n\n© 2026 SafeAI`,
+    text: `שלום ${name || "מנהל הארגון"},\n${copy.message(orgName).replace(/<[^>]+>/g, "")}${copy.showButton ? `\n${dashboardUrl}` : ""}\n\n© 2026 SafeAI`,
   };
 
   try {

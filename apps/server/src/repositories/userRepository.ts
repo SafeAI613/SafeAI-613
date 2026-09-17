@@ -57,6 +57,19 @@ export async function incrementUserMonthlySpend(userId: string, amount: number) 
   );
 }
 
+/**
+ * Adds `amount` to a user's costLimits.monthlyBudget (org-admin budget
+ * allocation from the organization wallet). Additive, not a "set to" -
+ * see allocateBudgetToUser in organizationService.ts for the reasoning.
+ */
+export async function incrementUserMonthlyBudget(userId: string, amount: number) {
+  return User.findByIdAndUpdate(
+    userId,
+    { $inc: { "costLimits.monthlyBudget": amount } },
+    { new: true, runValidators: true }
+  ).lean();
+}
+
 export async function resetUserMonthlyBudget(userId: string, resetDate: Date) {
   await User.updateOne(
     { _id: userId },

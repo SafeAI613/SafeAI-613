@@ -13,6 +13,7 @@ interface PendingOrganizationsTableProps {
   organizations: Organization[];
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
+  onOpenOrg: (id: string) => void;
   busyId: string | null;
 }
 
@@ -20,6 +21,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
   organizations,
   onApprove,
   onReject,
+  onOpenOrg,
   busyId,
 }) => {
   const { t } = useTranslation();
@@ -41,7 +43,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
       <tbody>
         {organizations.map((org) => (
           <tr key={org._id}>
-            <td>{org.name}</td>
+            <td className="orgs-name-cell" onClick={() => onOpenOrg(org._id)}>{org.name}</td>
             <td>{new Date(org.createdAt).toLocaleDateString("he-IL")}</td>
             <td>
               <span className={`status-badge ${org.status}`}>
@@ -49,6 +51,13 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
               </span>
             </td>
             <td>
+              <button
+                className="btn-view-details"
+                onClick={() => onOpenOrg(org._id)}
+                style={{ marginLeft: '8px', cursor: 'pointer' }}
+              >
+                {t("pendingOrganizations.viewDetailsButton")}
+              </button>
               <button
                 className="btn-approve"
                 onClick={() => onApprove(org._id)}
