@@ -237,23 +237,22 @@ export default function AiNewsPage() {
       setUploadingImage(true);
       setError(null);
 
-      const urlResponse = await fetch(API_ENDPOINTS.upload.getUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-          context: "newsImage",
-        }),
-      });
-
-      if (!urlResponse.ok) {
-        const data = await urlResponse.json().catch(() => null);
-        throw new Error(data?.error || "נכשלה קבלת קישור מאובטח מהשרת");
-      }
-
-      const { uploadUrl, fileUrl } = await urlResponse.json();
+      // POST /api/upload/get-url requires authentication - must go through
+      // apiCall() (which attaches the Authorization header and refreshes an
+      // expired token) rather than a bare fetch(), or this always 401s
+      // regardless of environment.
+      const { uploadUrl, fileUrl } = await apiCall<{ uploadUrl: string; fileUrl: string }>(
+        API_ENDPOINTS.upload.getUrl,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            context: "newsImage",
+          }),
+        },
+      );
 
       const s3Response = await fetch(uploadUrl, {
         method: "PUT",
