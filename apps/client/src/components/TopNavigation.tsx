@@ -137,6 +137,12 @@ export default function TopNavigation() {
                     <Link to="/recommended-guides" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.recommendedGuides")}
                     </Link>
+                    <Link to="/agents-marketplace" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                      {t("nav.agentsMarketplace")}
+                    </Link>
+                    <Link to="/download-agents" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                      {t("nav.downloadAgents")}
+                    </Link>
                   </div>
                 )}
               </div>
@@ -209,6 +215,9 @@ export default function TopNavigation() {
                     <Link to="/recommended-guides" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.recommendedGuides")}
                     </Link>
+                    <Link to="/agents-marketplace" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                      {t("nav.agentsMarketplace")}
+                    </Link>
                     {userRole === "admin" && (
                       <Link to="/admin/articles" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                         ניהול Docs
@@ -224,9 +233,9 @@ export default function TopNavigation() {
               <Link to="/tender-board" className="top-nav-link">
                 {t("nav.tenderBoard")}
               </Link>
-              {/* <Link to="/download-agents" className="top-nav-link">
+              <Link to="/download-agents" className="top-nav-link">
                 {t("nav.downloadAgents")}
-              </Link> */}
+              </Link>
 
               {/* User Menu */}
               <div className="user-menu-container" ref={menuRef}>
