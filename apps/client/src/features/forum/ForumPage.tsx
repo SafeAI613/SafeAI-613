@@ -147,7 +147,7 @@ export const ForumPage: React.FC = () => {
     if (!currentUser?._id) return showAlert('משתמש לא מחובר', { type: 'error' });
 
     try {
-      const response = await moderatePostApi(postId, currentUser._id, actionType);
+      const response = await moderatePostApi(postId, actionType);
 
       if (response.ok) {
         fetchPosts(searchQuery, currentPage);
