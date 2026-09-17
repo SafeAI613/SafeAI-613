@@ -115,7 +115,17 @@
     },
     "roleOrgOwner": "בעלים",
     "roleAdmin": "מנהל מערכת",
-    "roleUser": "משתמש"
+    "roleUser": "משתמש",
+    "profilesTitle": "פרופילי AI מורשים לארגון",
+    "profilesDescription": "בחר/י אילו פרופילי AI מאושרים במערכת יהיו זמינים לשימוש בארגון שלך.",
+    "profilesLoading": "טוען פרופילים...",
+    "profilesFetchErrorFallback": "שגיאה בטעינת רשימת הפרופילים",
+    "profilesEmpty": "לא נמצאו פרופילי AI מאושרים במערכת.",
+    "profilesCreatedByLabel": "נוצר על ידי:",
+    "profilesSaveButton": "שמירת בחירה",
+    "profilesSavingButton": "שומר...",
+    "profilesSaveSuccess": "רשימת הפרופילים המורשים עודכנה בהצלחה.",
+    "profilesSaveFailedFallback": "עדכון רשימת הפרופילים נכשל"
   },
   "registerSuccess": {
     "title": "✅ ההרשמה הושלמה בהצלחה!",

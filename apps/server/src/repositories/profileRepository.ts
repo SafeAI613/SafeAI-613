@@ -68,3 +68,14 @@ export async function getAllFullProfiles() {
     .sort({ createdAt: -1 })
     .lean();
 }
+
+// Approved profiles matching a given set of ids - used to validate an
+// organization admin's profile selection against real, approved profiles.
+export async function getApprovedProfilesByIds(profileIds: string[]) {
+  return AIProfile.find({
+    _id: { $in: profileIds },
+    approvalStatus: "approved",
+  })
+    .select("_id")
+    .lean();
+}

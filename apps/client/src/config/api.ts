@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     users: (id: string) => `${API_BASE_URL}/organizations/${id}/users`,
     members: (id: string) => `${API_BASE_URL}/organizations/${id}/members`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
+    profiles: (id: string) => `${API_BASE_URL}/organizations/${id}/profiles`,
     suspend: (id: string) => `${API_BASE_URL}/organizations/${id}/suspend`,
     activate: (id: string) => `${API_BASE_URL}/organizations/${id}/activate`,
     approve: (id: string) => `${API_BASE_URL}/organizations/${id}/approve`,

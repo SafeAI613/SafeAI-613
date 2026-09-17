@@ -7,6 +7,7 @@ import {
   getOrganizationUsers,
   updateOrganizationDetails,
 } from "../features/organizations/api/organizationApi";
+import OrganizationProfilesSection from "../features/organizations/components/OrganizationProfilesSection";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import "../styles/organization-wallet.css";
 
@@ -312,6 +313,8 @@ export default function OrganizationUsersPage() {
           </div>
         </div>
       )}
+
+      {organization && <OrganizationProfilesSection orgId={organization._id} />}
 
       <h3>{t("orgUsers.addMemberTitle")}</h3>
       <form onSubmit={handleAddMember} className="org-edit-form">

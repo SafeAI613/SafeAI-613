@@ -70,6 +70,28 @@ export async function incrementWalletBalance(orgId: string, amount: number) {
   }
 }
 
+export async function setAllowedProfileIds(orgId: string, profileIds: string[]) {
+  try {
+    const organization = await Organization.findByIdAndUpdate(
+      orgId,
+      { allowedProfileIds: profileIds },
+      { new: true, runValidators: true }
+    ).lean();
+    logger.info("Organization allowed profiles updated in DB", {
+      organizationId: orgId,
+      profileCount: profileIds.length,
+    });
+    return organization;
+  } catch (error: any) {
+    logger.error("Failed to update organization allowed profiles in DB", {
+      error: error.message,
+      stack: error.stack,
+      organizationId: orgId,
+    });
+    throw error;
+  }
+}
+
 export async function deleteOrganization(orgId: string) {
   try {
     const organization = await Organization.findByIdAndDelete(orgId).lean();

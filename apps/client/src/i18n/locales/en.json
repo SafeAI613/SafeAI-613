@@ -115,7 +115,17 @@
     },
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",
-    "roleUser": "User"
+    "roleUser": "User",
+    "profilesTitle": "Allowed AI Profiles",
+    "profilesDescription": "Choose which of the approved AI profiles available in the system your organization is allowed to use.",
+    "profilesLoading": "Loading profiles...",
+    "profilesFetchErrorFallback": "Failed to load the list of profiles",
+    "profilesEmpty": "No approved AI profiles were found in the system.",
+    "profilesCreatedByLabel": "Created by:",
+    "profilesSaveButton": "Save selection",
+    "profilesSavingButton": "Saving...",
+    "profilesSaveSuccess": "The allowed profiles list was updated successfully.",
+    "profilesSaveFailedFallback": "Failed to update the profiles list"
   },
   "registerSuccess": {
     "title": "\u2705 Registration Completed Successfully!",
