@@ -10,6 +10,7 @@ import UserApiKeysPage from "../features/safeai-ui/UserApiKeysPage";
 import BillingPage from "../features/safeai-ui/BillingPage";
 import MyRequestsList from "../features/safeai-ui/MyRequestsList";
 import AdminRequestsList from "../features/safeai-ui/AdminRequestsList";
+import ContactTypesManagement from "../features/safeai-ui/ContactTypesManagement";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { OrganizationsManagement } from "../features/organizations/OrganizationsManagement";
 import { PendingApprovalScreen } from "../features/organizations/PendingApprovalScreen";
@@ -34,6 +35,7 @@ type Section =
   | "organizations"
   | "requests"
   | "adminRequests"
+  | "contactTypes"
   | "org-statistics"
   | "org-users"
   | "billing";
@@ -162,6 +164,8 @@ export default function SafeAIUIPage() {
         return <MyRequestsList activeSection={activeSection} />;
       case "adminRequests":
         return <AdminRequestsList />;
+      case "contactTypes":
+        return <ContactTypesManagement />;
       case "org-statistics":
         return <Statistics user={currentUser} />;
       case "org-users":
@@ -274,6 +278,25 @@ export default function SafeAIUIPage() {
                   {newRequestCount > 0 && (
                     <span className="sub-nav-badge">({newRequestCount})</span>
                   )}
+                </button>
+                <button
+                  className={
+                    activeSection === "contactTypes"
+                      ? "sub-nav-btn active"
+                      : "sub-nav-btn"
+                  }
+                  onClick={() => setActiveSection("contactTypes")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 3h8l4 4v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1zM9 3v4h4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {t("contactTypesManagement.title")}
                 </button>
               </>
             )}

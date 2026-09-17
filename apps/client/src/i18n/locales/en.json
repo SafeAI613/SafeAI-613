@@ -7,7 +7,8 @@
     "all": "All",
     "edit": "Edit",
     "delete": "Delete",
-    "close": "Close"
+    "close": "Close",
+    "saving": "Saving..."
   },
   "nav": {
     "why": "Why?",
@@ -984,6 +985,25 @@
     "adminSenderLabel": "Admin",
     "meSenderLabel": "Me",
     "replyPlaceholder": "Write a reply..."
+  },
+  "contactTypesManagement": {
+    "title": "Manage Request Types",
+    "loading": "Loading request types...",
+    "errorLoading": "Failed to load request types",
+    "newTypeButton": "New Request Type",
+    "noTypesFound": "No request types defined yet.",
+    "newTitle": "New Request Type",
+    "editTitle": "Edit Request Type",
+    "labelField": "Display Label",
+    "valueField": "Value (identifier)",
+    "activeField": "Active",
+    "activeYes": "Active",
+    "activeNo": "Inactive",
+    "toggleError": "Failed to update the request type's status",
+    "createErrorPrefix": "Failed to create request type: {{message}}",
+    "updateErrorPrefix": "Failed to update request type: {{message}}",
+    "deleteErrorPrefix": "Failed to delete request type: {{message}}",
+    "deleteConfirm": "Delete the request type \"{{label}}\"?"
   },
   "authSection": {
     "registrationSuccessAlert": "Registration successful!\n\nYour API Key:\n{{apiKey}}\n\nSave this key in a safe place!",
