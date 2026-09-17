@@ -148,6 +148,35 @@
         "rejected": "נדחה"
       }
     }
+    "invoicesLinkLabel": "צפייה בחשבוניות"
+  },
+  "orgInvoices": {
+    "pageTitle": "חשבוניות הארגון",
+    "pageSubtitle": "היסטוריית טעינות הארנק של הארגון, מוצגת כרשימת חשבוניות.",
+    "backToDashboard": "חזרה ללוח הארגון",
+    "loading": "טוען...",
+    "errorTitle": "שגיאה בטעינת החשבוניות:",
+    "retryButton": "ניסיון חוזר",
+    "noInvoices": "לא נמצאו חשבוניות עבור ארגון זה.",
+    "tableHeaders": {
+      "date": "תאריך",
+      "amount": "סכום",
+      "status": "סטטוס",
+      "reference": "מספר אסמכתא"
+    },
+    "statusPending": "ממתין",
+    "statusCompleted": "שולם",
+    "statusFailed": "נכשל"
+    "profilesTitle": "פרופילי AI מורשים לארגון",
+    "profilesDescription": "בחר/י אילו פרופילי AI מאושרים במערכת יהיו זמינים לשימוש בארגון שלך.",
+    "profilesLoading": "טוען פרופילים...",
+    "profilesFetchErrorFallback": "שגיאה בטעינת רשימת הפרופילים",
+    "profilesEmpty": "לא נמצאו פרופילי AI מאושרים במערכת.",
+    "profilesCreatedByLabel": "נוצר על ידי:",
+    "profilesSaveButton": "שמירת בחירה",
+    "profilesSavingButton": "שומר...",
+    "profilesSaveSuccess": "רשימת הפרופילים המורשים עודכנה בהצלחה.",
+    "profilesSaveFailedFallback": "עדכון רשימת הפרופילים נכשל"
   },
   "registerSuccess": {
     "title": "✅ ההרשמה הושלמה בהצלחה!",

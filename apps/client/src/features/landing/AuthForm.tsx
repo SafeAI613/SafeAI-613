@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
+import { useAlert } from "../../context/alertStore";
 
 type AuthMode = "login" | "register";
 type UserRole = "admin" | "user";
@@ -20,6 +21,7 @@ export default function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,8 +47,9 @@ export default function AuthForm() {
 
         if (response.success) {
           // Show the API key to the user
-          alert(
-            t("authForm.registrationSuccessAlert", { apiKey: response.proxyApiKey })
+          showAlert(
+            t("authForm.registrationSuccessAlert", { apiKey: response.proxyApiKey }),
+            { type: "success" }
           );
           
           // Store user info in localStorage

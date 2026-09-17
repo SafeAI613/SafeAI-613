@@ -1,9 +1,12 @@
+import { useAlert } from "../../context/alertStore";
+
 interface Props {
   apiKey: string;
   onClose: () => void;
 }
 
 export default function NewApiKeyModal({ apiKey, onClose }: Props) {
+  const { showAlert } = useAlert();
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -29,7 +32,7 @@ export default function NewApiKeyModal({ apiKey, onClose }: Props) {
           <button
             className="btn btn-primary"
             style={{ width: "100%" }}
-            onClick={() => { navigator.clipboard.writeText(apiKey); alert("המפתח הועתק ללוח!"); }}
+            onClick={() => { navigator.clipboard.writeText(apiKey); showAlert("המפתח הועתק ללוח!", { type: "success" }); }}
           >
             📋 העתק ללוח
           </button>

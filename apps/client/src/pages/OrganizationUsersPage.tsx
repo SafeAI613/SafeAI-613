@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
   allocateBudgetToUser,
@@ -9,7 +10,9 @@ import {
   updateOrganizationDetails,
 } from "../features/organizations/api/organizationApi";
 import OrganizationFundingRequestsSection from "../features/organizations/components/OrganizationFundingRequestsSection";
+import OrganizationProfilesSection from "../features/organizations/components/OrganizationProfilesSection";
 import { apiCall, API_ENDPOINTS } from "../config/api";
+import { useAlert } from "../context/alertStore";
 import "../styles/organization-wallet.css";
 
 interface User {
@@ -44,6 +47,7 @@ interface OrganizationOwner {
 
 export default function OrganizationUsersPage() {
   const { t, i18n } = useTranslation();
+  const { showAlert } = useAlert();
   const [users, setUsers] = useState<User[]>([]);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,7 +131,7 @@ export default function OrganizationUsersPage() {
       window.location.href = iframeUrl;
     } catch (err: unknown) {
       console.error("Error initiating wallet top-up:", err);
-      alert(err instanceof Error ? err.message : "נכשלה יצירת בקשת התשלום");
+      showAlert(err instanceof Error ? err.message : "נכשלה יצירת בקשת התשלום", { type: "error" });
       setIsSubmitting(false);
     }
   };
@@ -156,7 +160,7 @@ export default function OrganizationUsersPage() {
       setIsEditingOrg(false);
     } catch (err: unknown) {
       console.error("Error updating organization:", err);
-      alert(err instanceof Error ? err.message : t("orgUsers.updateOrgFailedFallback"));
+      showAlert(err instanceof Error ? err.message : t("orgUsers.updateOrgFailedFallback"), { type: "error" });
     } finally {
       setIsSavingOrg(false);
     }
@@ -449,9 +453,15 @@ export default function OrganizationUsersPage() {
                 {isSubmitting ? t("orgUsers.processingButton") : t("orgUsers.topUpButton")}
               </button>
             </form>
+
+            <p style={{ marginTop: "14px" }}>
+              <Link to="/organization/invoices">{t("orgUsers.invoicesLinkLabel")}</Link>
+            </p>
           </div>
         </div>
       )}
+
+      {organization && <OrganizationProfilesSection orgId={organization._id} />}
 
       <h3>{t("orgUsers.addMemberTitle")}</h3>
       <form onSubmit={handleAddMember} className="org-edit-form">

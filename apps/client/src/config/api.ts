@@ -36,6 +36,8 @@ export const API_ENDPOINTS = {
     resolveFundingRequest: (id: string, requestId: string) =>
       `${API_BASE_URL}/organizations/${id}/funding-requests/${requestId}`,
     stats: (id: string) => `${API_BASE_URL}/organizations/${id}/stats`,
+    invoices: (id: string) => `${API_BASE_URL}/organizations/${id}/invoices`,
+    profiles: (id: string) => `${API_BASE_URL}/organizations/${id}/profiles`,
     suspend: (id: string) => `${API_BASE_URL}/organizations/${id}/suspend`,
     activate: (id: string) => `${API_BASE_URL}/organizations/${id}/activate`,
     approve: (id: string) => `${API_BASE_URL}/organizations/${id}/approve`,

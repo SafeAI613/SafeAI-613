@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
+import { useAlert } from "../../context/alertStore";
 
 interface ProviderKey {
   _id: string;
@@ -20,6 +21,7 @@ interface ProviderKeysManagementProps {
 
 export default function ProviderKeysManagement({ userId, userEmail, onClose }: ProviderKeysManagementProps) {
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
   const [keys, setKeys] = useState<ProviderKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -43,7 +45,7 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
       setKeys(userKeys);
     } catch (error) {
       console.error("Failed to fetch provider keys:", error);
-      alert(t("providerKeysManagement.errorLoadingKeys"));
+      showAlert(t("providerKeysManagement.errorLoadingKeys"), { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -68,11 +70,11 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
       await fetchKeys();
       setShowAddModal(false);
       resetForm();
-      alert(t("providerKeysManagement.keyAddedSuccess"));
+      showAlert(t("providerKeysManagement.keyAddedSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error adding provider key:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("providerKeysManagement.addKeyErrorPrefix", { message: errorMessage }));
+      showAlert(t("providerKeysManagement.addKeyErrorPrefix", { message: errorMessage }), { type: "error" });
     } finally {
       setSaving(false);
     }
@@ -88,11 +90,11 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
       });
 
       await fetchKeys();
-      alert(!currentStatus ? t("userApiKeys.keyEnabledSuccess") : t("userApiKeys.keyDisabledSuccess"));
+      showAlert(!currentStatus ? t("userApiKeys.keyEnabledSuccess") : t("userApiKeys.keyDisabledSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error toggling key status:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("providerKeysManagement.updateStatusErrorPrefix", { message: errorMessage }));
+      showAlert(t("providerKeysManagement.updateStatusErrorPrefix", { message: errorMessage }), { type: "error" });
     }
   };
 
@@ -107,11 +109,11 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
       });
 
       await fetchKeys();
-      alert(t("providerKeysManagement.keyDeletedSuccess"));
+      showAlert(t("providerKeysManagement.keyDeletedSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error deleting key:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("providerKeysManagement.deleteKeyErrorPrefix", { message: errorMessage }));
+      showAlert(t("providerKeysManagement.deleteKeyErrorPrefix", { message: errorMessage }), { type: "error" });
     }
   };
 

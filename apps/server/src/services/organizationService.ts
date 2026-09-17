@@ -1,7 +1,9 @@
 import crypto from "crypto";
+import mongoose from "mongoose";
 import * as repo from "../repositories/organizationRepository";
 import * as userRepo from "../repositories/userRepository";
 import * as fundingRequestRepo from "../repositories/fundingRequestRepository";
+import * as profileRepo from "../repositories/profileRepository";
 import { aggregateUsageStats } from "../repositories/usageRepository";
 import { register } from "./authService";
 import {
@@ -12,6 +14,10 @@ import {
   sendOrgAdminActionEmail,
 } from "../utils/email";
 import logger from "../logger";
+
+export class ValidationError extends Error {
+  statusCode = 400;
+}
 
 function generateTemporaryPassword(): string {
   return crypto.randomBytes(9).toString("base64").replace(/[^a-zA-Z0-9]/g, "");
@@ -622,6 +628,76 @@ export async function setOrganizationActive(
   );
 
   logger.info("Organization active state changed", { organizationId: orgId, isActive });
+  return updated;
+}
+
+/**
+ * List every approved AI profile available in the system, marking which
+ * ones the given organization currently has selected. Used by the org
+ * admin's "select profiles" screen.
+ */
+export async function getOrganizationAvailableProfiles(orgId: string) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const allowedProfileIds = new Set(
+    ((organization as any).allowedProfileIds || []).map((id: any) => id.toString())
+  );
+
+  const profiles = await profileRepo.getProfiles();
+
+  return {
+    profiles: profiles.map((profile: any) => ({
+      ...profile,
+      selected: allowedProfileIds.has(profile._id.toString()),
+    })),
+    selectedProfileIds: Array.from(allowedProfileIds),
+  };
+}
+
+/**
+ * Set the list of AI profiles an organization admin has chosen for their
+ * organization, out of the profiles available in the system. Every id must
+ * be a real, existing, approved AIProfile - otherwise the whole update is
+ * rejected (no partial application of an invalid selection).
+ */
+export async function setOrganizationAllowedProfiles(orgId: string, profileIds: unknown) {
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  if (!Array.isArray(profileIds)) {
+    throw new ValidationError("profileIds must be an array of profile ids");
+  }
+
+  const uniqueIds = Array.from(new Set(profileIds.map((id) => String(id))));
+
+  const invalidFormatId = uniqueIds.find((id) => !mongoose.Types.ObjectId.isValid(id));
+  if (invalidFormatId) {
+    throw new ValidationError(`Invalid profile id: ${invalidFormatId}`);
+  }
+
+  if (uniqueIds.length > 0) {
+    const approvedProfiles = await profileRepo.getApprovedProfilesByIds(uniqueIds);
+    const approvedIds = new Set(approvedProfiles.map((p: any) => p._id.toString()));
+    const unknownIds = uniqueIds.filter((id) => !approvedIds.has(id));
+    if (unknownIds.length > 0) {
+      throw new ValidationError(
+        `One or more profile ids are invalid or not approved: ${unknownIds.join(", ")}`
+      );
+    }
+  }
+
+  const updated = await repo.setAllowedProfileIds(orgId, uniqueIds);
+
+  logger.info("Organization allowed profiles set", {
+    organizationId: orgId,
+    profileIds: uniqueIds,
+  });
+
   return updated;
 }
 

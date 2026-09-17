@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
+import { useAlert } from "../../context/alertStore";
 
 interface AuthSectionProps {
   onLogin: (role: "admin" | "user", userData?: UserData) => void;
@@ -23,6 +24,7 @@ export default function AuthSection({ onLogin }: AuthSectionProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ export default function AuthSection({ onLogin }: AuthSectionProps) {
         );
         
         // Show success message with API key
-        alert(t("authSection.registrationSuccessAlert", { apiKey: data.proxyApiKey }));
+        showAlert(t("authSection.registrationSuccessAlert", { apiKey: data.proxyApiKey }), { type: "success" });
 
         // Auto login after registration
         onLogin("user", data.user);

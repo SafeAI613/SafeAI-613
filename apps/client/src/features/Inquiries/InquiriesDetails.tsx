@@ -3,6 +3,7 @@ import { updateStatus, setCurrentInquiry } from "./inquiriesSlice";
 import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent, type FC } from "react";
 import { useTranslation } from "react-i18next";
+import { useAlert } from "../../context/alertStore";
 import type { AppDispatch } from "../../app/store";
 import type { RootState } from "../../app/store";
 
@@ -26,6 +27,7 @@ const InquiriesDetails: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const inquiry = useSelector(
     (state: RootState) => state.inquiries.currentInquiry
@@ -50,7 +52,7 @@ const InquiriesDetails: FC = () => {
     navigate("/inquiry-list");
   };
 
-  const handleCreateTask = (): void => alert(t("inquiries.taskCreatedAlert"));
+  const handleCreateTask = (): void => showAlert(t("inquiries.taskCreatedAlert"), { type: "success" });
 
   return (
     <>

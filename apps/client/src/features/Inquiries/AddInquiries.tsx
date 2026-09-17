@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { addInquiry } from "./inquiriesSlice";
+import { useAlert } from "../../context/alertStore";
 import type { AppDispatch } from "../../app/store";
 
 interface Attachment {
@@ -24,6 +25,7 @@ const AddInquiries: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -45,7 +47,7 @@ const AddInquiries: React.FC = () => {
 
   const add = (): void => {
     if (!name || !email || !subject || !message) {
-      alert("Please fill all required fields!");
+      showAlert("Please fill all required fields!", { type: "error" });
       return;
     }
 

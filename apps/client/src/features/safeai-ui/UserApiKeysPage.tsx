@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import ProviderKeysManagement from "./ProviderKeysManagement";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
 import { useAuth } from "../../context/authStore";
+import { useAlert } from "../../context/alertStore";
 
 interface ProviderKey {
   _id: string;
@@ -24,6 +25,7 @@ interface ProxyKeyInfo {
 export default function UserApiKeysPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { showAlert } = useAlert();
   const [keys, setKeys] = useState<ProviderKey[]>([]);
   const [proxyKey, setProxyKey] = useState<ProxyKeyInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,11 +79,11 @@ export default function UserApiKeysPage() {
       
       if (result.success) {
         setProxyKey(result.keyInfo);
-        alert(result.keyInfo.isActive ? t("userApiKeys.keyEnabledSuccess") : t("userApiKeys.keyDisabledSuccess"));
+        showAlert(result.keyInfo.isActive ? t("userApiKeys.keyEnabledSuccess") : t("userApiKeys.keyDisabledSuccess"), { type: "success" });
       }
     } catch (error) {
       console.error("Failed to toggle proxy key:", error);
-      alert(t("userApiKeys.errorTogglingKey"));
+      showAlert(t("userApiKeys.errorTogglingKey"), { type: "error" });
     } finally {
       setProxyKeyLoading(false);
     }
@@ -113,7 +115,7 @@ export default function UserApiKeysPage() {
       }
     } catch (error) {
       console.error("Failed to regenerate proxy key:", error);
-      alert(t("userApiKeys.errorRegeneratingKey"));
+      showAlert(t("userApiKeys.errorRegeneratingKey"), { type: "error" });
     } finally {
       setProxyKeyLoading(false);
     }
@@ -122,7 +124,7 @@ export default function UserApiKeysPage() {
   const handleCopyProxyKey = async () => {
     try {
       await navigator.clipboard.writeText(newProxyKey);
-      alert(t("usersManagement.keyCopiedAlert"));
+      showAlert(t("usersManagement.keyCopiedAlert"), { type: "success" });
     } catch (err) {
       console.error("Failed to copy:", err);
     }
