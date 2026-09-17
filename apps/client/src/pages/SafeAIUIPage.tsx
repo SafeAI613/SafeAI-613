@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/safeai-ui.css";
 import ProfilesManagement from "../features/safeai-ui/ProfilesManagement";
@@ -49,9 +49,10 @@ type UserData = {
 export default function SafeAIUIPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Initialize state from localStorage
-  const getInitialState = () => {
+  const getInitialState = (requestedSection?: Section) => {
     const storedUser = localStorage.getItem("user");
     const storedRole = localStorage.getItem("userRole");
 
@@ -62,7 +63,7 @@ export default function SafeAIUIPage() {
       return {
         user: parsedUser,
         role: storedRole as "admin" | "user" | "org_owner",
-        section: defaultSection,
+        section: requestedSection ?? defaultSection,
       };
     }
 
@@ -73,7 +74,11 @@ export default function SafeAIUIPage() {
     };
   };
 
-  const initialState = getInitialState();
+  // Allows callers to deep-link into a specific section (e.g. redirecting
+  // here right after a contact form submission should land on "requests",
+  // not the default section) via navigate("/safeai-ui", { state: { section } }).
+  const requestedSection = (location.state as { section?: Section } | null)?.section;
+  const initialState = getInitialState(requestedSection);
   const [activeSection, setActiveSection] = useState<Section>(
     initialState.section,
   );

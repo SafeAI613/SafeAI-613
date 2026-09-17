@@ -306,9 +306,9 @@ useEffect(() => {
       setDescription("");
       clearAttachments();
 
-      // Redirect after 2 seconds
+      // Redirect to the user's personal requests area after 2 seconds
       setTimeout(() => {
-        navigate("/");
+        navigate("/safeai-ui", { state: { section: "requests" } });
       }, 2000);
     } catch (error) {
       const errorMessage =
