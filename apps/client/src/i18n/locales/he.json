@@ -93,6 +93,10 @@
     "updateOrgFailedFallback": "נכשל עדכון פרטי הארגון",
     "addMemberFieldsRequired": "יש למלא שם וכתובת אימייל",
     "addMemberFailedFallback": "הוספת המשתמש נכשלה",
+    "allocateBudgetButton": "הקצאת כספים",
+    "allocateBudgetSubmit": "הקצה",
+    "allocateBudgetSuccess": "התקציב הוקצה בהצלחה",
+    "allocateBudgetFailedFallback": "הקצאת התקציב נכשלה",
     "excelHeaderName": "שם",
     "excelHeaderEmail": "אימייל",
     "excelHeaderPassword": "סיסמה זמנית",
@@ -111,7 +115,9 @@
       "joined": "הצטרף",
       "joinStatus": "סטטוס הצטרפות",
       "joinedDate": "תאריך הצטרפות",
-      "password": "סיסמה זמנית"
+      "password": "סיסמה זמנית",
+      "monthlyBudget": "תקציב חודשי",
+      "actions": "פעולות"
     },
     "roleOrgOwner": "בעלים",
     "roleAdmin": "מנהל מערכת",
@@ -783,7 +789,8 @@
     "pendingStatus": "ממתין",
     "approveButton": "אישור",
     "rejectButton": "דחייה",
-    "processingButton": "מעבד..."
+    "processingButton": "מעבד...",
+    "viewDetailsButton": "צפייה בפרטים"
   },
   "weekDays": {
     "sunday": "ראשון",

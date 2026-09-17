@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as XLSX from "xlsx";
 import {
+  allocateBudgetToUser,
   createOrganizationMember,
   getMyOrganization,
   getOrganizationUsers,
@@ -20,6 +21,10 @@ interface User {
   createdAt: string;
   mode: string;
   lastLogin?: string;
+  costLimits?: {
+    monthlyBudget: number;
+    currentMonthSpent: number;
+  };
 }
 
 interface Organization {
@@ -60,6 +65,12 @@ export default function OrganizationUsersPage() {
   const [createdMembers, setCreatedMembers] = useState<
     { name: string; email: string; password: string }[]
   >([]);
+
+  const [allocatingUserId, setAllocatingUserId] = useState<string | null>(null);
+  const [allocateAmount, setAllocateAmount] = useState<number | "">("");
+  const [allocateSubmitting, setAllocateSubmitting] = useState(false);
+  const [allocateError, setAllocateError] = useState<string | null>(null);
+  const [allocateSuccessUserId, setAllocateSuccessUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrganizationAndUsers();
@@ -180,6 +191,46 @@ export default function OrganizationUsersPage() {
       setAddMemberError(err instanceof Error ? err.message : t("orgUsers.addMemberFailedFallback"));
     } finally {
       setAddingMember(false);
+    }
+  };
+
+  const toggleAllocateForm = (userId: string) => {
+    setAllocateSuccessUserId(null);
+    setAllocateError(null);
+    if (allocatingUserId === userId) {
+      setAllocatingUserId(null);
+      return;
+    }
+    setAllocatingUserId(userId);
+    setAllocateAmount("");
+  };
+
+  const handleAllocateBudget = async (e: React.FormEvent, userId: string) => {
+    e.preventDefault();
+    if (!organization || !allocateAmount || allocateAmount <= 0) return;
+
+    try {
+      setAllocateSubmitting(true);
+      setAllocateError(null);
+
+      const result = await allocateBudgetToUser(organization._id, userId, Number(allocateAmount));
+
+      setOrganization((prev) => (prev ? { ...prev, walletBalance: result.walletBalance } : prev));
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === userId
+            ? { ...u, costLimits: { ...u.costLimits, ...result.user.costLimits } as User["costLimits"] }
+            : u
+        )
+      );
+
+      setAllocateSuccessUserId(userId);
+      setAllocateAmount("");
+      setAllocatingUserId(null);
+    } catch (err: unknown) {
+      setAllocateError(err instanceof Error ? err.message : t("orgUsers.allocateBudgetFailedFallback"));
+    } finally {
+      setAllocateSubmitting(false);
     }
   };
 
@@ -385,10 +436,12 @@ export default function OrganizationUsersPage() {
               <th>{t("orgUsers.tableHeaders.status")}</th>
               <th>{t("orgUsers.tableHeaders.joinStatus")}</th>
               <th>{t("orgUsers.tableHeaders.joinedDate")}</th>
+              <th>{t("orgUsers.tableHeaders.monthlyBudget")}</th>
+              <th>{t("orgUsers.tableHeaders.actions")}</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {users.map((user) => [
               <tr key={user._id}>
                 <td>{user.email}</td>
                 <td>{user.name || "-"}</td>
@@ -418,8 +471,63 @@ export default function OrganizationUsersPage() {
                   </span>
                 </td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-              </tr>
-            ))}
+                <td dir="ltr">${user.costLimits?.monthlyBudget ?? 0}</td>
+                <td>
+                  <button
+                    type="button"
+                    className="topup-button"
+                    onClick={() => toggleAllocateForm(user._id)}
+                  >
+                    {t("orgUsers.allocateBudgetButton")}
+                  </button>
+                </td>
+              </tr>,
+              allocatingUserId === user._id && (
+                <tr key={`${user._id}-allocate`}>
+                  <td colSpan={8}>
+                    <form
+                      onSubmit={(e) => handleAllocateBudget(e, user._id)}
+                      className="topup-form"
+                    >
+                      <input
+                        type="number"
+                        min="1"
+                        dir="ltr"
+                        placeholder={t("orgUsers.amountPlaceholder")}
+                        value={allocateAmount}
+                        onChange={(e) =>
+                          setAllocateAmount(e.target.value !== "" ? Number(e.target.value) : "")
+                        }
+                        required
+                        className="topup-input"
+                        autoFocus
+                      />
+                      <button type="submit" disabled={allocateSubmitting} className="topup-button">
+                        {allocateSubmitting
+                          ? t("orgUsers.processingButton")
+                          : t("orgUsers.allocateBudgetSubmit")}
+                      </button>
+                      <button
+                        type="button"
+                        className="retry-button"
+                        disabled={allocateSubmitting}
+                        onClick={() => setAllocatingUserId(null)}
+                      >
+                        {t("orgUsers.cancelButton")}
+                      </button>
+                    </form>
+                    {allocateError && <p className="error-text">{allocateError}</p>}
+                  </td>
+                </tr>
+              ),
+              allocateSuccessUserId === user._id && (
+                <tr key={`${user._id}-success`}>
+                  <td colSpan={8}>
+                    <p className="wallet-balance">{t("orgUsers.allocateBudgetSuccess")}</p>
+                  </td>
+                </tr>
+              ),
+            ])}
           </tbody>
         </table>
       )}
