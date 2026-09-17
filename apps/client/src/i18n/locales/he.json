@@ -498,6 +498,7 @@
     "openFullExcelLink": "פתח את קובץ האקסל המלא"
   },
   "safeaiNav": {
+    "home": "בית",
     "statistics": "סטטיסטיקות",
     "manageProfiles": "ניהול פרופילים",
     "manageUsers": "ניהול משתמשים",
@@ -511,6 +512,7 @@
     "loadingData": "טוען נתונים...",
     "greeting": "שלום, {{name}}",
     "activeAccountBadge": "חשבון פעיל",
+    "quickLinkNews": "חדשות AI",
     "totalRequestsLabel": "סה\"כ בקשות",
     "successfulRequestsLabel": "בקשות מאושרות",
     "successfulPercent": "{{percent}}% מאושרות",

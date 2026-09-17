@@ -352,6 +352,14 @@
   border-top: 1px solid var(--border-default);
 }
 
+/* שורת קישורים מהירים בראש דף הבית של המשתמש */
+.quick-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 24px;
+}
+
 /* Dashboard */
 .dashboard-grid {
   display: grid;
