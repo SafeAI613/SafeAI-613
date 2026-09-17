@@ -61,6 +61,8 @@ export interface Tender {
   productType?: string
   aiApplicationType?: string
   isActive?: boolean
+  contactPhone?: string
+  contactEmail?: string
   agentsRequired?: string[]
   wantsEmails?: boolean
   additionalDetails?: string
@@ -82,6 +84,8 @@ export interface RawTender {
   productType?: string
   aiApplicationType?: string
   isActive?: boolean
+  contactPhone?: string
+  contactEmail?: string
   agentsRequired?: string[]
   wantsEmails?: boolean
   additionalDetails?: string
