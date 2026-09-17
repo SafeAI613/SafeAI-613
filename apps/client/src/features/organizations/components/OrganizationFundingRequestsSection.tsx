@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import {
   getOrganizationFundingRequests,
   resolveFundingRequest,
-  OrganizationFundingRequest,
-  OrganizationUser,
+  type OrganizationFundingRequest,
+  type OrganizationUser,
 } from "../api/organizationApi";
 import "../../../styles/organization-wallet.css";
 

@@ -147,7 +147,7 @@
         "approved": "אושר",
         "rejected": "נדחה"
       }
-    }
+    },
     "invoicesLinkLabel": "צפייה בחשבוניות"
   },
   "orgInvoices": {
@@ -166,7 +166,7 @@
     },
     "statusPending": "ממתין",
     "statusCompleted": "שולם",
-    "statusFailed": "נכשל"
+    "statusFailed": "נכשל",
     "profilesTitle": "פרופילי AI מורשים לארגון",
     "profilesDescription": "בחר/י אילו פרופילי AI מאושרים במערכת יהיו זמינים לשימוש בארגון שלך.",
     "profilesLoading": "טוען פרופילים...",

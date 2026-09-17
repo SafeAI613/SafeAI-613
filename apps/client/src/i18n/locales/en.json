@@ -147,7 +147,7 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
     "invoicesLinkLabel": "View invoices"
   },
   "orgInvoices": {
@@ -166,7 +166,7 @@
     },
     "statusPending": "Pending",
     "statusCompleted": "Paid",
-    "statusFailed": "Failed"
+    "statusFailed": "Failed",
     "profilesTitle": "Allowed AI Profiles",
     "profilesDescription": "Choose which of the approved AI profiles available in the system your organization is allowed to use.",
     "profilesLoading": "Loading profiles...",
