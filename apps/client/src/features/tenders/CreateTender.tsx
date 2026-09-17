@@ -287,7 +287,6 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
                 boxShadow: 'var(--shadow-sm)'
               }}
             >
-              <span>✨</span>
               {t('tenders.smartCreateBtn')}
             </button>
           </div>
@@ -522,7 +521,6 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
       {showSuccessOverlay && createSuccessMessage && (
         <div className="success-modal-overlay" role="alert" aria-live="assertive">
           <div className="success-modal">
-            <div className="success-modal__icon">✅</div>
             <div className="success-modal__text">{createSuccessMessage}</div>
           </div>
         </div>

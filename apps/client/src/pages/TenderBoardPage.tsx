@@ -392,7 +392,6 @@ export default function TenderBoardPage() {
               onClick={() => setIsSmartSearchOpen(!isSmartSearchOpen)}
               style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer' }}
             >
-              <span>✨</span>
               {isSmartSearchOpen ? <span>סגור חיפוש חכם</span> : <span>{t('tenders.smartSearchToggleBtn')}</span>}
             </button>
 
@@ -624,7 +623,6 @@ export default function TenderBoardPage() {
         {showSuccessOverlay && successMessage && (
           <div className="success-modal-overlay" role="alert" aria-live="assertive">
             <div className="success-modal">
-              <div className="success-modal__icon">✅</div>
               <div className="success-modal__text">{successMessage}</div>
             </div>
           </div>

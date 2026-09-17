@@ -101,12 +101,6 @@
   color: var(--text-primary);
 }
 
-.dashboard-hero h1::after {
-  content: ' 📋';
-  font-size: 2.4rem;
-  vertical-align: middle;
-}
-
 .dashboard-hero .lead-copy {
   margin-top: 4px;
   max-width: 600px;
