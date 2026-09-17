@@ -35,6 +35,29 @@
   max-width: 400px;
 }
 
+.forum-rating-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.forum-rating-filter-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.forum-rating-filter-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid var(--color-success-border);
+  font-size: 14px;
+  outline: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
 .forum-search-input {
   width: 100%;
   padding: 10px 35px 10px 15px;
