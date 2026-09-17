@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as XLSX from "xlsx";
 import {
-  createOrganizationMember,
   getOrganizationDetail,
   getOrganizationStats,
   getOrganizationUsers,
@@ -25,63 +24,10 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [memberName, setMemberName] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [addingMember, setAddingMember] = useState(false);
-  const [addMemberError, setAddMemberError] = useState<string | null>(null);
-  const [addMemberNotice, setAddMemberNotice] = useState<{
-    type: "success" | "warning";
-    text: string;
-  } | null>(null);
   const [createdMembers, setCreatedMembers] = useState<
     { name: string; email: string; password: string }[]
   >([]);
   const { t } = useTranslation();
-
-  const reloadUsers = async () => {
-    const usersData = await getOrganizationUsers(orgId);
-    setUsers(Array.isArray(usersData) ? usersData : []);
-  };
-
-  const handleAddMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!memberName.trim() || !memberEmail.trim()) {
-      setAddMemberError(t("organizations.addMemberErrorRequired"));
-      return;
-    }
-    try {
-      setAddingMember(true);
-      setAddMemberError(null);
-      setAddMemberNotice(null);
-      const result = await createOrganizationMember(orgId, {
-        name: memberName.trim(),
-        email: memberEmail.trim(),
-      });
-      setCreatedMembers((prev) => [
-        ...prev,
-        {
-          name: result.user.name || memberName.trim(),
-          email: result.user.email,
-          password: result.temporaryPassword,
-        },
-      ]);
-      setAddMemberNotice(
-        result.emailSent
-          ? { type: "success", text: `נשלח מייל הזמנה ל-${result.user.email}` }
-          : {
-              type: "warning",
-              text: "המשתמש נוצר אך שליחת מייל ההזמנה נכשלה — יש לשתף את הפרטים ידנית",
-            }
-      );
-      setMemberName("");
-      setMemberEmail("");
-      await reloadUsers();
-    } catch (err: unknown) {
-      setAddMemberError(err instanceof Error ? err.message : t("organizations.addMemberFailedFallback"));
-    } finally {
-      setAddingMember(false);
-    }
-  };
 
   const handleDownloadExcel = () => {
     const loginUrl = `${window.location.origin}/login`;
@@ -168,32 +114,6 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
           <div className="org-card-value">${(stats?.totalCost ?? 0).toFixed(2)}</div>
         </div>
       </div>
-
-      <h3>{t("orgUsers.addMemberTitle")}</h3>
-      <form onSubmit={handleAddMember} className="org-request-form">
-        <input
-          className="orgs-search"
-          value={memberName}
-          onChange={(e) => setMemberName(e.target.value)}
-          placeholder={t("orgUsers.fullNamePlaceholder")}
-        />
-        <input
-          type="email"
-          className="orgs-search"
-          value={memberEmail}
-          onChange={(e) => setMemberEmail(e.target.value)}
-          placeholder={t("orgUsers.emailPlaceholder")}
-        />
-        {addMemberError && <div className="orgs-error">{addMemberError}</div>}
-        {addMemberNotice && (
-          <div className={addMemberNotice.type === "success" ? "orgs-success" : "orgs-warning"}>
-            {addMemberNotice.text}
-          </div>
-        )}
-        <button type="submit" className="orgs-btn orgs-btn-activate" disabled={addingMember}>
-          {addingMember ? t("orgUsers.addingButton") : t("orgUsers.addMemberButton")}
-        </button>
-      </form>
 
       {createdMembers.length > 0 && (
         <div className="org-pending-card">
