@@ -10,6 +10,7 @@ import DocsPage from "../pages/DocsPage";
 import ArticlesPage from "../pages/ArticlesPage";
 import ArticlePage from "../pages/ArticlePage";
 import AdminArticlesPage from "../pages/AdminArticlesPage";
+import CategoriesAdminPage from "../pages/CategoriesAdminPage";
 import RecommendedGuidesPage from "../pages/RecommendedGuidesPage";
 import CoursesPage from "../pages/CoursesPage";
 import ActivityLogPage from "../pages/ActivityLogPage";
@@ -292,6 +293,17 @@ export default function AppRouter() {
             <ProtectedRoute>
               <ErrorBoundary>
                 <AdminArticlesPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/categories"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <CategoriesAdminPage />
               </ErrorBoundary>
             </ProtectedRoute>
           }

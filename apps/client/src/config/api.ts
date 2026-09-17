@@ -84,6 +84,12 @@ export const API_ENDPOINTS = {
   news: `${API_BASE_URL}/api/news`,
   // Forum endpoints
   posts: `${API_BASE_URL}/api/posts`,
+  categories: {
+    list: `${API_BASE_URL}/api/categories`,
+    create: `${API_BASE_URL}/api/categories`,
+    update: (id: string) => `${API_BASE_URL}/api/categories/${id}`,
+    delete: (id: string) => `${API_BASE_URL}/api/categories/${id}`,
+  },
   // Tender board endpoints
   tenders: {
     list: `${API_BASE_URL}/tender-board`,

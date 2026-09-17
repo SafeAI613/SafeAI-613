@@ -210,9 +210,14 @@ export default function TopNavigation() {
                       {t("nav.recommendedGuides")}
                     </Link>
                     {userRole === "admin" && (
-                      <Link to="/admin/articles" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                        ניהול Docs
-                      </Link>
+                      <>
+                        <Link to="/admin/articles" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                          ניהול Docs
+                        </Link>
+                        <Link to="/admin/categories" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                          ניהול קטגוריות פורום
+                        </Link>
+                      </>
                     )}
                   </div>
                 )}

@@ -1,0 +1,140 @@
+.admin-categories-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.admin-categories-header {
+  margin-bottom: 1.5rem;
+}
+
+.admin-categories-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.admin-categories-error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.admin-categories-new-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-categories-new-row input {
+  flex: 1;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.admin-categories-new-row input:focus {
+  border-color: var(--link-color);
+}
+
+.admin-categories-add-btn {
+  background: var(--link-color);
+  color: var(--text-inverse);
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-categories-add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-categories-loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.admin-categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-categories-table th {
+  background: var(--bg-page);
+  padding: 0.75rem 1rem;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.admin-categories-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--text-secondary);
+}
+
+.admin-categories-table td input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.admin-categories-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-categories-empty {
+  text-align: center;
+  color: var(--gray-400);
+  padding: 2rem;
+}
+
+.admin-categories-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-categories-actions button {
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  transition: background 0.15s;
+}
+
+.admin-categories-actions button:hover {
+  background: var(--gray-100);
+}
+
+.admin-categories-delete-btn {
+  color: var(--color-danger) !important;
+  border-color: var(--color-danger-border) !important;
+}
+
+.admin-categories-delete-btn:hover {
+  background: var(--color-danger-bg) !important;
+}

@@ -4,6 +4,7 @@ import CreatableSelect from 'react-select/creatable';
 import type { MultiValue } from 'react-select';
 import {
   fetchTags,
+  fetchCategories,
   fetchStrictSimilarPosts,
   generateAiAssistance,
   getUploadUrl,
@@ -20,7 +21,8 @@ interface AddPostModalProps {
 }
 
 export const AddPostModal: React.FC<AddPostModalProps> = ({ isOpen, onClose, onPostCreated }) => {
-  const [formData, setFormData] = useState({ title: '', category: 'פיתוח', tags: '', content: '' });
+  const [formData, setFormData] = useState({ title: '', category: '', tags: '', content: '' });
+  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [similarPosts, setSimilarPosts] = useState<{ _id: string; title: string }[]>([]);
   const [showSimilar, setShowSimilar] = useState(false); 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -73,6 +75,15 @@ export const AddPostModal: React.FC<AddPostModalProps> = ({ isOpen, onClose, onP
 
   useEffect(() => {
     loadTagsFromServer();
+
+    fetchCategories()
+      .then((res) => res.json())
+      .then((data: { _id: string; name: string }[]) => {
+        const list = Array.isArray(data) ? data : [];
+        setCategories(list);
+        setFormData((prev) => (prev.category ? prev : { ...prev, category: list[0]?.name || '' }));
+      })
+      .catch((err) => console.error('Error fetching categories:', err));
   }, []);
 
   if (!isOpen) return null;
@@ -203,7 +214,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
       const response = await createPost(postPayload);
 
       if (response.ok) {
-        setFormData({ title: '', category: 'כללי', tags: '', content: '' });
+        setFormData({ title: '', category: categories[0]?.name || '', tags: '', content: '' });
         setSelectedTags([]);
         setSelectedFile(null);
         setTagInputValue('');
@@ -265,9 +276,10 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
                 className="forum-category-select"
               >
-                <option value="פיתוח">פיתוח</option>
-                <option value="AI">AI</option>
-                <option value="כללי">כללי</option>
+                {categories.length === 0 && <option value="">טוען קטגוריות...</option>}
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat.name}>{cat.name}</option>
+                ))}
               </select>
             </div>
 

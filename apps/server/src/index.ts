@@ -31,6 +31,8 @@ import { errorHandler } from "./middleware/errorHandler";
 import { connectDatabase } from "./config/db";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
 import postRoutes from './routes/postRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import { ensureDefaultCategories } from './controllers/categoryController';
 import logger, { requestContext } from "./logger";
 import { randomUUID } from "node:crypto";
 import path from 'path';
@@ -129,6 +131,7 @@ app.use("/v1", openaiRouter); // Uses proxyAuth middleware in the router
 app.use('/api/posts', postRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/tags', tagRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use("/api/upload", uploadRouter);
 
 app.use(errorHandler);
@@ -137,6 +140,7 @@ app.use(errorHandler);
 async function start() {
   try {
     await connectDatabase();
+    await ensureDefaultCategories();
 
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
