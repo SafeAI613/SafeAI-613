@@ -77,6 +77,20 @@ export const getOrganizationStats = async (id: string): Promise<OrganizationUsag
   return apiCall<OrganizationUsageSummary>(API_ENDPOINTS.adminOrganizations.stats(id), { method: "GET" });
 };
 
+// חשבוניות (היסטוריית טעינות ארנק - אין מערכת חיוב נפרדת, כל טעינה מוצגת כחשבונית)
+export interface OrganizationInvoice {
+  id: string;
+  date: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "completed" | "failed";
+  reference: string;
+}
+
+export const getOrganizationInvoices = async (id: string): Promise<{ invoices: OrganizationInvoice[] }> => {
+  return apiCall<{ invoices: OrganizationInvoice[] }>(API_ENDPOINTS.adminOrganizations.invoices(id), { method: "GET" });
+};
+
 // השעיית ארגון
 export const suspendOrganization = async (id: string): Promise<{ success: boolean }> => {
   return apiCall<{ success: boolean }>(API_ENDPOINTS.adminOrganizations.suspend(id), { method: "PATCH" });

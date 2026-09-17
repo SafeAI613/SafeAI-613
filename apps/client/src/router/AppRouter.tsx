@@ -42,6 +42,7 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import ForumPage from '../features/forum/ForumPage';
 import { PostThreadPage } from '../features/forum/PostThreadPage';
 import PaymeResultPage from '../features/organizations/PaymeResultPage';
+import OrganizationInvoicesPage from '../features/organizations/pages/OrganizationInvoicesPage';
 import SafeAIHubHomePage from "../pages/SafeAIHubHomePage";
 import SafeAIPlatformHomePage from "../pages/SafeAIPlatformHomePage";
 
@@ -245,6 +246,17 @@ export default function AppRouter() {
             <ProtectedRoute>
               <ErrorBoundary>
                 <OrganizationUsersPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organization/invoices"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <OrganizationInvoicesPage />
               </ErrorBoundary>
             </ProtectedRoute>
           }

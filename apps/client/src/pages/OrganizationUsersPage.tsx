@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
   allocateBudgetToUser,
@@ -451,6 +452,10 @@ export default function OrganizationUsersPage() {
                 {isSubmitting ? t("orgUsers.processingButton") : t("orgUsers.topUpButton")}
               </button>
             </form>
+
+            <p style={{ marginTop: "14px" }}>
+              <Link to="/organization/invoices">{t("orgUsers.invoicesLinkLabel")}</Link>
+            </p>
           </div>
         </div>
       )}

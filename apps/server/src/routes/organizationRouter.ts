@@ -17,6 +17,7 @@ import {
   suspendOrganizationHandler,
   activateOrganizationHandler,
   getOrganizationStatsHandler,
+  getOrganizationInvoicesHandler,
   publicRequestOrganizationHandler,
   approveOrganizationHandler,
   rejectOrganizationHandler,
@@ -83,6 +84,9 @@ router.patch("/:id/reject", requireAdmin, rejectOrganizationHandler);   // Admin
 // Organization usage summary + wallet balance
 router.get("/:id/stats", getOrganizationStatsHandler);      // Admin or Org Owner
 
+// Organization "invoices" (billing history) - wallet top-up transactions,
+// there is no separate invoicing system (see paymeService.getOrganizationInvoices)
+router.get("/:id/invoices", getOrganizationInvoicesHandler); // Admin or Org Owner
 // AI profiles allowed for the organization - selected by the org admin out
 // of the approved profiles available in the system
 router.get("/:id/profiles", requireApprovedOrg, getOrganizationProfilesHandler);   // Admin or approved Org Owner

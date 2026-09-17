@@ -39,6 +39,18 @@ export async function findByRequestIdAndOrganization(requestId: string, organiza
 }
 
 /**
+ * All wallet transactions for an organization, newest first. Backs the
+ * org-admin "invoices" (billing history) view - there is no separate
+ * invoice model, so each wallet top-up record IS the invoice
+ * (see organizations/:id/invoices).
+ */
+export async function findByOrganization(organizationId: string) {
+  return WalletTransaction.find({ organizationId })
+    .sort({ requestedAt: -1 })
+    .lean();
+}
+
+/**
  * Atomically marks a pending transaction as completed, only if it hasn't
  * already been resolved (completed or failed) by an earlier webhook
  * delivery. Returns null if the transaction was already resolved - the

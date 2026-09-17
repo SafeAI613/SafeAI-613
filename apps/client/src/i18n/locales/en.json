@@ -126,6 +126,25 @@
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",
     "roleUser": "User",
+    "invoicesLinkLabel": "View invoices"
+  },
+  "orgInvoices": {
+    "pageTitle": "Organization Invoices",
+    "pageSubtitle": "Your organization's wallet top-up history, shown as an invoice list.",
+    "backToDashboard": "Back to organization dashboard",
+    "loading": "Loading...",
+    "errorTitle": "Error loading invoices:",
+    "retryButton": "Retry",
+    "noInvoices": "No invoices found for this organization.",
+    "tableHeaders": {
+      "date": "Date",
+      "amount": "Amount",
+      "status": "Status",
+      "reference": "Reference"
+    },
+    "statusPending": "Pending",
+    "statusCompleted": "Paid",
+    "statusFailed": "Failed"
     "profilesTitle": "Allowed AI Profiles",
     "profilesDescription": "Choose which of the approved AI profiles available in the system your organization is allowed to use.",
     "profilesLoading": "Loading profiles...",
