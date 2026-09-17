@@ -105,7 +105,7 @@ export default function OrganizationInvoicesPage() {
               <tr key={invoice.id}>
                 <td>{new Date(invoice.date).toLocaleDateString(i18n.language)}</td>
                 <td dir="ltr">
-                  {invoice.amount} {invoice.currency}
+                  {invoice.currency === "ILS" ? `₪${invoice.amount}` : `${invoice.amount} ${invoice.currency}`}
                 </td>
                 <td className="status-cell">
                   <span
