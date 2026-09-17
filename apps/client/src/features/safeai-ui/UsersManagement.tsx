@@ -6,6 +6,7 @@ import UserCard from "./UserCard";
 import UserFilters from "./UserFilters";
 import OrgStatsPanel from "./OrgStatsPanel";
 import NewApiKeyModal from "./NewApiKeyModal";
+import { useAlert } from "../../context/alertStore";
 
 export interface User {
   _id: string;
@@ -57,6 +58,7 @@ const EMPTY_EDIT = { name: "", profileId: "", organizationId: "", mode: "MANAGED
 
 export default function UsersManagement() {
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
   const [users, setUsers] = useState<User[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -83,7 +85,7 @@ export default function UsersManagement() {
       setUsers(await apiCall<User[]>(API_ENDPOINTS.users));
     } catch (err) {
       console.error("Failed to fetch users:", err);
-      alert(t("usersManagement.errorLoadingUsers"));
+      showAlert(t("usersManagement.errorLoadingUsers"), { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function UsersManagement() {
       setCreateFormData(EMPTY_CREATE);
       await fetchUsers();
     } catch (err) {
-      alert(t("usersManagement.createUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }));
+      showAlert(t("usersManagement.createUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }), { type: "error" });
     } finally {
       setSaving(false);
     }
@@ -165,9 +167,9 @@ export default function UsersManagement() {
       setModal(null);
       setEditingUser(null);
       await fetchUsers();
-      alert(t("usersManagement.userUpdatedSuccess"));
+      showAlert(t("usersManagement.userUpdatedSuccess"), { type: "success" });
     } catch (err) {
-      alert(t("usersManagement.updateUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }));
+      showAlert(t("usersManagement.updateUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }), { type: "error" });
     } finally {
       setSaving(false);
     }
@@ -178,9 +180,9 @@ export default function UsersManagement() {
     try {
       await apiCall(`${API_ENDPOINTS.users}/${id}`, { method: "DELETE" });
       await fetchUsers();
-      alert(t("usersManagement.userDeletedSuccess"));
+      showAlert(t("usersManagement.userDeletedSuccess"), { type: "success" });
     } catch (err) {
-      alert(t("usersManagement.deleteUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }));
+      showAlert(t("usersManagement.deleteUserErrorPrefix", { message: err instanceof Error ? err.message : t("usersManagement.errorUnknown") }), { type: "error" });
     }
   };
 

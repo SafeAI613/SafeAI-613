@@ -2,6 +2,39 @@ import { INews } from "../models/news";
 import { newsRepository } from "../repositories/newsRepository";
 import logger from "../logger";
 import { getPresignedViewUrl } from "../utils/s3Client";
+import { deleteObject } from "./s3Service";
+
+// אותה תיקיית יעד ב-S3 שהוגדרה עבור context "newsImage" ב-uploadController.ts -
+// כל imageUrl שנשמר על כתבת חדשות חייב להצביע לשם, אחרת מדובר בקישור שרירותי
+// שלא עבר דרך זרימת ההעלאה המוגנת (ולידציית type/size) של השרת.
+const NEWS_IMAGE_PATH_PREFIX = "uploads/news/";
+
+function isValidNewsImageUrl(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  const bucket = process.env.AWS_BUCKET_NAME;
+  const region = process.env.AWS_REGION;
+  if (bucket && region && parsed.hostname !== `${bucket}.s3.${region}.amazonaws.com`) {
+    return false;
+  }
+
+  return parsed.pathname.replace(/^\//, "").startsWith(NEWS_IMAGE_PATH_PREFIX);
+}
+
+// מוחקת תמונת חדשות קודמת מ-S3 - best-effort, לא אמורה אף פעם להפיל את
+// פעולת ה-DB שכבר הצליחה (כמו כל שאר פעולות ה-S3 ה"צדדיות" בקוד הזה).
+async function deleteNewsImageBestEffort(imageUrl: string, context: { id?: string }) {
+  try {
+    await deleteObject(imageUrl);
+  } catch (error: any) {
+    logger.warn("Failed to delete news image from S3", { id: context.id, error: error.message });
+  }
+}
 
 // ה-bucket שבו נשמרות תמונות החדשות חוסם קריאה ציבורית ישירה, לכן בכל
 // הגשה מוחלף ה-URL הקבוע בקישור צפייה חתום וזמני
@@ -58,6 +91,10 @@ export const newsService = {
       throw new Error("Content is required");
     }
 
+    if (data.imageUrl && !isValidNewsImageUrl(data.imageUrl)) {
+      throw new Error("Invalid image URL");
+    }
+
     const createData = {
       ...data,
       tags: data.tags || [],
@@ -70,10 +107,23 @@ export const newsService = {
   // Update news
   async updateNews(id: string, data: Partial<INews>): Promise<INews> {
     logger.info("Updating news", { id, data });
+
+    if (data.imageUrl && !isValidNewsImageUrl(data.imageUrl)) {
+      throw new Error("Invalid image URL");
+    }
+
+    // Read the pre-update imageUrl so a replaced/removed image can be
+    // cleaned up from S3 below - findByIdAndUpdate only ever returns the
+    // post-update document.
+    const existing = await newsRepository.findById(id);
     const updatedNews = await newsRepository.update(id, data);
 
     if (!updatedNews) {
       throw new Error("News not found");
+    }
+
+    if (existing?.imageUrl && data.imageUrl !== undefined && existing.imageUrl !== data.imageUrl) {
+      await deleteNewsImageBestEffort(existing.imageUrl, { id });
     }
 
     logger.info("News updated successfully", { id });
@@ -87,6 +137,10 @@ export const newsService = {
 
     if (!deletedNews) {
       throw new Error("News not found");
+    }
+
+    if (deletedNews.imageUrl) {
+      await deleteNewsImageBestEffort(deletedNews.imageUrl, { id });
     }
 
     logger.info("News deleted successfully", { id });

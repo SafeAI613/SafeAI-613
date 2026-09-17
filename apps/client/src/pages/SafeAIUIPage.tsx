@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/safeai-ui.css";
 import ProfilesManagement from "../features/safeai-ui/ProfilesManagement";
@@ -10,6 +10,7 @@ import UserApiKeysPage from "../features/safeai-ui/UserApiKeysPage";
 import BillingPage from "../features/safeai-ui/BillingPage";
 import MyRequestsList from "../features/safeai-ui/MyRequestsList";
 import AdminRequestsList from "../features/safeai-ui/AdminRequestsList";
+import ContactTypesManagement from "../features/safeai-ui/ContactTypesManagement";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { OrganizationsManagement } from "../features/organizations/OrganizationsManagement";
 import { PendingApprovalScreen } from "../features/organizations/PendingApprovalScreen";
@@ -34,6 +35,7 @@ type Section =
   | "organizations"
   | "requests"
   | "adminRequests"
+  | "contactTypes"
   | "org-statistics"
   | "org-users"
   | "billing";
@@ -47,19 +49,21 @@ type UserData = {
 export default function SafeAIUIPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Initialize state from localStorage
-  const getInitialState = () => {
+  const getInitialState = (requestedSection?: Section) => {
     const storedUser = localStorage.getItem("user");
     const storedRole = localStorage.getItem("userRole");
 
     if (storedUser && storedRole) {
       const parsedUser = JSON.parse(storedUser);
-      const defaultSection: Section = storedRole === "org_owner" ? "org-statistics" : "statistics";
+      const defaultSection: Section =
+        storedRole === "org_owner" ? "org-statistics" : storedRole === "user" ? "dashboard" : "statistics";
       return {
         user: parsedUser,
         role: storedRole as "admin" | "user" | "org_owner",
-        section: defaultSection,
+        section: requestedSection ?? defaultSection,
       };
     }
 
@@ -70,7 +74,11 @@ export default function SafeAIUIPage() {
     };
   };
 
-  const initialState = getInitialState();
+  // Allows callers to deep-link into a specific section (e.g. redirecting
+  // here right after a contact form submission should land on "requests",
+  // not the default section) via navigate("/safeai-ui", { state: { section } }).
+  const requestedSection = (location.state as { section?: Section } | null)?.section;
+  const initialState = getInitialState(requestedSection);
   const [activeSection, setActiveSection] = useState<Section>(
     initialState.section,
   );
@@ -149,7 +157,7 @@ export default function SafeAIUIPage() {
       case "users":
         return <UsersManagement />;
       case "dashboard":
-        return <UserDashboard user={currentUser} />;
+        return <UserDashboard user={currentUser} onNavigateSection={setActiveSection} />;
       case "statistics":
         return <Statistics user={currentUser} />;
       case "apikeys":
@@ -162,6 +170,8 @@ export default function SafeAIUIPage() {
         return <MyRequestsList activeSection={activeSection} />;
       case "adminRequests":
         return <AdminRequestsList />;
+      case "contactTypes":
+        return <ContactTypesManagement />;
       case "org-statistics":
         return <Statistics user={currentUser} />;
       case "org-users":
@@ -275,12 +285,50 @@ export default function SafeAIUIPage() {
                     <span className="sub-nav-badge">({newRequestCount})</span>
                   )}
                 </button>
+                <button
+                  className={
+                    activeSection === "contactTypes"
+                      ? "sub-nav-btn active"
+                      : "sub-nav-btn"
+                  }
+                  onClick={() => setActiveSection("contactTypes")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 3h8l4 4v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4a1 1 0 011-1zM9 3v4h4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {t("contactTypesManagement.title")}
+                </button>
               </>
             )}
 
             {/* משתמש רגיל */}
             {userRole === "user" && (
               <>
+                <button
+                  className={
+                    activeSection === "dashboard"
+                      ? "sub-nav-btn active"
+                      : "sub-nav-btn"
+                  }
+                  onClick={() => setActiveSection("dashboard")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 8l6-5.5L14 8M4 6.5V13.5h8V6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {t("safeaiNav.home")}
+                </button>
                 <button
                   className={
                     activeSection === "statistics"

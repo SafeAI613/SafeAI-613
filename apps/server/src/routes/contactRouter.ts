@@ -7,8 +7,9 @@ import {
   addReply,
   getAllRequests,
   deleteRequestById,
+  updateClassification,
 } from "../controllers/contactMessageController";
-import { authenticateToken, requireAdmin } from "../middleware/auth";
+import { authenticateToken, authenticateTokenOrServiceToken, requireAdmin, requireAdminOrServiceToken } from "../middleware/auth";
 
 const router = Router();
 
@@ -22,13 +23,22 @@ router.post("/", authenticateToken, submitContactForm);
 // to S3 as "pending", before it's necessarily attached to a submitted request
 router.post("/attachments", authenticateToken, registerAttachment);
 
-router.get("/all", authenticateToken, requireAdmin, getAllRequests);
+// Admin (or apps/agents/inquiry-agent, via AGENT_SERVICE_TOKEN) only.
+router.get("/all", requireAdminOrServiceToken, getAllRequests);
 
 router.get("/my-requests/:id", authenticateToken, getRequestById);
 
-router.patch("/my-requests/:id/close", authenticateToken, closeRequestById);
+// Used by regular users (closing/replying to their own request) AND by the
+// inquiry-agent (closing/replying on an admin's behalf after approval) -
+// authenticateTokenOrServiceToken accepts either identity; the handlers
+// themselves already enforce ownership-or-admin.
+router.patch("/my-requests/:id/close", authenticateTokenOrServiceToken, closeRequestById);
 
-router.post("/my-requests/:id/reply", authenticateToken, addReply);
+router.post("/my-requests/:id/reply", authenticateTokenOrServiceToken, addReply);
+
+// Admin (or the inquiry-agent) only - persists the triage agent's
+// urgency/category classification for a request.
+router.patch("/my-requests/:id/classification", requireAdminOrServiceToken, updateClassification);
 
 router.delete("/:id", authenticateToken, requireAdmin, deleteRequestById);
 

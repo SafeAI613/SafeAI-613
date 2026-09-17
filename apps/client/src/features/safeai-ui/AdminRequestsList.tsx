@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAlert } from "../../context/alertStore";
 
 type Reply = {
   senderRole: string;
@@ -20,6 +21,15 @@ type Request = {
   status: string;
   requestType?: string;
   replies?: Reply[];
+  // Set by apps/agents/inquiry-agent's classify_node, once it has looked at a request.
+  urgency?: "urgent" | "normal" | "low";
+  category?: "bug" | "feature" | "feedback";
+};
+
+const URGENCY_BADGE_CLASS: Record<string, string> = {
+  urgent: "badge badge-danger",
+  normal: "badge badge-info",
+  low: "badge",
 };
 
 type ContactType = { label: string; value: string };
@@ -31,6 +41,7 @@ export default function AdminRequestsList() {
   const [deletingRequestId, setDeletingRequestId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const [contactTypes, setContactTypes] = useState<ContactType[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -62,7 +73,7 @@ export default function AdminRequestsList() {
       setRequests((prev) => prev.filter((req) => req._id !== id));
     } catch (err) {
       console.error("שגיאה במחיקת הפנייה:", err);
-      alert(t("requests.deleteFailedAlert"));
+      showAlert(t("requests.deleteFailedAlert"), { type: "error" });
     } finally {
       setDeletingRequestId(null);
     }
@@ -202,6 +213,8 @@ export default function AdminRequestsList() {
               <th>{t("requests.emailColumn")}</th>
               <th>{t("requests.subjectColumn")}</th>
               <th>{t("requests.statusColumn")}</th>
+              <th>{t("requests.urgencyColumn")}</th>
+              <th>{t("requests.categoryColumn")}</th>
               <th>{t("common.delete")}</th>
             </tr>
           </thead>
@@ -229,6 +242,18 @@ export default function AdminRequestsList() {
                   <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
                     {req.status === "closed" ? t("requests.closedStatus") : t("inquiries.statusOpen")}
                     {newBadge && <span className="request-new-badge">{t("requests.newBadge")}</span>}
+                  </td>
+                  <td>
+                    {req.urgency ? (
+                      <span className={URGENCY_BADGE_CLASS[req.urgency] || "badge"}>
+                        {t(`requests.urgency.${req.urgency}`)}
+                      </span>
+                    ) : (
+                      <span className="badge">{t("requests.notClassifiedYet")}</span>
+                    )}
+                  </td>
+                  <td>
+                    {req.category ? t(`requests.category.${req.category}`) : "—"}
                   </td>
                   <td>
                     <button

@@ -12,6 +12,9 @@ import {
   addUserToOrganizationByEmail,
   getOrganizationForUser,
   topUpOrganizationWallet,
+  allocateBudgetToUser,
+  getOrganizationFundingRequests,
+  resolveFundingRequest,
   getPendingOrganizationsForAdmin,
   listAllOrganizationsWithStats,
   setOrganizationActive,
@@ -20,9 +23,12 @@ import {
   approveOrganization,
   rejectOrganization,
   getMyOrganization,
+  getOrganizationAvailableProfiles,
+  setOrganizationAllowedProfiles,
 } from "../services/organizationService";
 import { sanitizeUser } from "../utils/sanitizeUser";
 import { isOrganizationAccessAllowed } from "../utils/organizationAccess";
+import { getOrganizationInvoices } from "../services/paymeService";
 import logger from "../logger";
 
 /**
@@ -452,6 +458,152 @@ export async function topUpOrganizationWalletHandler(
 }
 
 /**
+ * Allocate (add) dollars from the organization's wallet to a member's
+ * personal monthly budget (Admin or the org's own owner only). Additive:
+ * see allocateBudgetToUser in organizationService.ts for the design
+ * rationale.
+ */
+export async function allocateBudgetToUserHandler(
+  req: Request<{ id: string; userId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const targetUserId = req.params.userId;
+    const { amount } = req.body;
+
+    if (amount === undefined || typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: "A valid positive amount is required" });
+    }
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await allocateBudgetToUser(orgId, targetUserId, amount);
+    res.json({
+      success: true,
+      message: "Budget allocated successfully",
+      walletBalance: (result.organization as any)?.walletBalance,
+      user: sanitizeUser(result.user),
+    });
+  } catch (error: any) {
+    logger.error("Failed to allocate budget to user", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      targetUserId: req.params.userId,
+    });
+    if (
+      error.message === "Organization not found" ||
+      error.message === "User not found in this organization"
+    ) {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(400).json({ error: error.message || "Failed to allocate budget" });
+  }
+}
+
+/**
+ * List an organization's FundingRequests (pending and resolved), newest
+ * first - the org admin's approval screen (Admin or the org's own owner).
+ */
+export async function getOrganizationFundingRequestsHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const fundingRequests = await getOrganizationFundingRequests(orgId);
+    res.json({ fundingRequests });
+  } catch (error: any) {
+    logger.error("Failed to list organization funding requests", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to retrieve funding requests" });
+  }
+}
+
+/**
+ * Approve or reject a member's FundingRequest (Admin or the org's own
+ * owner only). Approving reuses `allocateBudgetToUser` (PR #420's
+ * primitives) to actually move the money; rejecting only flips the status.
+ * See resolveFundingRequest in organizationService.ts for the full design.
+ */
+export async function resolveFundingRequestHandler(
+  req: Request<{ id: string; requestId: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const requestId = req.params.requestId;
+    const { decision } = req.body ?? {};
+
+    if (decision !== "approved" && decision !== "rejected") {
+      return res.status(400).json({ error: "decision must be 'approved' or 'rejected'" });
+    }
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const result = await resolveFundingRequest(orgId, requestId, decision);
+    res.json({
+      success: true,
+      message: decision === "approved" ? "Funding request approved" : "Funding request rejected",
+      fundingRequest: result.fundingRequest,
+      ...(result.user ? { user: sanitizeUser(result.user) } : {}),
+      ...(result.organization ? { walletBalance: (result.organization as any)?.walletBalance } : {}),
+    });
+  } catch (error: any) {
+    logger.error("Failed to resolve funding request", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+      requestId: req.params.requestId,
+    });
+    if (
+      error.message === "Funding request not found or already resolved" ||
+      error.message === "Organization not found" ||
+      error.message === "User not found in this organization"
+    ) {
+      return res.status(error.message === "Funding request not found or already resolved" ? 409 : 404).json({
+        error: error.message,
+      });
+    }
+    res.status(400).json({ error: error.message || "Failed to resolve funding request" });
+  }
+}
+
+/**
  * List ALL organizations with user counts + wallet balance (Admin only)
  */
 export async function getAllOrganizationsHandler(req: Request, res: Response) {
@@ -513,6 +665,79 @@ export async function activateOrganizationHandler(
 }
 
 /**
+ * Get all approved AI profiles available in the system, plus which ones are
+ * currently selected for this organization (Admin or approved Org Owner).
+ */
+export async function getOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { profiles, selectedProfileIds } = await getOrganizationAvailableProfiles(orgId);
+    res.json({ success: true, profiles, selectedProfileIds });
+  } catch (error: any) {
+    logger.error("Failed to get organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization profiles" });
+  }
+}
+
+/**
+ * Set the list of AI profiles selected for this organization out of the
+ * profiles available in the system (Admin or approved Org Owner).
+ */
+export async function updateOrganizationProfilesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+    const { profileIds } = req.body;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const updatedOrg = await setOrganizationAllowedProfiles(orgId, profileIds);
+    res.json({
+      success: true,
+      message: "Organization profiles updated successfully",
+      organization: updatedOrg,
+    });
+  } catch (error: any) {
+    logger.error("Failed to update organization profiles", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(400).json({ error: error.message || "Failed to update organization profiles" });
+  }
+}
+
+/**
  * Get organization usage summary + wallet balance (Admin or Org Owner)
  */
 export async function getOrganizationStatsHandler(
@@ -542,6 +767,43 @@ export async function getOrganizationStatsHandler(
       organizationId: req.params.id,
     });
     res.status(500).json({ error: "Failed to fetch organization stats" });
+  }
+}
+
+/**
+ * Get an organization's "invoices" (billing history) - Admin or Org Owner.
+ *
+ * There is no separate invoicing system in this codebase; each
+ * WalletTransaction (a PayMe wallet top-up attempt) is exposed here as an
+ * invoice, since it's the closest real financial record the org has.
+ */
+export async function getOrganizationInvoicesHandler(
+  req: Request<{ id: string }>,
+  res: Response
+) {
+  try {
+    const user = (req as any).user;
+    const orgId = req.params.id;
+
+    const organization = await getOrganizationById(orgId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    if (!isOrganizationAccessAllowed(user, organization)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const invoices = await getOrganizationInvoices(orgId);
+    res.json({ invoices });
+  } catch (error: any) {
+    logger.error("Failed to get organization invoices", {
+      error: error.message,
+      stack: error.stack,
+      userId: (req as any).user?.userId,
+      organizationId: req.params.id,
+    });
+    res.status(500).json({ error: "Failed to fetch organization invoices" });
   }
 }
 

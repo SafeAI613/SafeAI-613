@@ -4,6 +4,7 @@ import { AddPostModal } from './AddPostModal';
 import { fetchPosts as fetchPostsFromApi, fetchSimilarPosts, moderatePost as moderatePostApi } from './api';
 import type { Post } from './types';
 import { SEO } from '../../components/SEO';
+import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
 
 export const ForumPage: React.FC = () => {
@@ -21,6 +22,7 @@ export const ForumPage: React.FC = () => {
   const [recommendedPosts, setRecommendedPosts] = useState<{ _id: string; title: string }[]>([]);
 
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const userStr = localStorage.getItem('user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const isAdmin = currentUser?.role === 'admin';
@@ -142,7 +144,7 @@ export const ForumPage: React.FC = () => {
 
   const handleModeratePost = async (e: React.MouseEvent, postId: string, actionType: 'block' | 'unblock' | 'lock' | 'unlock') => {
     e.stopPropagation(); 
-    if (!currentUser?._id) return alert('משתמש לא מחובר');
+    if (!currentUser?._id) return showAlert('משתמש לא מחובר', { type: 'error' });
 
     try {
       const response = await moderatePostApi(postId, currentUser._id, actionType);
@@ -151,11 +153,11 @@ export const ForumPage: React.FC = () => {
         fetchPosts(searchQuery, currentPage);
       } else {
         const errData = await response.json();
-        alert(errData.message || 'שגיאה בביצוע הפעולה');
+        showAlert(errData.message || 'שגיאה בביצוע הפעולה', { type: 'error' });
       }
     } catch (error) {
       console.error('Error moderating post:', error);
-      alert('שגיאה בתקשורת עם השרת');
+      showAlert('שגיאה בתקשורת עם השרת', { type: 'error' });
     }
   };
 

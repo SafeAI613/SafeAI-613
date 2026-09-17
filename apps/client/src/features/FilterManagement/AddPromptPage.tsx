@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { approvePrompt } from "./FilterManagementSlice";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../context/alertStore";
 
 type PromptStatus = "active" | "not active";
 
@@ -17,6 +18,7 @@ const AddPromptPage = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const [type, setType] = useState<"free" | "list">("free");
   const [freeText, setFreeText] = useState<string>("");
@@ -28,7 +30,7 @@ const AddPromptPage = () => {
     e.preventDefault();
 
     if (type === "free") {
-      if (!freeText.trim()) return alert(t("filterManagement.enterContentAlert"));
+      if (!freeText.trim()) return showAlert(t("filterManagement.enterContentAlert"), { type: "error" });
 
       const newPrompt: Prompt = {
         id: Date.now(),
@@ -38,7 +40,7 @@ const AddPromptPage = () => {
       };
 
       dispatch(approvePrompt(newPrompt));
-      alert(t("filterManagement.promptAddedSuccessAlert"));
+      showAlert(t("filterManagement.promptAddedSuccessAlert"), { type: "success" });
       navigate(-1);
       return;
     }
@@ -48,10 +50,10 @@ const AddPromptPage = () => {
 
     if (promptToAdd) {
       dispatch(approvePrompt(promptToAdd));
-      alert(t("filterManagement.promptAddedSuccessAlert"));
+      showAlert(t("filterManagement.promptAddedSuccessAlert"), { type: "success" });
       navigate(-1);
     } else {
-      alert(t("filterManagement.selectValidPromptAlert"));
+      showAlert(t("filterManagement.selectValidPromptAlert"), { type: "error" });
     }
   };
 

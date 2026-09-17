@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { ContactMessage } from "../models/ContactMessage";
+import { ContactMessage, ContactUrgency, ContactCategory } from "../models/ContactMessage";
 
 export const create = async (data: any) => {
   return await ContactMessage.create(data);
@@ -78,4 +78,12 @@ export const updateStatus = async (id: string, userId: string, status: string, i
 export const deleteRequestById = async (id: string) => {
   const objectId = new Types.ObjectId(id);
   return await ContactMessage.findByIdAndDelete(objectId);
+};
+
+export const updateClassification = async (
+  id: string,
+  classification: { urgency?: ContactUrgency; category?: ContactCategory }
+) => {
+  const objectId = new Types.ObjectId(id);
+  return await ContactMessage.findByIdAndUpdate(objectId, classification, { new: true, runValidators: true });
 };

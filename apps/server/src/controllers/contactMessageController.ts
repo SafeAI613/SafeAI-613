@@ -1,6 +1,10 @@
 import { Response } from 'express';
 import * as contactMessageService from '../services/contactMessageService';
+import { ContactUrgency, ContactCategory } from '../models/ContactMessage';
+import { User } from '../models/user';
 import * as s3Service from '../services/s3Service';
+import { sendContactReplyEmail } from '../utils/email';
+import logger from '../logger';
 
 // The bucket is private - the `url` saved on a ContactMessage's attachment is
 // the raw S3 object URL with no signature, so it 403s if used directly as an
@@ -129,9 +133,65 @@ export const addReply = async (req: any, res: Response) => {
 
     if (!request) return res.status(404).json({ message: "פנייה לא נמצאה" });
 
+    if (isAdmin) {
+      // Best-effort: notify the request's owner that an admin (or the
+      // inquiry-agent, sending on an admin's behalf after approval) replied.
+      // Never fails the request itself - the reply is already saved above.
+      try {
+        const owner = await User.findById(request.userId).select("email name").lean();
+        if (owner?.email) {
+          await sendContactReplyEmail({
+            userEmail: owner.email,
+            userName: owner.name || owner.email,
+            title: request.title,
+            replyText: text,
+          });
+        }
+      } catch (emailError) {
+        logger.error("Failed to send contact reply notification email:", {
+          error: emailError instanceof Error ? emailError.message : String(emailError),
+          requestId: id,
+        });
+      }
+    }
+
     res.status(200).json({ success: true, message: "התגובה נוספה בהצלחה", request });
   } catch (error) {
     res.status(500).json({ message: "שגיאה בהוספת התגובה" });
+  }
+};
+
+// PATCH /contact/my-requests/:id/classification - admin (or the inquiry-agent
+// via AGENT_SERVICE_TOKEN) sets the urgency/category the triage agent assigned.
+export const updateClassification = async (req: any, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { urgency, category } = req.body;
+
+    const VALID_URGENCY: ContactUrgency[] = ["urgent", "normal", "low"];
+    const VALID_CATEGORY: ContactCategory[] = ["bug", "feature", "feedback"];
+
+    if (urgency === undefined && category === undefined) {
+      return res.status(400).json({ message: "יש לספק urgency ו/או category" });
+    }
+    if (urgency !== undefined && !VALID_URGENCY.includes(urgency)) {
+      return res.status(400).json({ message: `urgency לא תקין - ערכים אפשריים: ${VALID_URGENCY.join(", ")}` });
+    }
+    if (category !== undefined && !VALID_CATEGORY.includes(category)) {
+      return res.status(400).json({ message: `category לא תקין - ערכים אפשריים: ${VALID_CATEGORY.join(", ")}` });
+    }
+
+    const classification: { urgency?: ContactUrgency; category?: ContactCategory } = {};
+    if (urgency !== undefined) classification.urgency = urgency;
+    if (category !== undefined) classification.category = category;
+
+    const request = await contactMessageService.updateClassification(id, classification);
+
+    if (!request) return res.status(404).json({ message: "פנייה לא נמצאה" });
+
+    res.status(200).json({ success: true, request });
+  } catch (error) {
+    res.status(500).json({ message: "שגיאה בעדכון סיווג הפנייה" });
   }
 };
 

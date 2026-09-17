@@ -42,6 +42,11 @@ export interface OrganizationUser {
   mode?: string;
   createdAt: string;
   lastLogin?: string;
+  costLimits?: {
+    monthlyBudget: number;
+    currentMonthSpent: number;
+    lastResetDate?: string;
+  };
 }
 
 export interface OrganizationUsageSummary {
@@ -70,6 +75,20 @@ export const getOrganizationUsers = async (id: string): Promise<OrganizationUser
 // סיכום שימוש + יתרת ארנק
 export const getOrganizationStats = async (id: string): Promise<OrganizationUsageSummary> => {
   return apiCall<OrganizationUsageSummary>(API_ENDPOINTS.adminOrganizations.stats(id), { method: "GET" });
+};
+
+// חשבוניות (היסטוריית טעינות ארנק - אין מערכת חיוב נפרדת, כל טעינה מוצגת כחשבונית)
+export interface OrganizationInvoice {
+  id: string;
+  date: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "completed" | "failed";
+  reference: string;
+}
+
+export const getOrganizationInvoices = async (id: string): Promise<{ invoices: OrganizationInvoice[] }> => {
+  return apiCall<{ invoices: OrganizationInvoice[] }>(API_ENDPOINTS.adminOrganizations.invoices(id), { method: "GET" });
 };
 
 // השעיית ארגון
@@ -119,6 +138,61 @@ export const getMyOrganization = async (): Promise<{ organization: AdminOrganiza
   return apiCall(API_ENDPOINTS.adminOrganizations.my, { method: "GET" });
 };
 
+// הקצאת דולרים מהארנק הארגוני לתקציב החודשי האישי של משתמש (תוספתית - ראו
+// allocateBudgetToUser ב-organizationService.ts בשרת להסבר הבחירה)
+export const allocateBudgetToUser = async (
+  orgId: string,
+  userId: string,
+  amount: number
+): Promise<{ success: boolean; message?: string; walletBalance: number; user: OrganizationUser }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.allocateBudget(orgId, userId), {
+    method: "PATCH",
+    body: JSON.stringify({ amount }),
+  });
+};
+
+export interface OrganizationFundingRequest {
+  _id: string;
+  organizationId: string;
+  userId: {
+    _id: string;
+    name?: string;
+    email?: string;
+  };
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// רשימת בקשות המימון של חברי הארגון (ממתינות + טופלו), חדש לישן
+export const getOrganizationFundingRequests = async (
+  orgId: string
+): Promise<{ fundingRequests: OrganizationFundingRequest[] }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.fundingRequests(orgId), { method: "GET" });
+};
+
+// אישור/דחייה של בקשת מימון - אישור מבצע בפועל הקצאת תקציב (ראו
+// resolveFundingRequest ב-organizationService.ts בשרת, המשתמש באותה לוגיקת
+// הקצאה כמו allocateBudgetToUser)
+export const resolveFundingRequest = async (
+  orgId: string,
+  requestId: string,
+  decision: "approved" | "rejected"
+): Promise<{
+  success: boolean;
+  message?: string;
+  fundingRequest: OrganizationFundingRequest;
+  walletBalance?: number;
+  user?: OrganizationUser;
+}> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.resolveFundingRequest(orgId, requestId), {
+    method: "PATCH",
+    body: JSON.stringify({ decision }),
+  });
+};
+
 // עדכון שם/תיאור הארגון
 export const updateOrganizationDetails = async (
   id: string,
@@ -127,5 +201,31 @@ export const updateOrganizationDetails = async (
   return apiCall(API_ENDPOINTS.adminOrganizations.detail(id), {
     method: "PUT",
     body: JSON.stringify(data),
+  });
+};
+
+export interface OrganizationProfile {
+  _id: string;
+  name: string;
+  createdBy: string;
+  creatorEmail: string;
+  selected: boolean;
+}
+
+// רשימת כל פרופילי ה-AI המאושרים במערכת + אילו מהם נבחרו עבור הארגון
+export const getOrganizationProfiles = async (
+  id: string
+): Promise<{ profiles: OrganizationProfile[]; selectedProfileIds: string[] }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.profiles(id), { method: "GET" });
+};
+
+// עדכון רשימת פרופילי ה-AI המורשים לשימוש בארגון
+export const updateOrganizationProfiles = async (
+  id: string,
+  profileIds: string[]
+): Promise<{ success: boolean; organization: AdminOrganization }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.profiles(id), {
+    method: "PATCH",
+    body: JSON.stringify({ profileIds }),
   });
 };
