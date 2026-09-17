@@ -93,6 +93,10 @@
     "updateOrgFailedFallback": "Failed to update organization details",
     "addMemberFieldsRequired": "Please fill in name and email address",
     "addMemberFailedFallback": "Adding the user failed",
+    "allocateBudgetButton": "Allocate funds",
+    "allocateBudgetSubmit": "Allocate",
+    "allocateBudgetSuccess": "Budget allocated successfully",
+    "allocateBudgetFailedFallback": "Failed to allocate the budget",
     "excelHeaderName": "Name",
     "excelHeaderEmail": "Email",
     "excelHeaderPassword": "Temporary password",
@@ -111,7 +115,9 @@
       "joined": "Joined",
       "joinStatus": "Join status",
       "joinedDate": "Join date",
-      "password": "Temporary password"
+      "password": "Temporary password",
+      "monthlyBudget": "Monthly budget",
+      "actions": "Actions"
     },
     "roleOrgOwner": "Owner",
     "roleAdmin": "System Admin",

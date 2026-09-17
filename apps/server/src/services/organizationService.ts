@@ -260,6 +260,62 @@ export async function topUpOrganizationWallet(orgId: string, amount: number) {
   }
 }
 
+/**
+ * Allocate (add) dollars from the organization's wallet to a member's
+ * personal monthly budget (costLimits.monthlyBudget).
+ *
+ * Additive by design, not "set to X": an org admin allocating funds is
+ * giving the user *more* spending room on top of whatever they already
+ * have this month, the same way topUpOrganizationWallet adds to the org
+ * wallet instead of overwriting it. A "set to X" semantic would silently
+ * erase any unspent budget the admin never intended to claw back.
+ *
+ * Money-movement safety: the wallet decrement
+ * (repo.decrementWalletBalanceIfSufficient) is a single atomic,
+ * conditional update - the `walletBalance >= amount` check and the `$inc`
+ * happen in the same Mongo query - so two concurrent allocations can never
+ * together overdraw the wallet. There is, however, no cross-collection
+ * transaction wrapping the wallet decrement and the user's budget
+ * increment together: if the process crashes in between, the wallet is
+ * debited without the user being credited. The rest of this codebase's
+ * money-moving code (paymeService.ts) has the same limitation - it isn't
+ * running Mongo as a replica set / doesn't use sessions - so this follows
+ * existing precedent rather than introducing a new one. A future fix would
+ * wrap both writes in a Mongoose session transaction once that's available.
+ */
+export async function allocateBudgetToUser(orgId: string, userId: string, amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Amount must be a positive number");
+  }
+
+  const organization = await repo.getOrganizationById(orgId);
+  if (!organization) {
+    throw new Error("Organization not found");
+  }
+
+  const targetUser = await userRepo.getUserById(userId);
+  if (!targetUser || (targetUser as any).organizationId?.toString() !== orgId) {
+    throw new Error("User not found in this organization");
+  }
+
+  const updatedOrg = await repo.decrementWalletBalanceIfSufficient(orgId, amount);
+  if (!updatedOrg) {
+    throw new Error("יתרת הארנק של הארגון אינה מספיקה להקצאה זו");
+  }
+
+  const updatedUser = await userRepo.incrementUserMonthlyBudget(userId, amount);
+
+  logger.info("Budget allocated from organization wallet to user", {
+    organizationId: orgId,
+    userId,
+    amount,
+    newWalletBalance: (updatedOrg as any)?.walletBalance,
+    newUserMonthlyBudget: (updatedUser as any)?.costLimits?.monthlyBudget,
+  });
+
+  return { organization: updatedOrg, user: updatedUser };
+}
+
 export async function getPendingOrganizationsForAdmin() {
   return repo.getPendingOrganizations();
 }
