@@ -69,6 +69,40 @@
   font-family: inherit;
 }
 
+.email-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.email-autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  z-index: 20;
+}
+
+.email-autocomplete-item {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: start;
+  direction: ltr;
+}
+
+.email-autocomplete-item:hover,
+.email-autocomplete-item.active {
+  background-color: var(--bg-elevated);
+}
+
 .org-edit-actions {
   display: flex;
   gap: 10px;

@@ -78,6 +78,7 @@
     "addMemberTitle": "Add a new user to the organization",
     "fullNamePlaceholder": "Full name",
     "emailPlaceholder": "Email address",
+    "emailDomainSuggestionsAriaLabel": "Email domain suggestions",
     "addingButton": "Adding...",
     "addMemberButton": "Add user",
     "createdMembersMessage": "{{count}} new users were added in this session. Login details to share with them:",
