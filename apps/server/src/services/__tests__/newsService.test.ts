@@ -1,6 +1,7 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 import { newsService } from "../newsService";
 import { newsRepository } from "../../repositories/newsRepository";
+import { deleteObject } from "../s3Service";
 import { INews } from "../../models/news";
 
 jest.mock("../../repositories/newsRepository", () => ({
@@ -11,6 +12,10 @@ jest.mock("../../repositories/newsRepository", () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
+}));
+
+jest.mock("../s3Service", () => ({
+  deleteObject: jest.fn(),
 }));
 
 // Without this, newsService's logger.info/error calls try to write to a real
@@ -102,4 +107,81 @@ it("should throw error when deleting non existing news", async () => {
   await expect(
     newsService.deleteNews("123")
   ).rejects.toThrow("News not found");
+});
+
+describe("news image URL handling", () => {
+  // Matches the hostname newsService.isValidNewsImageUrl checks against
+  // (same shape uploadController.ts builds for a real presigned upload) -
+  // built from the same env vars so this test isn't tied to whatever
+  // AWS_BUCKET_NAME/AWS_REGION happen to be set to in this environment.
+  const VALID_BASE = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should reject creating news with an image URL outside the news upload path", async () => {
+    await expect(
+      newsService.createNews({
+        title: "t",
+        content: "c",
+        imageUrl: "https://evil.example.com/not-news.png",
+      })
+    ).rejects.toThrow("Invalid image URL");
+
+    expect(jest.mocked(newsRepository).create).not.toHaveBeenCalled();
+  });
+
+  it("should accept creating news with a valid uploads/news image URL", async () => {
+    const mockedRepository = jest.mocked(newsRepository);
+    mockedRepository.create.mockResolvedValue({ _id: "1" } as unknown as INews);
+
+    await newsService.createNews({
+      title: "t",
+      content: "c",
+      imageUrl: `${VALID_BASE}/uploads/news/abc.png`,
+    });
+
+    expect(mockedRepository.create).toHaveBeenCalled();
+  });
+
+  it("should delete the old S3 image when a news item's image is replaced", async () => {
+    const mockedRepository = jest.mocked(newsRepository);
+    mockedRepository.findById.mockResolvedValue({
+      _id: "1",
+      imageUrl: `${VALID_BASE}/uploads/news/old.png`,
+    } as unknown as INews);
+    mockedRepository.update.mockResolvedValue({ _id: "1" } as unknown as INews);
+
+    await newsService.updateNews("1", {
+      imageUrl: `${VALID_BASE}/uploads/news/new.png`,
+    });
+
+    expect(deleteObject).toHaveBeenCalledWith(`${VALID_BASE}/uploads/news/old.png`);
+  });
+
+  it("should not delete the image when a news update doesn't touch imageUrl", async () => {
+    const mockedRepository = jest.mocked(newsRepository);
+    mockedRepository.findById.mockResolvedValue({
+      _id: "1",
+      imageUrl: `${VALID_BASE}/uploads/news/old.png`,
+    } as unknown as INews);
+    mockedRepository.update.mockResolvedValue({ _id: "1" } as unknown as INews);
+
+    await newsService.updateNews("1", { title: "new title" });
+
+    expect(deleteObject).not.toHaveBeenCalled();
+  });
+
+  it("should delete the image from S3 when a news item with an image is deleted", async () => {
+    const mockedRepository = jest.mocked(newsRepository);
+    mockedRepository.delete.mockResolvedValue({
+      _id: "1",
+      imageUrl: `${VALID_BASE}/uploads/news/old.png`,
+    } as unknown as INews);
+
+    await newsService.deleteNews("1");
+
+    expect(deleteObject).toHaveBeenCalledWith(`${VALID_BASE}/uploads/news/old.png`);
+  });
 });
