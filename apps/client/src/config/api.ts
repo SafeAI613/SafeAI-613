@@ -54,6 +54,8 @@ export const API_ENDPOINTS = {
     limits: `${API_BASE_URL}/usage/limits`,
     costs: `${API_BASE_URL}/usage/costs`,
   },
+  // A regular org member's own funding requests (asking for more monthly budget)
+  fundingRequests: `${API_BASE_URL}/users/me/funding-requests`,
   // Public statistics endpoint (no auth — landing page counts)
   publicStats: `${API_BASE_URL}/public-stats`,
   // Admin statistics endpoints

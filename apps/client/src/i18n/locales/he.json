@@ -1283,16 +1283,31 @@
     "recentCostTitle": "עלות ב-7 ימים אחרונים",
     "recentCostDescription": "עלות מצטברת של כל הבקשות שבוצעו ב-7 הימים האחרונים.",
     "topUpModal": {
-      "title": "טעינת יתרה",
-      "description": "מערכת התשלומים בפיתוח. מלא את הפרטים ונחזור אליך בהקדם לביצוע הטעינה.",
+      "title": "בקשת הגדלת תקציב",
+      "description": "הבקשה תישלח למנהל הארגון שלך לאישור. לאחר האישור, התקציב החודשי שלך יעודכן בהתאם.",
       "emailLabel": "אימייל",
-      "amountLabel": "סכום לטעינה (USD)",
+      "amountLabel": "סכום מבוקש (USD)",
       "amountPlaceholder": "לדוגמה: 20",
       "notesLabel": "הערות (אופציונלי)",
       "notesPlaceholder": "כל מידע נוסף שתרצה להוסיף...",
-      "submitButton": "שלח בקשה לטעינה",
+      "submitButton": "שלח בקשה",
+      "submittingButton": "שולח...",
+      "invalidAmountError": "יש להזין סכום חיובי תקין.",
+      "submitFailedError": "שליחת הבקשה נכשלה. נסה שוב מאוחר יותר.",
       "successTitle": "הבקשה נשלחה!",
-      "successMessage": "קיבלנו את בקשת הטעינה שלך. נציג יצור איתך קשר בקרוב לסיום התהליך."
+      "successMessage": "בקשתך להגדלת התקציב נשלחה למנהל הארגון וממתינה לאישור."
+    },
+    "fundingRequests": {
+      "title": "היסטוריית בקשות תקציב",
+      "empty": "עדיין לא שלחת בקשות להגדלת תקציב.",
+      "amountColumn": "סכום מבוקש",
+      "statusColumn": "סטטוס",
+      "dateColumn": "תאריך",
+      "status": {
+        "pending": "ממתין לאישור",
+        "approved": "אושר",
+        "rejected": "נדחה"
+      }
     }
   }
 }
