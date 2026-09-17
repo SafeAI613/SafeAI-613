@@ -560,6 +560,7 @@
     "openFullExcelLink": "Open the full spreadsheet"
   },
   "safeaiNav": {
+    "home": "Home",
     "statistics": "Statistics",
     "manageProfiles": "Manage Profiles",
     "manageUsers": "Manage Users",
@@ -573,6 +574,7 @@
     "loadingData": "Loading data...",
     "greeting": "Hello, {{name}}",
     "activeAccountBadge": "Active account",
+    "quickLinkNews": "AI News",
     "totalRequestsLabel": "Total requests",
     "successfulRequestsLabel": "Successful requests",
     "successfulPercent": "{{percent}}% successful",

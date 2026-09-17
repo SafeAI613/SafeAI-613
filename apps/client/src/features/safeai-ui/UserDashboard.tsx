@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
 import { useUsageData } from "../../hooks/useUsageData";
 import { useProfiles, type Profile } from "../../hooks/useProfiles";
 import { useAuth } from "../../context/authStore";
 import BudgetCard from "./BudgetCard";
 import UsageChart from "./UsageChart";
+
+type InAppSection = "requests" | "apikeys" | "billing";
 
 interface UserDashboardProps {
   user: {
@@ -14,10 +17,15 @@ interface UserDashboardProps {
     _id?: string;
     profileId?: string;
   } | null;
+  // Switches SafeAIUIPage's own active tab - the quick links below need this
+  // for "requests"/"apikeys"/"billing" since those are tabs within this page,
+  // not standalone routes (unlike "/ai-news" and "/contact" below, which are).
+  onNavigateSection?: (section: InAppSection) => void;
 }
 
-export default function UserDashboard({ user }: UserDashboardProps) {
+export default function UserDashboard({ user, onNavigateSection }: UserDashboardProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { setUser } = useAuth();
   const { usageStats, dailyUsage, modelUsage, limitsStatus, loading: usageLoading } = useUsageData(!!user);
   const { profiles: allProfiles } = useProfiles();
@@ -90,6 +98,24 @@ export default function UserDashboard({ user }: UserDashboardProps) {
       <div className="management-header">
         <h2>{t("userDashboard.greeting", { name: user?.name || user?.email })}</h2>
         <span className="badge badge-success">{t("userDashboard.activeAccountBadge")}</span>
+      </div>
+
+      <div className="quick-links-row">
+        <button className="btn btn-secondary" onClick={() => onNavigateSection?.("requests")}>
+          {t("requests.myRequestsTitle")}
+        </button>
+        <button className="btn btn-secondary" onClick={() => onNavigateSection?.("apikeys")}>
+          {t("safeaiNav.apiKeys")}
+        </button>
+        <button className="btn btn-secondary" onClick={() => onNavigateSection?.("billing")}>
+          {t("safeaiNav.billing")}
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate("/ai-news")}>
+          {t("userDashboard.quickLinkNews")}
+        </button>
+        <button className="btn btn-secondary" onClick={() => navigate("/contact")}>
+          {t("nav.contact")}
+        </button>
       </div>
 
       <div className="dashboard-grid">

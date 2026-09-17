@@ -57,7 +57,8 @@ export default function SafeAIUIPage() {
 
     if (storedUser && storedRole) {
       const parsedUser = JSON.parse(storedUser);
-      const defaultSection: Section = storedRole === "org_owner" ? "org-statistics" : "statistics";
+      const defaultSection: Section =
+        storedRole === "org_owner" ? "org-statistics" : storedRole === "user" ? "dashboard" : "statistics";
       return {
         user: parsedUser,
         role: storedRole as "admin" | "user" | "org_owner",
@@ -151,7 +152,7 @@ export default function SafeAIUIPage() {
       case "users":
         return <UsersManagement />;
       case "dashboard":
-        return <UserDashboard user={currentUser} />;
+        return <UserDashboard user={currentUser} onNavigateSection={setActiveSection} />;
       case "statistics":
         return <Statistics user={currentUser} />;
       case "apikeys":
@@ -304,6 +305,25 @@ export default function SafeAIUIPage() {
             {/* משתמש רגיל */}
             {userRole === "user" && (
               <>
+                <button
+                  className={
+                    activeSection === "dashboard"
+                      ? "sub-nav-btn active"
+                      : "sub-nav-btn"
+                  }
+                  onClick={() => setActiveSection("dashboard")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M2 8l6-5.5L14 8M4 6.5V13.5h8V6.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {t("safeaiNav.home")}
+                </button>
                 <button
                   className={
                     activeSection === "statistics"
