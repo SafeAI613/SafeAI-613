@@ -4,14 +4,27 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { changePromptStatus, removePrompt } from './FilterManagementSlice';
+import { changePromptStatus, removePrompt, type Prompt } from './FilterManagementSlice';
+import { useAlert } from '../../context/alertStore';
 
 const GroupPromptsPage: React.FC = () => {
     const { t } = useTranslation();
     const groupPrompts = useAppSelector(state => state.filterManagement.groupPrompts);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
     const [search, setSearch] = useState("");
+
+    // Mirrors the condition the reducer used to check before mutating state:
+    // pausing only succeeds while the prompt is currently active.
+    const handleChangePromptStatus = (prompt: Prompt) => {
+        dispatch(changePromptStatus(prompt.id));
+        if (prompt.Status === "active") {
+            showAlert(t("filterManagement.pauseSuccessAlert"), { type: "success" });
+        } else {
+            showAlert(t("filterManagement.pauseFailedAlert"), { type: "error" });
+        }
+    };
 
     const filteredPrompts = groupPrompts.filter(p =>
         p.content.toLowerCase().includes(search.toLowerCase())
@@ -47,7 +60,7 @@ const GroupPromptsPage: React.FC = () => {
                             <div>
                                 <button onClick={() => navigate(`edit-prompt/${prompt.id}`)} style={{ marginLeft: '5px' }}>{t("common.edit")}</button>
                                 <button onClick={() => dispatch(removePrompt(prompt.id))} style={{ marginLeft: '5px', backgroundColor: 'var(--color-danger)', color: 'var(--text-inverse)' }}>{t("filterManagement.removeBtn")}</button>
-                                <button onClick={() => dispatch(changePromptStatus(prompt.id))}>{t("filterManagement.pauseBtn")}</button>
+                                <button onClick={() => handleChangePromptStatus(prompt)}>{t("filterManagement.pauseBtn")}</button>
                             </div>
                         </li>
                     ))}

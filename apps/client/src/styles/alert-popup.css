@@ -1,0 +1,110 @@
+.alert-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  padding: 16px;
+  animation: alert-popup-fade-in 0.15s ease-out;
+}
+
+.alert-popup {
+  background: var(--bg-surface, #ffffff);
+  border-radius: 10px;
+  padding: 28px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  animation: alert-popup-pop-in 0.18s ease-out;
+}
+
+.alert-popup-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.alert-popup-info .alert-popup-icon {
+  background: rgba(20, 60, 66, 0.1);
+  color: var(--lv2-accent, #14444c);
+}
+
+.alert-popup-success .alert-popup-icon {
+  background: rgba(22, 163, 74, 0.12);
+  color: #16a34a;
+}
+
+.alert-popup-error .alert-popup-icon {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.alert-popup-message {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 22px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.alert-popup-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.alert-popup-ok {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--lv2-accent, #14444c);
+  color: #ffffff;
+  transition: opacity 0.15s;
+}
+
+.alert-popup-ok:hover {
+  opacity: 0.9;
+}
+
+.alert-popup-error .alert-popup-ok {
+  background: #dc2626;
+}
+
+.alert-popup-success .alert-popup-ok {
+  background: #16a34a;
+}
+
+@keyframes alert-popup-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes alert-popup-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+[data-theme="dark"] .alert-popup-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}

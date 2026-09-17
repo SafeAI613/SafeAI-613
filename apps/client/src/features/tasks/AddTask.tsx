@@ -2,16 +2,17 @@ import React, { useState, type ChangeEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { addTask } from './tasksSlice';
 import { useNavigate } from 'react-router-dom';
+import { useAlert } from '../../context/alertStore';
 
 
 const AddTask: React.FC = () => {
-    const dispatch = useDispatch(); const navigate = useNavigate();
+    const dispatch = useDispatch(); const navigate = useNavigate(); const { showAlert } = useAlert();
 
     const [title, setTitle] = useState(''); const [desc, setDesc] = useState(''); const [date, setDate] = useState(''); const [img, setImg] = useState<string | null | ArrayBuffer>(null); const [isCompleted] = useState(false);
 
     const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setImg(reader.result); }; reader.readAsDataURL(file); } };
 
-    const submit = () => { if (!title || !desc || !date) return alert('Fill all fields'); dispatch(addTask({ title, desc, date, img, isCompleted })); navigate("/tasks"); };
+    const submit = () => { if (!title || !desc || !date) return showAlert('Fill all fields', { type: 'error' }); dispatch(addTask({ title, desc, date, img, isCompleted })); navigate("/tasks"); };
 
     return (
 

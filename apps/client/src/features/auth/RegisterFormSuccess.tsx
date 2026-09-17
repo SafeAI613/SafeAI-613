@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAlert } from "../../context/alertStore";
 
 export default function RegisterFormSuccess() {
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
   const [showAPIKey, setShowAPIKey] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -91,7 +93,7 @@ export default function RegisterFormSuccess() {
                   onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(proxyApiKey);
-                      alert(t("registerSuccess.keyCopied"));
+                      showAlert(t("registerSuccess.keyCopied"), { type: "success" });
                     } catch (err) {
                       console.error("Failed to copy:", err);
                     }

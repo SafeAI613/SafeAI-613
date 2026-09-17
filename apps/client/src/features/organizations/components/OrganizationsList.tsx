@@ -7,6 +7,7 @@ import {
 } from "../api/organizationApi";
 import type { AdminOrganization } from "../api/organizationApi";
 import { OrganizationsTable } from "./OrganizationsTable";
+import { useAlert } from "../../../context/alertStore";
 
 type StatusFilter = "all" | "active" | "suspended" | "pending" | "approved" | "rejected";
 
@@ -22,6 +23,7 @@ export const OrganizationsList = ({ onOpenOrg }: OrganizationsListProps) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [busyId, setBusyId] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
 
   const loadOrganizations = async () => {
     try {
@@ -58,7 +60,7 @@ export const OrganizationsList = ({ onOpenOrg }: OrganizationsListProps) => {
       await suspendOrganization(id);
       setOrganizations((prev) => prev.map((o) => (o._id === id ? { ...o, isActive: false } : o)));
     } catch (err: unknown) {
-      alert(t("organizations.suspendErrorAlert", { error: err instanceof Error ? err.message : t("organizations.genericFailedFallback") }));
+      showAlert(t("organizations.suspendErrorAlert", { error: err instanceof Error ? err.message : t("organizations.genericFailedFallback") }), { type: "error" });
     } finally {
       setBusyId(null);
     }
@@ -71,7 +73,7 @@ export const OrganizationsList = ({ onOpenOrg }: OrganizationsListProps) => {
       await activateOrganization(id);
       setOrganizations((prev) => prev.map((o) => (o._id === id ? { ...o, isActive: true } : o)));
     } catch (err: unknown) {
-      alert(t("organizations.activateErrorAlert", { error: err instanceof Error ? err.message : t("organizations.genericFailedFallback") }));
+      showAlert(t("organizations.activateErrorAlert", { error: err instanceof Error ? err.message : t("organizations.genericFailedFallback") }), { type: "error" });
     } finally {
       setBusyId(null);
     }

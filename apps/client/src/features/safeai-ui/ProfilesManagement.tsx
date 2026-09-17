@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { API_ENDPOINTS, apiCall } from "../../config/api";
+import { useAlert } from "../../context/alertStore";
 import ProfileTester from "./ProfileTester";
 import ArrayInput from "./ArrayInput";
 
@@ -42,6 +43,7 @@ const EMPTY_FORM: Partial<Profile> = {
 
 export default function ProfilesManagement() {
   const { t } = useTranslation();
+  const { showAlert } = useAlert();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,7 +61,7 @@ export default function ProfilesManagement() {
       setProfiles(data);
     } catch (error) {
       console.error("Failed to fetch profiles:", error);
-      alert(t("profilesManagement.errorLoading"));
+      showAlert(t("profilesManagement.errorLoading"), { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -78,11 +80,11 @@ export default function ProfilesManagement() {
       await fetchProfiles();
       setShowCreateModal(false);
       resetForm();
-      alert(t("profilesManagement.createdSuccess"));
+      showAlert(t("profilesManagement.createdSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error creating profile:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("profilesManagement.createErrorPrefix", { message: errorMessage }));
+      showAlert(t("profilesManagement.createErrorPrefix", { message: errorMessage }), { type: "error" });
     } finally {
       setSaving(false);
     }
@@ -104,11 +106,11 @@ export default function ProfilesManagement() {
       setShowEditModal(false);
       setEditingProfile(null);
       resetForm();
-      alert(t("profilesManagement.updatedSuccess"));
+      showAlert(t("profilesManagement.updatedSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error updating profile:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("profilesManagement.updateErrorPrefix", { message: errorMessage }));
+      showAlert(t("profilesManagement.updateErrorPrefix", { message: errorMessage }), { type: "error" });
     } finally {
       setSaving(false);
     }
@@ -123,11 +125,11 @@ export default function ProfilesManagement() {
       });
 
       await fetchProfiles();
-      alert(t("profilesManagement.deletedSuccess"));
+      showAlert(t("profilesManagement.deletedSuccess"), { type: "success" });
     } catch (error: unknown) {
       console.error("Error deleting profile:", error);
       const errorMessage = error instanceof Error ? error.message : t("usersManagement.errorUnknown");
-      alert(t("profilesManagement.deleteErrorPrefix", { message: errorMessage }));
+      showAlert(t("profilesManagement.deleteErrorPrefix", { message: errorMessage }), { type: "error" });
     }
   };
 
