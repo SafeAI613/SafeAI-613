@@ -80,6 +80,11 @@ const UPLOAD_CONTEXTS: Record<string, UploadContextConfig> = {
     allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
     maxSizeBytes: 5 * 1024 * 1024,
   },
+  orgLogo: {
+    prefix: "uploads/organizations",
+    allowedTypes: ["image/jpeg", "image/png", "image/webp"],
+    maxSizeBytes: 2 * 1024 * 1024,
+  },
   post: {
     prefix: "uploads/forum",
     categorySizeLimits: true,

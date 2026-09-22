@@ -28,6 +28,7 @@ export interface AdminOrganization {
   isActive: boolean;
   status: string;
   walletBalance: number;
+  logoUrl?: string;
   userCount: number;
   ownerId?: OrganizationOwner;
   createdAt: string;
@@ -151,6 +152,38 @@ export const allocateBudgetToUser = async (
   });
 };
 
+// עריכת פרטי משתמש בתוך הארגון (שם / פעיל-לא פעיל בלבד - לא תקציב, ראו
+// updateOrganizationMember ב-organizationService.ts בשרת)
+export const updateOrganizationMember = async (
+  orgId: string,
+  userId: string,
+  data: { name?: string; isActive?: boolean }
+): Promise<{ success: boolean; user: OrganizationUser }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.member(orgId, userId), {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+};
+
+// חלוקה שווה של יתרת ארנק הארגון בין כל חברי הארגון (לא כולל הבעלים)
+export const distributeOrganizationBudgetEqually = async (
+  orgId: string
+): Promise<{ success: boolean; walletBalance: number; memberCount: number; perMemberAmount: number }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.distributeBudget(orgId), { method: "POST" });
+};
+
+// הוספת משתמש קיים שאינו משויך לארגון אחר, לפי כתובת אימייל
+export const addUserByEmailToOrganization = async (
+  orgId: string,
+  email: string,
+  role: string = "user"
+): Promise<{ success: boolean; message: string; organization: AdminOrganization }> => {
+  return apiCall(API_ENDPOINTS.adminOrganizations.userByEmail(orgId), {
+    method: "POST",
+    body: JSON.stringify({ email, role }),
+  });
+};
+
 export interface OrganizationFundingRequest {
   _id: string;
   organizationId: string;
@@ -196,7 +229,7 @@ export const resolveFundingRequest = async (
 // עדכון שם/תיאור הארגון
 export const updateOrganizationDetails = async (
   id: string,
-  data: { name: string; description: string }
+  data: { name: string; description: string; logoUrl?: string }
 ): Promise<{ organization: AdminOrganization }> => {
   return apiCall(API_ENDPOINTS.adminOrganizations.detail(id), {
     method: "PUT",
