@@ -511,9 +511,11 @@ export const createComment = async (req: Request, res: Response) => {
 export const deleteCommentByAdmin = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
-    const { userId } = req.body; 
+    // הזהות נלקחת מה-JWT (requireAdmin כבר אימת אותו), לא מגוף הבקשה -
+    // אחרת כל מי שיודע את ה-userId של מנהל היה יכול להתחזות אליו בלי טוקן.
+    const adminUserId = (req as any).user?.userId;
 
-    const user = await User.findById(userId);
+    const user = await User.findById(adminUserId);
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ message: 'אין לך הרשאה לבצע פעולה זו. מורשה למנהלים בלבד.' });
     }
@@ -535,8 +537,8 @@ export const deleteCommentByAdmin = async (req: Request, res: Response) => {
     logger.error('Failed to delete comment as admin', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       commentId: req.params.commentId,
     });
@@ -546,10 +548,13 @@ export const deleteCommentByAdmin = async (req: Request, res: Response) => {
 
 export const moderatePost = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params; 
-    const { userId, actionType } = req.body; 
+    const { id } = req.params;
+    const { actionType } = req.body;
+    // הזהות נלקחת מה-JWT (requireAdmin כבר אימת אותו), לא מגוף הבקשה -
+    // אחרת כל מי שיודע את ה-userId של מנהל היה יכול להתחזות אליו בלי טוקן.
+    const adminUserId = (req as any).user?.userId;
 
-    const user = await User.findById(userId);
+    const user = await User.findById(adminUserId);
     if (!user || user.role !== 'admin') {
       return res.status(403).json({ message: 'פעולה זו מורשית למנהלי מערכת בלבד' });
     }
@@ -595,8 +600,8 @@ export const moderatePost = async (req: Request, res: Response) => {
     logger.error('Failed to moderate post', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       postId: req.params.id,
       actionType: req.body.actionType,
@@ -607,8 +612,11 @@ export const moderatePost = async (req: Request, res: Response) => {
 
 export const ratePost = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params; 
-    const { userId, rating } = req.body; 
+    const { id } = req.params;
+    const { rating } = req.body;
+    // דירוג דורש התחברות (הנתיב מוגן ב-authenticateToken) - הזהות נלקחת
+    // מה-JWT, לא מגוף הבקשה, כדי שאורח לא יוכל לדרג בשם משתמש כלשהו.
+    const userId = (req as any).user?.userId;
 
     const ratingNum = Number(rating);
     if (!ratingNum || ratingNum < 1 || ratingNum > 5) {
@@ -647,8 +655,8 @@ export const ratePost = async (req: Request, res: Response) => {
     logger.error('Failed to rate post', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       postId: req.params.id,
       rating: req.body.rating,

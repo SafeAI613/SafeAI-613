@@ -50,20 +50,21 @@ export function generateAiAssistance(mode: string, content: string): Promise<Res
   });
 }
 
-export function moderatePost(postId: string, userId: string, actionType: string): Promise<Response> {
-  return fetch(`${API_BASE_URL}/api/posts/${postId}/moderation`, {
+// מוגבל למנהלי מערכת בשרת - חייב טוקן תקף, לא רק לשלוח userId בגוף הבקשה
+export function moderatePost(postId: string, actionType: string): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/posts/${postId}/moderation`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, actionType }),
+    body: JSON.stringify({ actionType }),
   });
 }
 
-export function ratePost(postId: string, userId: string | undefined, rating: number): Promise<Response> {
-  return fetch(`${API_BASE_URL}/api/posts/${postId}/rate`, {
+// דורש התחברות בשרת - אורח לא יכול לדרג פוסט
+export function ratePost(postId: string, rating: number): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/posts/${postId}/rate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ userId, rating }),
+    body: JSON.stringify({ rating }),
   });
 }
 
@@ -85,11 +86,10 @@ export function createComment(postId: string | undefined, payload: unknown): Pro
   });
 }
 
-export function deleteComment(commentId: string, userId: string | undefined): Promise<Response> {
-  return fetch(`${API_BASE_URL}/api/posts/comment/${commentId}`, {
+// מוגבל למנהלי מערכת בשרת - חייב טוקן תקף, לא רק לשלוח userId בגוף הבקשה
+export function deleteComment(commentId: string): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/posts/comment/${commentId}`, {
     method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId }),
   });
 }
 

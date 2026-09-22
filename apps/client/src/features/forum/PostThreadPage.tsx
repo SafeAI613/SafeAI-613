@@ -157,7 +157,7 @@ export const PostThreadPage: React.FC = () => {
     if (!window.confirm('האם את בטוחה שברצונך למחוק תגובה זו לצמיתות?')) return;
 
     try {
-      const response = await deleteComment(commentId, currentUser?._id);
+      const response = await deleteComment(commentId);
 
       if (response.ok) {
         setComments((prev) => prev.filter((comment) => comment._id !== commentId));
@@ -256,7 +256,7 @@ export const PostThreadPage: React.FC = () => {
     setUserRating(selectedRating);
 
     try {
-      const response = await ratePost(post._id, currentUser?._id, selectedRating);
+      const response = await ratePost(post._id, selectedRating);
 
       if (response.ok) {
         const data = await response.json();
