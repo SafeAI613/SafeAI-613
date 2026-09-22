@@ -99,6 +99,35 @@ export function fetchTags(): Promise<Response> {
   return fetch(`${API_BASE_URL}/api/tags`);
 }
 
+// --- קטגוריות ---
+
+export function fetchCategories(): Promise<Response> {
+  return fetch(`${API_BASE_URL}/api/categories`);
+}
+
+// שלוש הפעולות הבאות הן ניהול קטגוריות - מוגבל למנהלי מערכת בשרת
+export function createCategory(name: string): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function updateCategory(id: string, name: string): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/categories/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function deleteCategory(id: string): Promise<Response> {
+  return authFetch(`${API_BASE_URL}/api/categories/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // --- העלאת קבצים ---
 
 export function getUploadUrl(
