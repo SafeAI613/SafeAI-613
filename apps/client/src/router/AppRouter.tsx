@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import LandingPage from "../pages/LandingPage";
 import LandingPageV2 from "../pages/LandingPageV2";
 import SafeAIUIPage from "../pages/SafeAIUIPage";
 import NotFound from "../pages/NotFound";
@@ -100,9 +99,9 @@ export default function AppRouter() {
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        {/* טיוטת דף בית חדש (SCRUM-227) — לתצוגה מקדימה בלבד, טרם מוחלף בנתיב הראשי */}
-        <Route path="/landing-preview" element={<LandingPageV2 />} />
+        {/* דף הבית החדש (SCRUM-227) הוחלף לנתיב הראשי; /landing-preview נשמר כהפניה למי שיש לו קישור ישן */}
+        <Route path="/" element={<LandingPageV2 />} />
+        <Route path="/landing-preview" element={<Navigate to="/" replace />} />
         <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
 
         <Route
@@ -201,9 +200,10 @@ export default function AppRouter() {
           }
         />
 
-        {/* Sub-homepages (SCRUM-228 / SCRUM-229) — not yet linked from the
-            main navigation; the SafeAI Hub / SafeAI Platform banners on
-            /landing-preview stay "בעדכון" until that connection is made. */}
+        {/* Sub-homepages (SCRUM-228 / SCRUM-229) — the two content branches
+            reached from the SafeAI Hub / SafeAI Platform banners on the
+            main homepage ("/"). Purely visual/content separation for the
+            same audience (SCRUM-227): no per-branch access control here. */}
         <Route
           path="/safeai-hub"
           element={

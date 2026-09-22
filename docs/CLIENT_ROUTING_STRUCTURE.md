@@ -6,14 +6,23 @@
 
 ## דפים עיקריים
 
-### 1. **LandingPage** (`/`)
-- **תיאור**: דף הנחיתה הראשי של האתר
+### 1. **LandingPageV2** (`/`)
+- **תיאור**: דף הבית הראשי של האתר (SCRUM-227), מסתעף לשני דפי בית פנימיים
 - **גישה**: ציבורי
 - **תכונות**:
-  - אודות החברה (AboutCompany)
-  - המוצרים שלנו (Products)
+  - דרופדאון "המוצרים שלנו", חיפוש, וסטטיסטיקות ציבוריות חיות (`/public-stats`)
+  - שני באנרים שמובילים לענפי התוכן: **SafeAI Hub** ו-**SafeAI Platform** — ראו סעיף "דפי בית פנימיים" למטה
   - כפתורי התחברות והרשמה בניווט
-- **שינויים**: הוסר `AuthForm` הישן, הוחלף בכפתורי ניווט ל-`/login` ו-`/register`
+- **הערה**: הדף הישן `LandingPage` (`pages/LandingPage.tsx`) הוסר מהניתוב הראשי; הנתיב `/landing-preview` (שבו LandingPageV2 שירת בעבר כתצוגה מקדימה בלבד) הפך להפניה (`redirect`) ל-`/`
+
+### 1א. דפי בית פנימיים (SCRUM-228 / SCRUM-229)
+
+| נתיב | קומפוננטה | גישה | תוכן |
+|---|---|---|---|
+| `/safeai-hub` | `SafeAIHubHomePage` | ProtectedRoute | פורום/קורסים/מדריכים/פרויקטים/חדשות |
+| `/safeai-platform` | `SafeAIPlatformHomePage` | ProtectedRoute | תיעוד/מפתחות API/אזור אישי/יצירת קשר |
+
+שני הענפים מיועדים **לאותו קהל משתמשים** — זו הפרדה חזותית/תוכנית בלבד בין שני תחומי עניין, לא פיצול הרשאות. שניהם משתמשים ב-`DashboardSidebar` המשותף (`features/dashboard/`) וניגשים דרך אותו guard (`handleProtectedNav` ב-`LandingPageV2`) שמשמש לכל שאר הדפים המוגנים בעמוד הבית.
 
 ### 2. **SafeAIUIPage** (`/safeai-ui`)
 - **תיאור**: דשבורד ראשי למשתמשים מחוברים
@@ -113,14 +122,19 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 ## מבנה הניתוב המלא
 
 ```
-/                           → LandingPage (ציבורי)
+/                           → LandingPageV2 (ציבורי)
+/landing-preview            → redirect → /
 /login                      → LoginForm (PublicRoute)
 /register                   → RegisterForm (PublicRoute)
 /verify-email/:token        → EmailVerification (ציבורי)
 /api-key-display            → ApiKeyDisplay (ProtectedRoute)
 /safeai-ui                  → SafeAIUIPage (ProtectedRoute)
+/safeai-hub                 → SafeAIHubHomePage (ProtectedRoute)
+/safeai-platform            → SafeAIPlatformHomePage (ProtectedRoute)
 /*                          → NotFound (404)
 ```
+
+> הרשימה לעיל מתמקדת בדפי הבית ובאימות. ה-router המלא (`apps/client/src/router/AppRouter.tsx`) כולל נתיבים נוספים רבים (פורום, חדשות, לוח פרויקטים, סוכנים, ארגונים ועוד) שאינם מתועדים כאן.
 
 ## זרימת משתמש (User Flow)
 
@@ -207,6 +221,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 ---
 
-**תאריך עדכון**: 27/03/2026  
-**גרסה**: 2.0  
+**תאריך עדכון**: 22/09/2026
+**גרסה**: 2.1
 **מחבר**: AI Assistant
