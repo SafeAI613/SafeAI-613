@@ -291,7 +291,6 @@ export default function ManageTenderDetails({
               <AiThinkingLoader color="#ffffff" />
             ) : (
               <>
-                <span>✨</span>
                 {specification?.status === 'ready' || specification?.status === 'failed'
                   ? 'הפק אפיון מחדש'
                   : 'צור אפיון ראשוני והמלצת פיתוח'}
