@@ -43,16 +43,24 @@ export const getPosts = async (req: Request, res: Response) => {
     const limit = 10; // הגדרה קבועה של 10 פוסטים לעמוד
     const skip = (page - 1) * limit; // חישוב כמה פוסטים לדלג עליהם
 
+    // סינון לפי דירוג מינימלי (כוכבים) - אופציונלי, לשימוש משתמשים רגילים
+    // בעמוד הפורום. ערך לא תקין (מחוץ לטווח 1-5) פשוט מתעלם מהסינון.
+    const minRatingNum = Number(req.query.minRating);
+    const hasMinRatingFilter = Number.isFinite(minRatingNum) && minRatingNum >= 1 && minRatingNum <= 5;
+
     const filterQuery: any = {};
     if (userRole !== 'admin') {
       filterQuery.isBlocked = { $ne: true };
     }
+    if (hasMinRatingFilter) {
+      filterQuery.averageRating = { $gte: minRatingNum };
+    }
 
     // Cache קצר-טווח (10 שניות) לרשימת הפוסטים - זה הנתיב הכי נטען באתר,
-    // וכל המשתמשות עם אותו userRole מקבלות תוצאה זהה לאותו עמוד. חלון
-    // זמן קצר כזה משמעו שפוסט חדש יופיע כמעט מיידית, אבל בעומס גבוה
+    // וכל המשתמשות עם אותו userRole+minRating מקבלות תוצאה זהה לאותו עמוד.
+    // חלון זמן קצר כזה משמעו שפוסט חדש יופיע כמעט מיידית, אבל בעומס גבוה
     // (הרבה כניסות בבת אחת) רוב הבקשות נענות מהזיכרון ולא ממסד הנתונים.
-    const listCacheKey = `posts-list:${page}:${userRole || 'user'}`;
+    const listCacheKey = `posts-list:${page}:${userRole || 'user'}:${hasMinRatingFilter ? minRatingNum : 'all'}`;
     const cachedList = recommendationCache.get(listCacheKey);
     if (cachedList) {
       return res.status(200).json(cachedList);
@@ -431,6 +439,11 @@ export const searchPosts = async (req: Request, res: Response) => {
       searchFilter.isBlocked = { $ne: true };
     }
 
+    const minRatingNum = Number(req.query.minRating);
+    if (Number.isFinite(minRatingNum) && minRatingNum >= 1 && minRatingNum <= 5) {
+      searchFilter.averageRating = { $gte: minRatingNum };
+    }
+
     const postsWithDetails = await Post.aggregate(
       buildPostListPipeline(searchFilter)
     );
@@ -445,6 +458,7 @@ export const searchPosts = async (req: Request, res: Response) => {
       requestId: (req as any).requestId,
       query: req.query.query,
       userRole: req.query.userRole,
+      minRating: req.query.minRating,
     });
     res.status(500).json({ message: 'שגיאה בביצוע החיפוש' });
   }
