@@ -126,17 +126,20 @@ export default function ContactPage() {
     console.log(`[attachment-upload ${id}] start (size=${file.size}, type=${type})`);
     try {
       console.log(`[attachment-upload ${id}] requesting presigned S3 URL...`);
-      const urlResponse = await withTimeout(
-        fetch(API_ENDPOINTS.upload.getUrl, {
+      // POST /api/upload/get-url requires authentication - must go through
+      // apiCall() (which attaches the Authorization header and refreshes an
+      // expired token) rather than a bare fetch(), or this always 401s. A
+      // 401 here was silently masked by the MongoDB fallback below, so every
+      // attachment was quietly going through the slow/size-capped path
+      // instead of S3.
+      const { uploadUrl, fileUrl } = await withTimeout(
+        apiCall<{ uploadUrl: string; fileUrl: string }>(API_ENDPOINTS.upload.getUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fileName: file.name, fileType: file.type }),
         }),
         UPLOAD_STEP_TIMEOUT_MS,
         "בקשת קישור מאובטח",
       );
-      if (!urlResponse.ok) throw new Error("נכשלה קבלת קישור מאובטח מהשרת");
-      const { uploadUrl, fileUrl } = await urlResponse.json();
 
       console.log(`[attachment-upload ${id}] uploading to S3...`);
       const s3Response = await withTimeout(
