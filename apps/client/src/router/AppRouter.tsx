@@ -44,6 +44,8 @@ import PaymeResultPage from '../features/organizations/PaymeResultPage';
 import OrganizationInvoicesPage from '../features/organizations/pages/OrganizationInvoicesPage';
 import SafeAIHubHomePage from "../pages/SafeAIHubHomePage";
 import SafeAIPlatformHomePage from "../pages/SafeAIPlatformHomePage";
+import HubTeaserPage from "../pages/HubTeaserPage";
+import PlatformTeaserPage from "../pages/PlatformTeaserPage";
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -78,7 +80,7 @@ const ROUTER_BASE = import.meta.env.VITE_BASE_PATH?.replace(/\/$/, "") || "";
 // complete sidebar navigation — showing the global header/banner above them
 // too just duplicates every link a second time. Hidden only on these two
 // routes; every other page keeps the global chrome unchanged.
-const ROUTES_WITHOUT_GLOBAL_CHROME = ["/safeai-hub", "/safeai-platform"];
+const ROUTES_WITHOUT_GLOBAL_CHROME = ["/safeai-hub", "/safeai-platform", "/hub", "/platform"];
 
 function GlobalChrome() {
   const location = useLocation();
@@ -102,6 +104,9 @@ export default function AppRouter() {
         {/* דף הבית החדש (SCRUM-227) הוחלף לנתיב הראשי; /landing-preview נשמר כהפניה למי שיש לו קישור ישן */}
         <Route path="/" element={<LandingPageV2 />} />
         <Route path="/landing-preview" element={<Navigate to="/" replace />} />
+        {/* Pre-login "teaser" pages for the two gateway worlds (SCRUM-228/229) */}
+        <Route path="/hub" element={<HubTeaserPage />} />
+        <Route path="/platform" element={<PlatformTeaserPage />} />
         <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
 
         <Route
@@ -201,9 +206,9 @@ export default function AppRouter() {
         />
 
         {/* Sub-homepages (SCRUM-228 / SCRUM-229) — the two content branches
-            reached from the SafeAI Hub / SafeAI Platform banners on the
-            main homepage ("/"). Purely visual/content separation for the
-            same audience (SCRUM-227): no per-branch access control here. */}
+            reached after login, via /hub or /platform for a logged-out
+            visitor. Purely visual/content separation for the same audience
+            (SCRUM-227): no per-branch access control here. */}
         <Route
           path="/safeai-hub"
           element={

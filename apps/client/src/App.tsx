@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import "./styles/design-system.css";
+import "./styles/auth-form.css";
 import './App.css'
 import AppRouter from './router/AppRouter'
 import { AuthProvider } from './context/AuthContext'

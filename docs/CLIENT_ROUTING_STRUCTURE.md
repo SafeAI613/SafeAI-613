@@ -6,23 +6,29 @@
 
 ## דפים עיקריים
 
-### 1. **LandingPageV2** (`/`)
-- **תיאור**: דף הבית הראשי של האתר (SCRUM-227), מסתעף לשני דפי בית פנימיים
+### 1. **LandingPageV2** (`/`) — Gateway
+- **תיאור**: דף בית ראשי, שיווקי וניטרלי (SCRUM-227) — אינו משויך לאף אחד משני העולמות. תפקידו היחיד הוא להציג את שני הכרטיסים (SafeAI Hub / SafeAI Platform) ולתת לבוחר להחליט; אין כאן דרופדאון מוצרים, חיפוש או באנר נפרד לפורום/תיעוד — תכנים אלה פנימיים לכל עולם ונגישים דרך ה-sidebar שלו.
 - **גישה**: ציבורי
-- **תכונות**:
-  - דרופדאון "המוצרים שלנו", חיפוש, וסטטיסטיקות ציבוריות חיות (`/public-stats`)
-  - שני באנרים שמובילים לענפי התוכן: **SafeAI Hub** ו-**SafeAI Platform** — ראו סעיף "דפי בית פנימיים" למטה
-  - כפתורי התחברות והרשמה בניווט
-- **הערה**: הדף הישן `LandingPage` (`pages/LandingPage.tsx`) הוסר מהניתוב הראשי; הנתיב `/landing-preview` (שבו LandingPageV2 שירת בעבר כתצוגה מקדימה בלבד) הפך להפניה (`redirect`) ל-`/`
+- **זרימה**: לחיצה על כרטיס Hub/Platform → אם המשתמש כבר מחובר, ניווט ישיר ל-`/safeai-hub` / `/safeai-platform`; אחרת ניווט ל-"טעימה" הציבורית (`/hub` / `/platform`, ראו 1א)
+- **הערה**: הדף הישן `LandingPage` (`pages/LandingPage.tsx`) הוסר מהניתוב הראשי (עדיין קיים כקובץ יתום); הנתיב `/landing-preview` הפך להפניה (`redirect`) ל-`/`
 
-### 1א. דפי בית פנימיים (SCRUM-228 / SCRUM-229)
+### 1א. דפי טעימה ציבוריים (SCRUM-228 / SCRUM-229)
+
+| נתיב | קומפוננטה | גישה | תוכן |
+|---|---|---|---|
+| `/hub` | `HubTeaserPage` | ציבורי | תצוגה מקדימה של Hub (פוסטי פורום אחרונים) + כפתור "התחבר והמשך ל-Hub" |
+| `/platform` | `PlatformTeaserPage` | ציבורי | תצוגה מקדימה של יכולות Platform + כפתור "התחבר והמשך ל-Platform" |
+
+שני הדפים צבועים לפי היעד (כתום ל-Hub, כחול ל-Platform, דרך המחלקות `theme-hub`/`theme-platform` ב-`landing-page-v2.css`) וכפתור ההתחברות שלהם מוביל ל-`/login?next=/safeai-hub` (או `/safeai-platform`), שם `LoginForm` מזהה את היעד מתוך `next` ומציג טופס באותו צבע (ראו `styles/auth-form.css`).
+
+### 1ב. דפי בית פנימיים (SCRUM-228 / SCRUM-229)
 
 | נתיב | קומפוננטה | גישה | תוכן |
 |---|---|---|---|
 | `/safeai-hub` | `SafeAIHubHomePage` | ProtectedRoute | פורום/קורסים/מדריכים/פרויקטים/חדשות |
 | `/safeai-platform` | `SafeAIPlatformHomePage` | ProtectedRoute | תיעוד/מפתחות API/אזור אישי/יצירת קשר |
 
-שני הענפים מיועדים **לאותו קהל משתמשים** — זו הפרדה חזותית/תוכנית בלבד בין שני תחומי עניין, לא פיצול הרשאות. שניהם משתמשים ב-`DashboardSidebar` המשותף (`features/dashboard/`) וניגשים דרך אותו guard (`handleProtectedNav` ב-`LandingPageV2`) שמשמש לכל שאר הדפים המוגנים בעמוד הבית.
+שני הענפים מיועדים **לאותו קהל משתמשים** — זו הפרדה חזותית/תוכנית בלבד בין שני תחומי עניין, לא פיצול הרשאות. שניהם משתמשים ב-`DashboardSidebar` המשותף (`features/dashboard/`), כל אחד עם המחלקה `theme-hub`/`theme-platform` משלו לצביעת ה-sidebar וה-stat tiles.
 
 ### 2. **SafeAIUIPage** (`/safeai-ui`)
 - **תיאור**: דשבורד ראשי למשתמשים מחוברים
@@ -122,8 +128,10 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 ## מבנה הניתוב המלא
 
 ```
-/                           → LandingPageV2 (ציבורי)
+/                           → LandingPageV2 — Gateway (ציבורי)
 /landing-preview            → redirect → /
+/hub                        → HubTeaserPage (ציבורי)
+/platform                   → PlatformTeaserPage (ציבורי)
 /login                      → LoginForm (PublicRoute)
 /register                   → RegisterForm (PublicRoute)
 /verify-email/:token        → EmailVerification (ציבורי)
@@ -221,6 +229,6 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 ---
 
-**תאריך עדכון**: 22/09/2026
-**גרסה**: 2.1
+**תאריך עדכון**: 24/09/2026
+**גרסה**: 2.2
 **מחבר**: AI Assistant
