@@ -123,7 +123,7 @@ export default function SafeAIPlatformHomePage() {
   }, [navigate]);
 
   return (
-    <div className="landing-v2 dash-page" dir="rtl">
+    <div className="landing-v2 dash-page theme-platform" dir="rtl">
       <DashboardSidebar
         homeLabel="SafeAI Platform"
         items={SIDEBAR_ITEMS}

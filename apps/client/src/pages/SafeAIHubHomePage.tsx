@@ -87,7 +87,7 @@ export default function SafeAIHubHomePage() {
   }, [navigate]);
 
   return (
-    <div className="landing-v2 dash-page" dir="rtl">
+    <div className="landing-v2 dash-page theme-hub" dir="rtl">
       <DashboardSidebar
         homeLabel="SafeAI Hub"
         items={SIDEBAR_ITEMS}
