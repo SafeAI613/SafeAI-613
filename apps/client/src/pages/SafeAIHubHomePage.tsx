@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/landing-page-v2.css";
-import "../styles/dashboard-pages.css";
 import { useAuth } from "../context/authStore";
 import { API_ENDPOINTS, apiCall } from "../config/api";
-import { ChatIcon, BookIcon, CompassIcon, ClipboardIcon, NewsIcon, ShieldIcon } from "../features/landing/icons";
-import DashboardSidebar from "../features/dashboard/DashboardSidebar";
+import { ChatIcon, NewsIcon } from "../features/landing/icons";
 import FeedList, { type FeedItem } from "../features/dashboard/FeedList";
 
 interface ForumPost {
@@ -25,14 +22,6 @@ interface NewsItem {
   content: string;
   createdAt: string;
 }
-
-const SIDEBAR_ITEMS = [
-  { key: "forum", icon: <ChatIcon size={18} />, label: "פורום", path: "/forum" },
-  { key: "courses", icon: <BookIcon size={18} />, label: "קורסים", path: "/courses" },
-  { key: "guides", icon: <CompassIcon size={18} />, label: "מדריכים מומלצים", path: "/recommended-guides" },
-  { key: "tenders", icon: <ClipboardIcon size={18} />, label: "לוח פרויקטים", path: "/tender-board" },
-  { key: "news", icon: <NewsIcon size={18} />, label: "חדשות AI", path: "/ai-news" },
-];
 
 function truncate(text: string, maxLength: number): string {
   return text.length <= maxLength ? text : `${text.slice(0, maxLength).trimEnd()}…`;
@@ -87,37 +76,29 @@ export default function SafeAIHubHomePage() {
   }, [navigate]);
 
   return (
-    <div className="landing-v2 dash-page theme-hub" dir="rtl">
-      <DashboardSidebar
-        homeLabel="SafeAI Hub"
-        items={SIDEBAR_ITEMS}
-        crossLink={{ icon: <ShieldIcon size={18} />, label: "SafeAI Platform", path: "/safeai-platform" }}
-      />
+    <>
+      <span className="dash-eyebrow">SafeAI Hub</span>
+      <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
+      <p className="dash-subtitle">כל המשאבים למתכנתים במקום אחד — פורום, קורסים, מדריכים, פרויקטים וחדשות.</p>
 
-      <div className="dash-main">
-        <span className="dash-eyebrow">SafeAI Hub</span>
-        <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
-        <p className="dash-subtitle">כל המשאבים למתכנתים במקום אחד — פורום, קורסים, מדריכים, פרויקטים וחדשות.</p>
-
-        <div className="dash-feeds-lead">
-          <FeedList
-            title="פוסטים אחרונים בפורום"
-            items={postItems}
-            loading={postsLoading}
-            failed={postsFailed}
-            emptyLabel="אין עדיין פוסטים בפורום."
-            variant="cards"
-          />
-          <FeedList
-            title="עדכונים"
-            items={newsItems}
-            loading={newsLoading}
-            failed={newsFailed}
-            emptyLabel="אין עדכונים חדשים כרגע."
-            variant="updates"
-          />
-        </div>
+      <div className="dash-feeds-lead">
+        <FeedList
+          title="פוסטים אחרונים בפורום"
+          items={postItems}
+          loading={postsLoading}
+          failed={postsFailed}
+          emptyLabel="אין עדיין פוסטים בפורום."
+          variant="cards"
+        />
+        <FeedList
+          title="עדכונים"
+          items={newsItems}
+          loading={newsLoading}
+          failed={newsFailed}
+          emptyLabel="אין עדכונים חדשים כרגע."
+          variant="updates"
+        />
       </div>
-    </div>
+    </>
   );
 }

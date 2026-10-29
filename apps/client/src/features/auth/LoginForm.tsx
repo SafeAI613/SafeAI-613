@@ -6,6 +6,7 @@ import { startActivityTracking } from "../../utils/tokenManager";
 import ProfileSelectionModal from "../../components/ProfileSelectionModal";
 import { AUTH_ERROR_CODE_KEYS } from "../../i18n/authErrorCodes";
 import { useAuth } from "../../context/authStore";
+import { ROUTES, safeNextPath } from "../../router/paths";
 
 interface LoginFormData {
   email: string;
@@ -36,18 +37,16 @@ export default function LoginForm() {
   const [searchParams] = useSearchParams();
   const { setUser } = useAuth();
 
-  // Where to send the user after they authenticate — carried in from the
-  // landing page's login-destination dropdown (SCRUM-227). Only a same-site
-  // relative path is honored, to rule out an open-redirect via this param.
-  const nextParam = searchParams.get("next");
-  const postLoginDestination =
-    nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/safeai-ui";
+  // Where to send the user after they authenticate: back to the page that
+  // sent them here (`?next=`), else the gateway home page. safeNextPath only
+  // honors a same-site relative path, to rule out an open-redirect.
+  const postLoginDestination = safeNextPath(searchParams.get("next"));
 
-  // Arriving from a gateway world's teaser page (SCRUM-228/229): brand the
-  // form to that destination instead of showing a generic login screen.
-  const flavor: "hub" | "platform" | null = postLoginDestination.startsWith("/safeai-hub")
+  // Arriving from one of the platforms (SCRUM-228/229): brand the form to
+  // that destination instead of showing a generic login screen.
+  const flavor: "hub" | "platform" | null = postLoginDestination.startsWith(ROUTES.hub.root)
     ? "hub"
-    : postLoginDestination.startsWith("/safeai-platform")
+    : postLoginDestination.startsWith(ROUTES.platform.root)
       ? "platform"
       : null;
 
