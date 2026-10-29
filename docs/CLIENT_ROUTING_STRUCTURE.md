@@ -68,7 +68,21 @@
 /platform/changelog             → ActivityLogPage
 /platform/api-key-created       → ApiKeyDisplay (הצגה חד-פעמית של מפתח חדש; המפתח מגיע ב-navigation state)
 
-/hub                      → SafeAIHubHomePage (ציבורי)
+/hub                            → SafeAIHubHomePage
+/hub/news, /hub/news/:id        → AiNewsPage, AiNewsDetailsPage
+/hub/forum, /hub/forum/:id      → ForumPage, PostThreadPage
+/hub/articles, /hub/articles/:slug → ArticlesPage, ArticlePage
+/hub/courses                    → CoursesPage
+/hub/guides                     → RecommendedGuidesPage
+/hub/projects                   → TenderBoardPage (לוח פרויקטים)
+/hub/agents                     → AgentsIndexPage (layout עם טאבים) + AgentsMarketplace
+/hub/agents/submit              → AgentSubmitPage (מוגן)
+/hub/agents/stats               → AgentStatsPage
+/hub/agents/:id                 → AgentDetailPage
+/hub/agents/download            → AgentDownloadsPage (הורדת אפליקציית הסוכנים)
+/hub/admin/articles             → AdminArticlesPage (מוגן; השרת אוכף admin)
+
+כל `/hub/*` ציבורי לקריאה, חוץ מהגשת סוכן וניהול מאמרים (מוגנים). `HubLayout` עוטף את התוכן ב-`ErrorBoundary` שמתאפס במעבר דף, ומציג לאורחים קישור "התחברות" שמחזיר לאותו דף.
 
 כל `/platform/*` (חוץ מ-`/platform` עצמו) מוגן ומוצג בתוך `PlatformLayout`, שעוטף את התוכן ב-`ErrorBoundary` אחד שמתאפס במעבר דף.
 
@@ -86,6 +100,15 @@
 /organization/invoices    → /platform/organization/invoices
 /activity-log             → /platform/changelog
 /api-key-display          → /platform/api-key-created
+/forum, /forum/post/:id   → /hub/forum, /hub/forum/:id
+/ai-news, /ai-news/:id    → /hub/news, /hub/news/:id
+/docs, /docs/:slug        → /hub/articles, /hub/articles/:slug
+/courses                  → /hub/courses
+/recommended-guides       → /hub/guides
+/tender-board             → /hub/projects   (מקושר גם ממיילים של השרת, עם query)
+/agents-marketplace[/...] → /hub/agents[/...]
+/download-agents          → /hub/agents/download
+/admin/articles           → /hub/admin/articles
 ```
 
 שאר הדפים עדיין בנתיבים הישנים תחת `SiteLayout`, עד שיועברו לפי התוכנית למטה.
@@ -94,5 +117,5 @@
 
 1. **תשתית** ✅ — `ROUTES`, guards עם `next`, layouts לכל פלטפורמה, מנגנון הפניות, דפי הבית של שתי הפלטפורמות.
 2. **Platform** ✅ — העברת האזור האישי (`/safeai-ui` והטאבים שלו), מפתחות API, בקשות, חשבוניות ארגון, ניהול מערכת (`/platform/admin/*`), ו-`/activity-log` כ-changelog של הפלטפורמה (`/platform/changelog`).
-3. **Hub** — העברת חדשות, פורום, מאמרים (`/docs`), קורסים, מדריכים מומלצים, לוח פרויקטים, מרקטפלייס הסוכנים והורדת הסוכנים, וניהול תוכן (`/hub/admin/*`). קריאה ציבורית בכל אלה.
-4. **ניקוי** — הסרת קוד מת (`layout/AppLayout.tsx`, `layout/Sidebar.tsx`, `GoogleAuthCallback`, `DocsPage` הישן), איחוד הניווט העליון, ועדכון המסמך הזה.
+3. **Hub** ✅ — העברת חדשות, פורום, מאמרים (`/docs`), קורסים, מדריכים מומלצים, לוח פרויקטים, מרקטפלייס הסוכנים והורדת הסוכנים, וניהול תוכן (`/hub/admin/*`). קריאה ציבורית בכל אלה.
+4. **ניקוי** — הסרת קוד מת (`layout/AppLayout.tsx`, `layout/Sidebar.tsx`, `GoogleAuthCallback`, `AuthForm`, `DocsPage` הישן ב-`/docs-old`), איחוד הניווט העליון, ועדכון המסמך הזה.

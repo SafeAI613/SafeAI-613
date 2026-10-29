@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link, generatePath, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
@@ -23,6 +23,7 @@ import type { Post, Comment } from './types';
 import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
+import { ROUTES } from "../../router/paths";
 
 // Builds a meta description of roughly 160 characters, without cutting a
 // word in half - post.content is plain text (rendered unescaped as a React
@@ -222,7 +223,7 @@ export const PostThreadPage: React.FC = () => {
         setComments((prevComments) => [...prevComments, savedComment]);
         editor.commands.clearContent();
         setSelectedFile(null);
-        navigate('/forum');
+        navigate(ROUTES.hub.forum);
       } else {
         const errData = await response.json();
         showAlert(`שגיאת שרת: ${errData.message || 'לא ניתן לשמור תגובה'}`, { type: 'error' });
@@ -453,7 +454,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
       />
 
       <button
-        onClick={() => navigate('/forum')}
+        onClick={() => navigate(ROUTES.hub.forum)}
         className="forum-back-btn"
       >
         ← חזרה לפורום
@@ -798,7 +799,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               <div
                 key={p._id}
                 onClick={() => {
-                  navigate(`/forum/post/${p._id}`);
+                  navigate(generatePath(ROUTES.hub.forumPost, { id: p._id }));
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="forum-thread-recommendation-card"

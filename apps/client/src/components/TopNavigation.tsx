@@ -97,10 +97,10 @@ export default function TopNavigation() {
               <Link to="/about" className="top-nav-link">
                 {t("nav.why")}
               </Link>
-              <Link to="/courses" className="top-nav-link">
+              <Link to={ROUTES.hub.courses} className="top-nav-link">
                {t("nav.courses")}
               </Link>
-              <Link to="/forum" className="top-nav-link">
+              <Link to={ROUTES.hub.forum} className="top-nav-link">
                 פורום
               </Link>
 
@@ -129,13 +129,13 @@ export default function TopNavigation() {
                 </button>
                 {showDevMenu && (
                   <div className="dev-menu-dropdown">
-                    <Link to="/docs" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                    <Link to={ROUTES.hub.articles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.docs")}
                     </Link>
                     <Link to="/docs-old" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       מדריך SafeAI
                     </Link>
-                    <Link to="/recommended-guides" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                    <Link to={ROUTES.hub.guides} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.recommendedGuides")}
                     </Link>
                   </div>
@@ -164,15 +164,15 @@ export default function TopNavigation() {
                {t("nav.personalArea")}
               </Link>
               <Link
-                to="/ai-news"
-                className={`top-nav-link ${location.pathname === "/ai-news" ? "active" : ""}`}
+                to={ROUTES.hub.news}
+                className={`top-nav-link ${location.pathname.startsWith(ROUTES.hub.news) ? "active" : ""}`}
               >
                 {t("nav.aiNews")}
               </Link>
-              <Link to="/courses" className="top-nav-link">
+              <Link to={ROUTES.hub.courses} className="top-nav-link">
                 {t("nav.courses")}
               </Link>
-              <Link to="/forum" className="top-nav-link">
+              <Link to={ROUTES.hub.forum} className="top-nav-link">
                 פורום
               </Link>
 
@@ -201,17 +201,17 @@ export default function TopNavigation() {
                 </button>
                 {showDevMenu && (
                   <div className="dev-menu-dropdown">
-                    <Link to="/docs" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                    <Link to={ROUTES.hub.articles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.docs")}
                     </Link>
                     <Link to="/docs-old" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       מדריך SafeAI
                     </Link>
-                    <Link to="/recommended-guides" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                    <Link to={ROUTES.hub.guides} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                       {t("nav.recommendedGuides")}
                     </Link>
                     {userRole === "admin" && (
-                      <Link to="/admin/articles" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
+                      <Link to={ROUTES.hub.adminArticles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
                         ניהול Docs
                       </Link>
                     )}
@@ -222,10 +222,10 @@ export default function TopNavigation() {
               <Link to="/contact" className="top-nav-link">
                 {t("nav.contact")}
               </Link>
-              <Link to="/tender-board" className="top-nav-link">
+              <Link to={ROUTES.hub.projects} className="top-nav-link">
                 {t("nav.tenderBoard")}
               </Link>
-              {/* <Link to="/download-agents" className="top-nav-link">
+              {/* <Link to={ROUTES.hub.agentsDownload} className="top-nav-link">
                 {t("nav.downloadAgents")}
               </Link> */}
 

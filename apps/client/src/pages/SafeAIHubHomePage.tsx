@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authStore";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { ChatIcon, NewsIcon } from "../features/landing/icons";
 import FeedList, { type FeedItem } from "../features/dashboard/FeedList";
+import { ROUTES } from "../router/paths";
 
 interface ForumPost {
   _id: string;
@@ -49,7 +50,7 @@ export default function SafeAIHubHomePage() {
             title: post.title,
             meta: `${post.author?.name || "משתמש"} · ${new Date(post.createdAt).toLocaleDateString("he-IL")}`,
             icon: <ChatIcon size={18} />,
-            onClick: () => navigate(`/forum/post/${post._id}`),
+            onClick: () => navigate(generatePath(ROUTES.hub.forumPost, { id: post._id })),
           })),
         ),
       )
@@ -67,7 +68,7 @@ export default function SafeAIHubHomePage() {
             meta: new Date(item.createdAt).toLocaleDateString("he-IL"),
             description: truncate(item.content, 60),
             icon: <NewsIcon size={14} />,
-            onClick: () => navigate(`/ai-news/${item._id}`),
+            onClick: () => navigate(generatePath(ROUTES.hub.newsItem, { id: item._id })),
           })),
         ),
       )

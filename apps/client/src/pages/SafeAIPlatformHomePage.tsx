@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authStore";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import ChecklistStep from "../features/dashboard/ChecklistStep";
@@ -104,7 +104,7 @@ export default function SafeAIPlatformHomePage() {
             id: item._id,
             title: item.title,
             meta: new Date(item.createdAt).toLocaleDateString("he-IL"),
-            onClick: () => navigate(`/ai-news/${item._id}`),
+            onClick: () => navigate(generatePath(ROUTES.hub.newsItem, { id: item._id })),
           })),
         ),
       )
@@ -132,7 +132,7 @@ export default function SafeAIPlatformHomePage() {
           label="בצע קריאה ראשונה"
           description="לפי המדריך בתיעוד"
           done={!usageLoading && !!usage?.totalRequests}
-          path="/docs"
+          path={ROUTES.hub.articles}
         />
       </div>
 

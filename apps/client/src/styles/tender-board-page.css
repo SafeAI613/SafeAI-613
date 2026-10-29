@@ -156,7 +156,7 @@
 .filters-row {
   display: flex !important;
   flex-direction: row !important;
-  flex-wrap: nowrap !important;       /* מונע מהאלמנטים לרדת שורה בזמן לחיצה */
+  flex-wrap: wrap !important;         /* יורד שורה רק כשאין מקום (למשל ליד הסיידבר של ה-Hub); לשדות רוחב קבוע, כך שאין קפיצות בלחיצה */
   align-items: center !important;     /* יישור אנכי מושלם למרכז השורה */
   justify-content: space-around !important; /* פיזור נקי ומאוזן לרוחב כל המסגרת */
   gap: 20px !important;               /* מרווח קבוע בין פקדי הסינון */

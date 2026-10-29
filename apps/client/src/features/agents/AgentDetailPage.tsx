@@ -9,6 +9,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchAgentById, recordDownload } from "./api/agentsApi";
 import type { Agent } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
+import { ROUTES } from "../../router/paths";
 
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +39,7 @@ export default function AgentDetailPage() {
 
   return (
     <div className="agent-detail">
-      <button className="agent-back-btn" onClick={() => navigate("/agents-marketplace")}>
+      <button className="agent-back-btn" onClick={() => navigate(ROUTES.hub.agents)}>
         ‹ חזרה לגלריה
       </button>
 

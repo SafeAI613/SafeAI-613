@@ -18,11 +18,12 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* content starts at the top of the Hub layout */
   align-items: stretch;
   background: var(--bg-elevated);
   padding: 2rem;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .news-page * {

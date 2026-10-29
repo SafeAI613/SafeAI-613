@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import "../styles/news-page.css";
+import { ROUTES } from "../router/paths";
 
 interface NewsItem {
   _id: string;
@@ -69,13 +70,13 @@ export default function AiNewsDetailsPage() {
   }
 
   if (!news) {
-    return <Navigate to="/ai-news" replace />;
+    return <Navigate to={ROUTES.hub.news} replace />;
   }
 
   return (
     <div className="news-details-page">
       <div className="news-details-container">
-        <Link to="/ai-news" className="news-back-link">
+        <Link to={ROUTES.hub.news} className="news-back-link">
           → חזרה לחדשות
         </Link>
 
@@ -110,7 +111,7 @@ export default function AiNewsDetailsPage() {
         </div>
 
         <div className="news-details-footer">
-          <Link to="/ai-news" className="btn-reset">
+          <Link to={ROUTES.hub.news} className="btn-reset">
             {t("aiNews.backToNewsBtn")}
           </Link>
         </div>

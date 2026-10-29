@@ -1,5 +1,5 @@
 import { useState, type FormEvent, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { useScreenCapture } from "../hooks/useScreenCapture";
 import "../styles/contact-page.css";
@@ -374,12 +374,12 @@ useEffect(() => {
             </p>
             <div className="guides-link-section">
               <p>זקוקים לעזרה? בקרו במרכז המדריכים שלנו:</p>
-              <a
-                href="/docs"
+              <Link
+                to={ROUTES.hub.articles}
                 className="guides-link-button"
               >
                 📚 מדריכי שימוש
-              </a>
+              </Link>
               <a
                 href="https://drive.google.com/drive/folders/1-x8qSkCQRWxfIGyNzjszUW_u3eiggY8b?usp=drive_link"
                 target="_blank"

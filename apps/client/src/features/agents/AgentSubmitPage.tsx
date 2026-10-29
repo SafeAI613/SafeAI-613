@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchManifest, generateIcon, submitAgent } from "./api/agentsApi";
 import type { AgentManifest } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
+import { ROUTES } from "../../router/paths";
 
 type Step = "idle" | "loading-manifest" | "manifest-ready" | "generating-icon" | "submitting" | "done" | "error";
 
@@ -61,7 +62,7 @@ export default function AgentSubmitPage() {
     try {
       await submitAgent(repoUrl.trim(), icon);
       setStep("done");
-      setTimeout(() => navigate("/agents-marketplace"), 1500);
+      setTimeout(() => navigate(ROUTES.hub.agents), 1500);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "שגיאה בשליחת האייג'נט");
       setStep("manifest-ready");

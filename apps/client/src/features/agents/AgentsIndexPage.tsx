@@ -8,11 +8,12 @@
 
 import { NavLink, Outlet } from "react-router-dom";
 import "../../styles/agents.css";
+import { ROUTES } from "../../router/paths";
 
 const TABS = [
-  { to: "/agents-marketplace", label: "🏠 גלריה", end: true },
-  { to: "/agents-marketplace/submit", label: "➕ הוסיפי אייג'נט" },
-  { to: "/agents-marketplace/stats", label: "📊 סטטיסטיקות" },
+  { to: ROUTES.hub.agents, label: "🏠 גלריה", end: true },
+  { to: ROUTES.hub.agentsSubmit, label: "➕ הוסיפי אייג'נט" },
+  { to: ROUTES.hub.agentsStats, label: "📊 סטטיסטיקות" },
 ];
 
 export default function AgentsIndexPage() {
