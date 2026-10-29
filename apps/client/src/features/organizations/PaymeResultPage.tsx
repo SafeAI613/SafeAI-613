@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { ROUTES } from "../../router/paths";
 
 interface WalletTransactionStatus {
   status: "pending" | "completed" | "failed";
@@ -102,7 +103,7 @@ export default function PaymeResultPage() {
           <div style={{ textAlign: "center", padding: "40px" }}>
             <h2>הטעינה הצליחה!</h2>
             <p>יתרת הארנק המעודכנת: <strong>{view.walletBalance.toFixed(2)}</strong></p>
-            <button className="btn-primary" onClick={() => navigate("/organization/users")}>
+            <button className="btn-primary" onClick={() => navigate(ROUTES.platform.organizationUsers)}>
               חזרה לניהול הארגון
             </button>
           </div>
@@ -119,7 +120,7 @@ export default function PaymeResultPage() {
           <p style={{ color: "#666" }}>
             {view.phase === "error" ? view.message : "התשלום לא הושלם או בוטל."}
           </p>
-          <button className="btn-primary" onClick={() => navigate("/organization/users")}>
+          <button className="btn-primary" onClick={() => navigate(ROUTES.platform.organizationUsers)}>
             נסה שוב
           </button>
         </div>

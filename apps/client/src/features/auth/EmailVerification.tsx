@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { startActivityTracking } from "../../utils/tokenManager";
 import { useAuth, type AuthUser } from "../../context/authStore";
+import { ROUTES } from "../../router/paths";
 
 export default function EmailVerification() {
   const { token } = useParams<{ token: string }>();
@@ -45,7 +46,7 @@ export default function EmailVerification() {
                 response.user!.mustChangePassword
                   ? "/change-password"
                   : response.user!.profileId
-                    ? "/safeai-ui"
+                    ? ROUTES.home
                     : "/login",
               );
             }, 3000);

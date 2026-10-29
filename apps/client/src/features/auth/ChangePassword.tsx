@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { useAuth } from "../../context/authStore";
+import { ROUTES } from "../../router/paths";
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function ChangePassword() {
       if (user) {
         setUser({ ...user, mustChangePassword: false });
       }
-      navigate(user?.profileId ? "/safeai-ui" : "/login");
+      navigate(user?.profileId ? ROUTES.home : ROUTES.login);
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "עדכון הסיסמה נכשל";

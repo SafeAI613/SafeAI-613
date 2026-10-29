@@ -4,6 +4,7 @@ import { API_ENDPOINTS, apiCall } from "../config/api";
 import { useScreenCapture } from "../hooks/useScreenCapture";
 import "../styles/contact-page.css";
 import { SEO } from "../components/SEO";
+import { ROUTES } from "../router/paths";
 
 const CONTACT_SEO_DESCRIPTION =
   "צריכים עזרה או תמיכה טכנית? מעוניינים להצטרף לצוות הפיתוח או לנהל קהילה? כתבו לנו ונשמח לעמוד לרשותכם בהקדם.";
@@ -311,7 +312,7 @@ useEffect(() => {
 
       // Redirect to the user's personal requests area after 2 seconds
       setTimeout(() => {
-        navigate("/safeai-ui", { state: { section: "requests" } });
+        navigate(`${ROUTES.platform.account}/requests`);
       }, 2000);
     } catch (error) {
       const errorMessage =

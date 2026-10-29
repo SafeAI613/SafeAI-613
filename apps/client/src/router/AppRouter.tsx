@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import LandingPageV2 from "../pages/LandingPageV2";
 import SafeAIUIPage from "../pages/SafeAIUIPage";
@@ -32,7 +32,6 @@ import RegisterFormSuccess from "../features/auth/RegisterFormSuccess";
 import Footer from "../components/Footer";
 import { PublicOrgOwnerSignup } from "../features/organizations/PublicOrgOwnerSignup";
 import RequestDetails from "../features/safeai-ui/RequestDetails";
-import AdminRequestsList from "../features/safeai-ui/AdminRequestsList";
 import AiNewsPage from "../pages/AiNewsPage";
 import AiNewsDetailsPage from "../pages/AiNewsDetailsPage";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -76,6 +75,13 @@ export default function AppRouter() {
             }
           >
             <Route path={ROUTES.platform.dashboard} element={<SafeAIPlatformHomePage />} />
+            <Route path={`${ROUTES.platform.account}/:section?`} element={<SafeAIUIPage area="account" />} />
+            <Route path={`${ROUTES.platform.admin}/:section?`} element={<SafeAIUIPage area="admin" />} />
+            <Route path={ROUTES.platform.requestDetails} element={<RequestDetails />} />
+            <Route path={ROUTES.platform.organizationUsers} element={<OrganizationUsersPage />} />
+            <Route path={ROUTES.platform.organizationInvoices} element={<OrganizationInvoicesPage />} />
+            <Route path={ROUTES.platform.changelog} element={<ActivityLogPage />} />
+            <Route path={ROUTES.platform.apiKeyCreated} element={<ApiKeyDisplay />} />
           </Route>
         </Route>
 
@@ -144,47 +150,6 @@ export default function AppRouter() {
             }
           />
 
-          {/* Protected Routes */}
-          <Route
-            path="/api-key-display"
-            element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <ApiKeyDisplay />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/safeai-ui"
-            element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <SafeAIUIPage />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/request/:id"
-            element={
-              <ProtectedRoute>
-                <RequestDetails />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin/all-requests"
-            element={
-              <ProtectedRoute>
-                <AdminRequestsList />
-              </ProtectedRoute>
-            }
-          />
-
           <Route
             path="/forum"
             element={
@@ -211,29 +176,6 @@ export default function AppRouter() {
           />
 
           {/* Organization Routes */}
-          <Route
-            path="/organization/users"
-            element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <OrganizationUsersPage />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/organization/invoices"
-            element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <OrganizationInvoicesPage />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route path="/admin/organizations" element={<Navigate to="/safeai-ui" replace />} />
 
           {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
           <Route
@@ -279,7 +221,6 @@ export default function AppRouter() {
           <Route path="/docs-old" element={<DocsPage />} />
           <Route path="/recommended-guides" element={<RecommendedGuidesPage />} />
           <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/activity-log" element={<ActivityLogPage />} />
           <Route path="/tender-board" element={<TenderBoardPage />} />
           <Route path="/download-agents" element={<DownloadAgentsPage />} />
 

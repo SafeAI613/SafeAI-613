@@ -35,6 +35,18 @@
 - `PublicRoute` — משתמש מחובר שמגיע לדף אורחים (login, register, דף ההיכרות של Platform) מועבר ל-`next`, או ל-`redirectTo` אם הוגדר, או ל-`/`.
 - `safeNextPath()` מקבל רק נתיב יחסי באותו אתר (מתחיל ב-`/` ולא ב-`//`) — הגנה מפני open-redirect.
 
+## טאבים של האזור האישי
+
+`SafeAIUIPage` (ב-`pages/SafeAIUIPage.tsx`) מציג טאב לפי `:section` ב-URL (אפשר לשלוח קישור לטאב, ו-refresh/back עובדים). הטאבים המותרים לכל תפקיד מוגדרים ב-`ROLE_SECTIONS`, והראשון הוא ברירת המחדל:
+
+| תפקיד | אזור | טאבים |
+|-------|------|-------|
+| `user` | `/platform/account` | `overview`, `statistics`, `api-keys`, `requests`, `billing` |
+| `org_owner` | `/platform/account` | `org-statistics`, `org-users` |
+| `admin` | `/platform/admin` | `statistics`, `profiles`, `users`, `organizations`, `all-requests`, `contact-types` |
+
+טאב לא מוכר, טאב של תפקיד אחר, או האזור הלא נכון לתפקיד → הפניה לטאב ברירת המחדל של התפקיד. קישור לטאב: `` `${ROUTES.platform.account}/requests` ``.
+
 ## הפניות מנתיבים ישנים
 
 כשנתיב זז, מוסיפים שורה ל-`LEGACY_REDIRECTS` ב-`paths.ts` במקום למחוק את הנתיב הישן — כך קישורים במיילים, סימניות ומנועי חיפוש ממשיכים לעבוד (המקבילה ב-SPA להפניה קבועה 301).
@@ -46,14 +58,34 @@
 ```
 /                         → LandingPageV2 (Gateway)
 
-/platform                 → PlatformTeaserPage (אורחים; מחובר → /platform/dashboard)
-/platform/dashboard       → SafeAIPlatformHomePage (מוגן)
+/platform                       → PlatformTeaserPage (אורחים; מחובר → /platform/dashboard)
+/platform/dashboard             → SafeAIPlatformHomePage
+/platform/account/:section      → SafeAIUIPage — אזור אישי (user, org_owner)
+/platform/admin/:section        → SafeAIUIPage — ניהול מערכת (admin)
+/platform/requests/:id          → RequestDetails
+/platform/organization/users    → OrganizationUsersPage
+/platform/organization/invoices → OrganizationInvoicesPage
+/platform/changelog             → ActivityLogPage
+/platform/api-key-created       → ApiKeyDisplay (הצגה חד-פעמית של מפתח חדש; המפתח מגיע ב-navigation state)
 
 /hub                      → SafeAIHubHomePage (ציבורי)
 
-/safeai-platform          → הפניה ל-/platform/dashboard
-/safeai-hub               → הפניה ל-/hub
-/landing-preview          → הפניה ל-/
+כל `/platform/*` (חוץ מ-`/platform` עצמו) מוגן ומוצג בתוך `PlatformLayout`, שעוטף את התוכן ב-`ErrorBoundary` אחד שמתאפס במעבר דף.
+
+הפניות מנתיבים ישנים (`LEGACY_REDIRECTS`):
+
+```
+/safeai-platform          → /platform/dashboard
+/safeai-hub               → /hub
+/landing-preview          → /
+/safeai-ui                → /platform/account   (מקושר גם ממיילים של השרת)
+/admin/all-requests       → /platform/admin/all-requests
+/admin/organizations      → /platform/admin/organizations
+/request/:id              → /platform/requests/:id
+/organization/users       → /platform/organization/users
+/organization/invoices    → /platform/organization/invoices
+/activity-log             → /platform/changelog
+/api-key-display          → /platform/api-key-created
 ```
 
 שאר הדפים עדיין בנתיבים הישנים תחת `SiteLayout`, עד שיועברו לפי התוכנית למטה.
@@ -61,6 +93,6 @@
 ## תוכנית ההעברה (PRs הדרגתיים מול `develop`)
 
 1. **תשתית** ✅ — `ROUTES`, guards עם `next`, layouts לכל פלטפורמה, מנגנון הפניות, דפי הבית של שתי הפלטפורמות.
-2. **Platform** — העברת האזור האישי (`/safeai-ui` והטאבים שלו), מפתחות API, בקשות, חשבוניות ארגון, ניהול מערכת (`/platform/admin/*`), ו-`/activity-log` כ-changelog של הפלטפורמה (`/platform/changelog`).
+2. **Platform** ✅ — העברת האזור האישי (`/safeai-ui` והטאבים שלו), מפתחות API, בקשות, חשבוניות ארגון, ניהול מערכת (`/platform/admin/*`), ו-`/activity-log` כ-changelog של הפלטפורמה (`/platform/changelog`).
 3. **Hub** — העברת חדשות, פורום, מאמרים (`/docs`), קורסים, מדריכים מומלצים, לוח פרויקטים, מרקטפלייס הסוכנים והורדת הסוכנים, וניהול תוכן (`/hub/admin/*`). קריאה ציבורית בכל אלה.
 4. **ניקוי** — הסרת קוד מת (`layout/AppLayout.tsx`, `layout/Sidebar.tsx`, `GoogleAuthCallback`, `DocsPage` הישן), איחוד הניווט העליון, ועדכון המסמך הזה.

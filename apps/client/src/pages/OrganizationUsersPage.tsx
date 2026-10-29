@@ -14,6 +14,7 @@ import OrganizationProfilesSection from "../features/organizations/components/Or
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { useAlert } from "../context/alertStore";
 import "../styles/organization-wallet.css";
+import { ROUTES } from "../router/paths";
 
 interface User {
   _id: string;
@@ -455,7 +456,7 @@ export default function OrganizationUsersPage() {
             </form>
 
             <p style={{ marginTop: "14px" }}>
-              <Link to="/organization/invoices">{t("orgUsers.invoicesLinkLabel")}</Link>
+              <Link to={ROUTES.platform.organizationInvoices}>{t("orgUsers.invoicesLinkLabel")}</Link>
             </p>
           </div>
         </div>

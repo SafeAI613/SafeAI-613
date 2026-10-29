@@ -1,7 +1,8 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, generatePath, useLocation, useParams } from "react-router-dom";
 
-/** Redirects a moved URL to its new location, keeping the query string and hash. */
+/** Redirects a moved URL to its new location, keeping params, query string, hash and navigation state. */
 export default function LegacyRedirect({ to }: { to: string }) {
-  const { search, hash } = useLocation();
-  return <Navigate to={{ pathname: to, search, hash }} replace />;
+  const { search, hash, state } = useLocation();
+  const params = useParams();
+  return <Navigate to={{ pathname: generatePath(to, params), search, hash }} state={state} replace />;
 }

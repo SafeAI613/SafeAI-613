@@ -10,7 +10,7 @@
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-default);
   position: sticky;
-  top: 110px;
+  top: 0; /* rendered inside PlatformLayout, which has no global top navigation */
   z-index: 998;
   box-shadow: var(--shadow-sm);
 }

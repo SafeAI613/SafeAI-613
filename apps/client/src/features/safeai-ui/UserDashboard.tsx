@@ -8,7 +8,7 @@ import { useAuth } from "../../context/authStore";
 import BudgetCard from "./BudgetCard";
 import UsageChart from "./UsageChart";
 
-type InAppSection = "requests" | "apikeys" | "billing";
+type InAppSection = "requests" | "api-keys" | "billing";
 
 interface UserDashboardProps {
   user: {
@@ -104,7 +104,7 @@ export default function UserDashboard({ user, onNavigateSection }: UserDashboard
         <button className="btn btn-secondary" onClick={() => onNavigateSection?.("requests")}>
           {t("requests.myRequestsTitle")}
         </button>
-        <button className="btn btn-secondary" onClick={() => onNavigateSection?.("apikeys")}>
+        <button className="btn btn-secondary" onClick={() => onNavigateSection?.("api-keys")}>
           {t("safeaiNav.apiKeys")}
         </button>
         <button className="btn btn-secondary" onClick={() => onNavigateSection?.("billing")}>

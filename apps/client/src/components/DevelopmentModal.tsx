@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/safeai-ui.css";
+import { ROUTES } from "../router/paths";
 
 interface DevelopmentModalProps {
   show: boolean;
@@ -13,7 +14,7 @@ export default function DevelopmentModal({ show }: DevelopmentModalProps) {
   if (!show) return null;
 
   const handleGoToSafeAI = () => {
-    navigate("/safeai-ui");
+    navigate(ROUTES.platform.account);
   };
 
   return (

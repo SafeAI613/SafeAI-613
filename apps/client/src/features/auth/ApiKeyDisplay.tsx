@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ROUTES } from "../../router/paths";
 
 export default function ApiKeyDisplay() {
   const navigate = useNavigate();
@@ -50,7 +51,7 @@ export default function ApiKeyDisplay() {
   };
 
   const handleContinue = () => {
-    navigate("/safeai-ui");
+    navigate(ROUTES.platform.dashboard);
   };
 
   if (!proxyApiKey) {
