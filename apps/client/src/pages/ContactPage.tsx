@@ -4,7 +4,7 @@ import { API_ENDPOINTS, apiCall } from "../config/api";
 import { useScreenCapture } from "../hooks/useScreenCapture";
 import "../styles/contact-page.css";
 import { SEO } from "../components/SEO";
-import { ROUTES } from "../router/paths";
+import { ROUTES, loginPath } from "../router/paths";
 
 const CONTACT_SEO_DESCRIPTION =
   "צריכים עזרה או תמיכה טכנית? מעוניינים להצטרף לצוות הפיתוח או לנהל קהילה? כתבו לנו ונשמח לעמוד לרשותכם בהקדם.";
@@ -338,7 +338,7 @@ useEffect(() => {
             <p>עליך להתחבר כדי לשלוח הודעה</p>
             <button
               className="btn btn-primary"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(loginPath(ROUTES.contact))}
             >
               התחבר
             </button>

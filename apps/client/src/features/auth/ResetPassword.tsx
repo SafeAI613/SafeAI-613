@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { ROUTES } from "../../router/paths";
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -82,7 +83,7 @@ export default function ResetPassword() {
         setSuccess(true);
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          navigate("/login");
+          navigate(ROUTES.login);
         }, 3000);
       }
     } catch (err: unknown) {
@@ -204,7 +205,7 @@ export default function ResetPassword() {
             {t("resetPassword.forgotPasswordLink")}{" "}
             <button
               className="link-button"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(ROUTES.login)}
             >
               {t("resetPassword.loginLink")}
             </button>

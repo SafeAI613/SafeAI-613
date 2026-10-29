@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import "../styles/landing-page-v2.css";
 import { BookIcon, ShieldIcon } from "../features/landing/icons";
@@ -42,26 +42,6 @@ export default function LandingPageV2() {
 
   return (
     <div className="landing-v2 lv2-gateway">
-      <header className="lv2-header">
-        <Link to={ROUTES.home} className="lv2-logo">
-          SafeAI<span>613</span>
-        </Link>
-
-        <nav className="lv2-header-nav">
-          <Link to="/about" className="lv2-header-link">אודות</Link>
-          <Link to="/contact" className="lv2-header-link">צור קשר</Link>
-        </nav>
-
-        <div className="lv2-header-actions">
-          <button className="lv2-btn lv2-btn-ghost lv2-btn-sm" onClick={() => navigate(ROUTES.login)}>
-            התחברות
-          </button>
-          <button className="lv2-btn lv2-btn-primary lv2-btn-sm" onClick={() => navigate(ROUTES.register)}>
-            הרשמה
-          </button>
-        </div>
-      </header>
-
       <section className="lv2-gateway-hero">
         <span className="lv2-badge">SafeAI613</span>
         <h1 className="lv2-title">שימוש בטוח ואחראי בבינה מלאכותית</h1>

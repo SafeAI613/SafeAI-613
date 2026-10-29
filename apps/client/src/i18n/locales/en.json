@@ -11,6 +11,8 @@
     "saving": "Saving..."
   },
   "nav": {
+    "safeaiHub": "SafeAI Hub",
+    "safeaiPlatform": "SafeAI Platform",
     "why": "Why?",
     "courses": "Courses",
     "docs": "SafeAI Guide",

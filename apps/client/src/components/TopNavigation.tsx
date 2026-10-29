@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import "../styles/top-navigation.css";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -7,22 +7,28 @@ import { useAuth } from "../context/authStore";
 import ThemeToggle from "./ThemeToggle";
 import { ROUTES } from "../router/paths";
 
+// Shown only on gateway-level pages (SiteLayout); inside a platform its own
+// sidebar takes over, so this lists just the two platforms and general pages.
+const PRIMARY_LINKS = [
+  { to: ROUTES.hub.root, labelKey: "nav.safeaiHub" },
+  { to: ROUTES.platform.root, labelKey: "nav.safeaiPlatform" },
+  { to: ROUTES.about, labelKey: "nav.why" },
+  { to: ROUTES.contact, labelKey: "nav.contact" },
+];
+
 export default function TopNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user, userRole, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showDevMenu, setShowDevMenu] = useState(false);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const menuRef = useRef<HTMLDivElement>(null);
-  const devMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus on navigation
   if (location.key !== prevLocationKey) {
     setPrevLocationKey(location.key);
     setShowUserMenu(false);
-    setShowDevMenu(false);
   }
 
   // Close menu when clicking outside
@@ -39,7 +45,7 @@ export default function TopNavigation() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate(ROUTES.home);
   };
 
   return (
@@ -47,7 +53,7 @@ export default function TopNavigation() {
       <div className="top-nav-container">
         {/* Logo and Brand */}
         <div className="top-nav-brand">
-          <Link to="/" className="brand-link" aria-label="SafeAI 613">
+          <Link to={ROUTES.home} className="brand-link" aria-label="SafeAI 613">
             <svg
               className="brand-logo"
               viewBox="0 0 400 120"
@@ -88,147 +94,29 @@ export default function TopNavigation() {
           </Link>
         </div>
 
-        {/* Navigation Links */}
+        {/* Navigation Links — the same for guests and logged-in users */}
         <div className="top-nav-links">
+          {PRIMARY_LINKS.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => (isActive ? "top-nav-link active" : "top-nav-link")}
+            >
+              {t(link.labelKey)}
+            </NavLink>
+          ))}
+
           {!isAuthenticated ? (
             <>
-              {/* Public Navigation */}
-
-              <Link to="/about" className="top-nav-link">
-                {t("nav.why")}
-              </Link>
-              <Link to={ROUTES.hub.courses} className="top-nav-link">
-               {t("nav.courses")}
-              </Link>
-              <Link to={ROUTES.hub.forum} className="top-nav-link">
-                פורום
-              </Link>
-
-              {/* Developers Dropdown */}
-              <div className="dev-menu-container" ref={devMenuRef}>
-                <button
-                  className="top-nav-link dev-menu-trigger"
-                  onClick={() => setShowDevMenu(!showDevMenu)}
-                >
-                  Developers
-                  <svg
-                    className={`dropdown-arrow ${showDevMenu ? "open" : ""}`}
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                  >
-                    <path
-                      d="M2.5 4.5L6 8L9.5 4.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {showDevMenu && (
-                  <div className="dev-menu-dropdown">
-                    <Link to={ROUTES.hub.articles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      {t("nav.docs")}
-                    </Link>
-                    <Link to="/docs-old" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      מדריך SafeAI
-                    </Link>
-                    <Link to={ROUTES.hub.guides} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      {t("nav.recommendedGuides")}
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              <Link to="/contact" className="top-nav-link">
-                {t("nav.contact")}
-              </Link>
-
-              {/* Auth Buttons */}
-              <Link to="/login" className="top-nav-btn top-nav-btn-secondary">
+              <Link to={ROUTES.login} className="top-nav-btn top-nav-btn-secondary">
                 {t("nav.login")}
               </Link>
-              <Link to="/register" className="top-nav-btn top-nav-btn-primary">
+              <Link to={ROUTES.register} className="top-nav-btn top-nav-btn-primary">
                 {t("nav.register")}
               </Link>
             </>
           ) : (
             <>
-              {/* Authenticated Navigation */}
-              <Link
-                to={ROUTES.platform.account}
-                className={`top-nav-link ${location.pathname.startsWith(ROUTES.platform.root) ? "active" : ""}`}
-              >
-               {t("nav.personalArea")}
-              </Link>
-              <Link
-                to={ROUTES.hub.news}
-                className={`top-nav-link ${location.pathname.startsWith(ROUTES.hub.news) ? "active" : ""}`}
-              >
-                {t("nav.aiNews")}
-              </Link>
-              <Link to={ROUTES.hub.courses} className="top-nav-link">
-                {t("nav.courses")}
-              </Link>
-              <Link to={ROUTES.hub.forum} className="top-nav-link">
-                פורום
-              </Link>
-
-              {/* Developers Dropdown */}
-              <div className="dev-menu-container" ref={devMenuRef}>
-                <button
-                  className="top-nav-link dev-menu-trigger"
-                  onClick={() => setShowDevMenu(!showDevMenu)}
-                >
-                  Developers
-                  <svg
-                    className={`dropdown-arrow ${showDevMenu ? "open" : ""}`}
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                  >
-                    <path
-                      d="M2.5 4.5L6 8L9.5 4.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                {showDevMenu && (
-                  <div className="dev-menu-dropdown">
-                    <Link to={ROUTES.hub.articles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      {t("nav.docs")}
-                    </Link>
-                    <Link to="/docs-old" className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      מדריך SafeAI
-                    </Link>
-                    <Link to={ROUTES.hub.guides} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                      {t("nav.recommendedGuides")}
-                    </Link>
-                    {userRole === "admin" && (
-                      <Link to={ROUTES.hub.adminArticles} className="dev-menu-item" onClick={() => setShowDevMenu(false)}>
-                        ניהול Docs
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <Link to="/contact" className="top-nav-link">
-                {t("nav.contact")}
-              </Link>
-              <Link to={ROUTES.hub.projects} className="top-nav-link">
-                {t("nav.tenderBoard")}
-              </Link>
-              {/* <Link to={ROUTES.hub.agentsDownload} className="top-nav-link">
-                {t("nav.downloadAgents")}
-              </Link> */}
-
               {/* User Menu */}
               <div className="user-menu-container" ref={menuRef}>
                 <button

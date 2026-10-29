@@ -11,6 +11,8 @@
     "saving": "שומר..."
   },
   "nav": {
+    "safeaiHub": "SafeAI Hub",
+    "safeaiPlatform": "SafeAI Platform",
     "why": "למה?",
     "courses": "קורסים",
     "docs": "מדריך SafeAI",

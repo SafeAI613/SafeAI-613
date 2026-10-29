@@ -12,9 +12,23 @@
 export const ROUTES = {
   home: "/",
 
-  // Shared auth pages
+  // Shared pages (outside both platforms)
   login: "/login",
   register: "/register",
+  registerSuccess: "/register-success",
+  forgotPassword: "/forgot-password",
+  changePassword: "/change-password",
+  about: "/about",
+  contact: "/contact",
+  privacy: "/privacy",
+  becomeOrgOwner: "/become-org-owner",
+
+  // Linked from outside the app — never move these: emails (verify / reset)
+  // and PayMe's redirect after a wallet top-up.
+  verifyEmail: "/verify-email/:token",
+  resetPassword: "/reset-password/:token",
+  paymeSuccess: "/organizations/:id/wallet/payme/success",
+  paymeFail: "/organizations/:id/wallet/payme/fail",
 
   platform: {
     root: "/platform",
@@ -79,6 +93,7 @@ export const LEGACY_REDIRECTS: ReadonlyArray<{ from: string; to: string }> = [
   { from: "/ai-news/:id", to: ROUTES.hub.newsItem },
   { from: "/docs", to: ROUTES.hub.articles },
   { from: "/docs/:slug", to: ROUTES.hub.article },
+  { from: "/docs-old", to: ROUTES.hub.articles },
   { from: "/courses", to: ROUTES.hub.courses },
   { from: "/recommended-guides", to: ROUTES.hub.guides },
   { from: "/tender-board", to: ROUTES.hub.projects },

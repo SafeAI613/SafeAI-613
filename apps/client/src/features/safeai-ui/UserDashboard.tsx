@@ -114,7 +114,7 @@ export default function UserDashboard({ user, onNavigateSection }: UserDashboard
         <button className="btn btn-secondary" onClick={() => navigate(ROUTES.hub.news)}>
           {t("userDashboard.quickLinkNews")}
         </button>
-        <button className="btn btn-secondary" onClick={() => navigate("/contact")}>
+        <button className="btn btn-secondary" onClick={() => navigate(ROUTES.contact)}>
           {t("nav.contact")}
         </button>
       </div>

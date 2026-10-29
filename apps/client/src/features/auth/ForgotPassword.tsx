@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { ROUTES } from "../../router/paths";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -85,7 +86,7 @@ export default function ForgotPassword() {
                 {t("resetPassword.forgotPasswordLink")}{" "}
                 <button
                   className="link-button"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate(ROUTES.login)}
                 >
                   {t("resetPassword.loginLink")}
                 </button>
@@ -111,7 +112,7 @@ export default function ForgotPassword() {
               {t("forgotPassword.checkInboxMessage")}
             </p>
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(ROUTES.login)}
               className="btn btn-primary"
             >
               {t("emailVerification.backToLoginBtn")}

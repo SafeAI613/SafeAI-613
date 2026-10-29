@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAlert } from "../../context/alertStore";
+import { ROUTES } from "../../router/paths";
 
 export default function RegisterFormSuccess() {
   const { t } = useTranslation();
@@ -110,7 +111,7 @@ export default function RegisterFormSuccess() {
 
         <div style={{ textAlign: "center", marginTop: "30px" }}>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate(ROUTES.login)}
             className="btn btn-primary btn-full"
             style={{ fontSize: "16px", padding: "15px" }}
           >
