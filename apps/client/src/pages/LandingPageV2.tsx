@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import "../styles/landing-page-v2.css";
-import { useAuth } from "../context/authStore";
 import { BookIcon, ShieldIcon } from "../features/landing/icons";
+import { ROUTES } from "../router/paths";
 
 interface WorldCard {
   key: "hub" | "platform";
@@ -10,8 +10,7 @@ interface WorldCard {
   title: string;
   description: string;
   ctaLabel: string;
-  teaserPath: string;
-  homePath: string;
+  path: string;
 }
 
 // Gateway (SCRUM-227): a neutral marketing entry point with no association to
@@ -26,8 +25,7 @@ const WORLDS: WorldCard[] = [
     title: "SafeAI Hub",
     description: "כל הידע במקום אחד — פורום, קורסים, מדריכים, לוח פרויקטים וחדשות.",
     ctaLabel: "כניסה ל-Hub",
-    teaserPath: "/hub",
-    homePath: "/safeai-hub",
+    path: ROUTES.hub.root,
   },
   {
     key: "platform",
@@ -35,26 +33,17 @@ const WORLDS: WorldCard[] = [
     title: "SafeAI Platform",
     description: "כל מה שצריך לניהול השימוש שלך ב-API ובחשבון — במקום אחד.",
     ctaLabel: "כניסה ל-Platform",
-    teaserPath: "/platform",
-    homePath: "/safeai-platform",
+    path: ROUTES.platform.root,
   },
 ];
 
 export default function LandingPageV2() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  // Already-authenticated visitors skip straight to the world's home; a
-  // logged-out visitor sees the marketing "teaser" for that world first,
-  // with its own login CTA (SCRUM-228/229).
-  const enterWorld = (world: WorldCard) => {
-    navigate(isAuthenticated ? world.homePath : world.teaserPath);
-  };
 
   return (
     <div className="landing-v2 lv2-gateway">
       <header className="lv2-header">
-        <Link to="/" className="lv2-logo">
+        <Link to={ROUTES.home} className="lv2-logo">
           SafeAI<span>613</span>
         </Link>
 
@@ -64,10 +53,10 @@ export default function LandingPageV2() {
         </nav>
 
         <div className="lv2-header-actions">
-          <button className="lv2-btn lv2-btn-ghost lv2-btn-sm" onClick={() => navigate("/login")}>
+          <button className="lv2-btn lv2-btn-ghost lv2-btn-sm" onClick={() => navigate(ROUTES.login)}>
             התחברות
           </button>
-          <button className="lv2-btn lv2-btn-primary lv2-btn-sm" onClick={() => navigate("/register")}>
+          <button className="lv2-btn lv2-btn-primary lv2-btn-sm" onClick={() => navigate(ROUTES.register)}>
             הרשמה
           </button>
         </div>
@@ -86,7 +75,7 @@ export default function LandingPageV2() {
           <button
             key={world.key}
             className={`lv2-gateway-card lv2-gateway-card-${world.key}`}
-            onClick={() => enterWorld(world)}
+            onClick={() => navigate(world.path)}
           >
             <div className="lv2-gateway-card-icon">{world.icon}</div>
             <h3 className="lv2-gateway-card-title">{world.title}</h3>

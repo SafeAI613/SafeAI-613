@@ -60,6 +60,8 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--lv2-ink-soft);
+  text-decoration: none;
+  box-sizing: border-box;
   cursor: pointer;
 }
 

@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/landing-page-v2.css";
-import "../styles/dashboard-pages.css";
 import { useAuth } from "../context/authStore";
 import { API_ENDPOINTS, apiCall } from "../config/api";
-import { DocIcon, MailIcon, UserIcon, KeyIcon, BookIcon } from "../features/landing/icons";
-import DashboardSidebar from "../features/dashboard/DashboardSidebar";
 import ChecklistStep from "../features/dashboard/ChecklistStep";
 import StatTile from "../features/dashboard/StatTile";
 import FeedList, { type FeedItem } from "../features/dashboard/FeedList";
@@ -33,13 +29,6 @@ interface NewsItem {
   content: string;
   createdAt: string;
 }
-
-const SIDEBAR_ITEMS = [
-  { key: "docs", icon: <DocIcon size={18} />, label: "תיעוד", path: "/docs" },
-  { key: "api-keys", icon: <KeyIcon size={18} />, label: "מפתחות API", path: "/api-key-display" },
-  { key: "personal-area", icon: <UserIcon size={18} />, label: "אזור אישי", path: "/safeai-ui" },
-  { key: "contact", icon: <MailIcon size={18} />, label: "צור קשר", path: "/contact" },
-];
 
 // GET /usage/daily only returns rows for days that actually had usage — days
 // with none are simply absent. Fill the gaps with 0 so the sparkline always
@@ -123,58 +112,50 @@ export default function SafeAIPlatformHomePage() {
   }, [navigate]);
 
   return (
-    <div className="landing-v2 dash-page theme-platform" dir="rtl">
-      <DashboardSidebar
-        homeLabel="SafeAI Platform"
-        items={SIDEBAR_ITEMS}
-        crossLink={{ icon: <BookIcon size={18} />, label: "SafeAI Hub", path: "/safeai-hub" }}
-      />
+    <>
+      <span className="dash-eyebrow">SafeAI Platform</span>
+      <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
+      <p className="dash-subtitle">כל מה שצריך לניהול השימוש שלך ב-SafeAI API Platform במקום אחד.</p>
 
-      <div className="dash-main">
-        <span className="dash-eyebrow">SafeAI Platform</span>
-        <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
-        <p className="dash-subtitle">כל מה שצריך לניהול השימוש שלך ב-SafeAI API Platform במקום אחד.</p>
-
-        <h2 className="dash-section-title">בואו נתחיל</h2>
-        <div className="dash-getstarted-card">
-          <ChecklistStep
-            step={1}
-            label="צור מפתח API"
-            description="נדרש כדי לבצע קריאות ל-API"
-            done={!keysLoading && !!activeKeysCount}
-            path="/api-key-display"
-          />
-          <ChecklistStep
-            step={2}
-            label="בצע קריאה ראשונה"
-            description="לפי המדריך בתיעוד"
-            done={!usageLoading && !!usage?.totalRequests}
-            path="/docs"
-          />
-        </div>
-
-        <div className="dash-stats-row">
-          <StatTile
-            label="בקשות (7 ימים אחרונים)"
-            value={usage?.totalRequests ?? null}
-            loading={statsRowLoading}
-            failed={usageFailed}
-            trend={requestsTrend}
-          />
-          <StatTile
-            label="טוקנים בשימוש"
-            value={usage?.totalTokens ?? null}
-            loading={statsRowLoading}
-            failed={usageFailed}
-            trend={tokensTrend}
-          />
-          <StatTile label="מפתחות API פעילים" value={activeKeysCount} loading={statsRowLoading} failed={keysFailed} />
-        </div>
-
-        <div className="dash-feeds">
-          <FeedList title="עדכונים אחרונים" items={newsItems} loading={newsLoading} failed={newsFailed} emptyLabel="אין עדכונים חדשים כרגע." />
-        </div>
+      <h2 className="dash-section-title">בואו נתחיל</h2>
+      <div className="dash-getstarted-card">
+        <ChecklistStep
+          step={1}
+          label="צור מפתח API"
+          description="נדרש כדי לבצע קריאות ל-API"
+          done={!keysLoading && !!activeKeysCount}
+          path="/api-key-display"
+        />
+        <ChecklistStep
+          step={2}
+          label="בצע קריאה ראשונה"
+          description="לפי המדריך בתיעוד"
+          done={!usageLoading && !!usage?.totalRequests}
+          path="/docs"
+        />
       </div>
-    </div>
+
+      <div className="dash-stats-row">
+        <StatTile
+          label="בקשות (7 ימים אחרונים)"
+          value={usage?.totalRequests ?? null}
+          loading={statsRowLoading}
+          failed={usageFailed}
+          trend={requestsTrend}
+        />
+        <StatTile
+          label="טוקנים בשימוש"
+          value={usage?.totalTokens ?? null}
+          loading={statsRowLoading}
+          failed={usageFailed}
+          trend={tokensTrend}
+        />
+        <StatTile label="מפתחות API פעילים" value={activeKeysCount} loading={statsRowLoading} failed={keysFailed} />
+      </div>
+
+      <div className="dash-feeds">
+        <FeedList title="עדכונים אחרונים" items={newsItems} loading={newsLoading} failed={newsFailed} emptyLabel="אין עדכונים חדשים כרגע." />
+      </div>
+    </>
   );
 }

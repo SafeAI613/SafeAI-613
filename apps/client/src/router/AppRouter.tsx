@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import LandingPageV2 from "../pages/LandingPageV2";
 import SafeAIUIPage from "../pages/SafeAIUIPage";
@@ -29,8 +29,6 @@ import ForgotPassword from "../features/auth/ForgotPassword";
 import ResetPassword from "../features/auth/ResetPassword";
 import ChangePassword from "../features/auth/ChangePassword";
 import RegisterFormSuccess from "../features/auth/RegisterFormSuccess";
-import TopNavigation from "../components/TopNavigation";
-import BetaBanner from "../components/BetaBanner";
 import Footer from "../components/Footer";
 import { PublicOrgOwnerSignup } from "../features/organizations/PublicOrgOwnerSignup";
 import RequestDetails from "../features/safeai-ui/RequestDetails";
@@ -44,291 +42,260 @@ import PaymeResultPage from '../features/organizations/PaymeResultPage';
 import OrganizationInvoicesPage from '../features/organizations/pages/OrganizationInvoicesPage';
 import SafeAIHubHomePage from "../pages/SafeAIHubHomePage";
 import SafeAIPlatformHomePage from "../pages/SafeAIPlatformHomePage";
-import HubTeaserPage from "../pages/HubTeaserPage";
 import PlatformTeaserPage from "../pages/PlatformTeaserPage";
-
-// Protected Route Component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const accessToken = localStorage.getItem("accessToken");
-  const user = localStorage.getItem("user");
-
-  if (!accessToken || !user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-}
-
-// Public Route Component (redirect to dashboard if already logged in)
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const accessToken = localStorage.getItem("accessToken");
-  const refreshToken = localStorage.getItem("refreshToken");
-  const user = localStorage.getItem("user");
-
-  // Only redirect if user has valid tokens AND user data
-  // This prevents redirect during registration when tokens don't exist yet
-  if (accessToken && refreshToken && user) {
-    return <Navigate to="/safeai-ui" replace />;
-  }
-
-  return <>{children}</>;
-}
+import SiteLayout from "../layout/SiteLayout";
+import PlatformLayout from "../layout/PlatformLayout";
+import HubLayout from "../layout/HubLayout";
+import { ProtectedRoute, PublicRoute } from "./guards";
+import LegacyRedirect from "./LegacyRedirect";
+import { ROUTES, LEGACY_REDIRECTS } from "./paths";
 
 const ROUTER_BASE = import.meta.env.VITE_BASE_PATH?.replace(/\/$/, "") || "";
-
-// The SafeAI Hub / SafeAI Platform dashboards (SCRUM-228/229) ship their own
-// complete sidebar navigation — showing the global header/banner above them
-// too just duplicates every link a second time. Hidden only on these two
-// routes; every other page keeps the global chrome unchanged.
-const ROUTES_WITHOUT_GLOBAL_CHROME = ["/safeai-hub", "/safeai-platform", "/hub", "/platform"];
-
-function GlobalChrome() {
-  const location = useLocation();
-  if (ROUTES_WITHOUT_GLOBAL_CHROME.includes(location.pathname)) return null;
-  return (
-    <>
-      <TopNavigation />
-      <BetaBanner />
-    </>
-  );
-}
 
 export default function AppRouter() {
   return (
     <HelmetProvider>
     <BrowserRouter basename={ROUTER_BASE}>
-      <GlobalChrome />
-
       <Routes>
-        {/* Public Routes */}
-        {/* דף הבית החדש (SCRUM-227) הוחלף לנתיב הראשי; /landing-preview נשמר כהפניה למי שיש לו קישור ישן */}
-        <Route path="/" element={<LandingPageV2 />} />
-        <Route path="/landing-preview" element={<Navigate to="/" replace />} />
-        {/* Pre-login "teaser" pages for the two gateway worlds (SCRUM-228/229) */}
-        <Route path="/hub" element={<HubTeaserPage />} />
-        <Route path="/platform" element={<PlatformTeaserPage />} />
-        <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
-
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <LoginForm />
-            </PublicRoute>
-          }
-        />
-
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <RegisterForm />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register-success"
-          element={
-            <PublicRoute>
-              <RegisterFormSuccess />
-            </PublicRoute>
-          }
-        />
-
-        <Route path="/verify-email/:token" element={<EmailVerification />} />
-
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicRoute>
-              <ForgotPassword />
-            </PublicRoute>
-          }
-        />
-
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-        <Route
-          path="/change-password"
-          element={
-            <ProtectedRoute>
-              <ChangePassword />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Protected Routes */}
-        <Route
-          path="/api-key-display"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <ApiKeyDisplay />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/safeai-ui"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <SafeAIUIPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/request/:id"
-          element={
-            <ProtectedRoute>
-              <RequestDetails />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/all-requests"
-          element={
-            <ProtectedRoute>
-              <AdminRequestsList />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/forum"
-          element={
-              <ForumPage />
-          }
-        />
-
-        {/* Sub-homepages (SCRUM-228 / SCRUM-229) — the two content branches
-            reached after login, via /hub or /platform for a logged-out
-            visitor. Purely visual/content separation for the same audience
-            (SCRUM-227): no per-branch access control here. */}
-        <Route
-          path="/safeai-hub"
-          element={
-            <ProtectedRoute>
-              <SafeAIHubHomePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/safeai-platform"
-          element={
-            <ProtectedRoute>
-              <SafeAIPlatformHomePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Organization Routes */}
-         <Route
-          path="/ai-news"
-          element={
-           <ProtectedRoute>
-             <AiNewsPage />
-           </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ai-news/:id"
-          element={
-           <ProtectedRoute>
-             <AiNewsDetailsPage />
-           </ProtectedRoute>
-          }
-        />
-
-        {/* Organization Routes */}
-        <Route
-          path="/organization/users"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <OrganizationUsersPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/organization/invoices"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <OrganizationInvoicesPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="/admin/organizations" element={<Navigate to="/safeai-ui" replace />} />
-
-        {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
-        <Route
-          path="/organizations/:id/wallet/payme/success"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <PaymeResultPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/organizations/:id/wallet/payme/fail"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <PaymeResultPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/articles"
-          element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <AdminArticlesPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          }
-        />
-
-
-
-        {/* New Pages Routes */}
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/privacy" element={<PrivacyPolicyPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/docs" element={<ArticlesPage />} />
-        <Route path="/docs/:slug" element={<ArticlePage />} />
-        <Route path="/docs-old" element={<DocsPage />} />
-        <Route path="/recommended-guides" element={<RecommendedGuidesPage />} />
-        <Route path="/courses" element={<CoursesPage />} />
-        <Route path="/activity-log" element={<ActivityLogPage />} />
-        <Route path="/tender-board" element={<TenderBoardPage />} />
-        <Route path="/download-agents" element={<DownloadAgentsPage />} />
-
-        {/* Agents Marketplace — community-submitted agents, separate from the desktop-app download page above */}
-        <Route path="/agents-marketplace" element={<AgentsIndexPage />}>
-          <Route index element={<AgentsMarketplace />} />
-          <Route path="submit" element={<AgentSubmitPage />} />
-          <Route path="stats" element={<AgentStatsPage />} />
-          <Route path=":id" element={<AgentDetailPage />} />
+        {/* SafeAI Platform — using SafeAI as an AI provider. The index is a
+            public teaser for guests; everything else requires login. */}
+        <Route path={ROUTES.platform.root}>
+          <Route
+            index
+            element={
+              <PublicRoute redirectTo={ROUTES.platform.dashboard}>
+                <PlatformTeaserPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            element={
+              <ProtectedRoute>
+                <PlatformLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path={ROUTES.platform.dashboard} element={<SafeAIPlatformHomePage />} />
+          </Route>
         </Route>
 
-        <Route path="/forum/post/:id" element={<PostThreadPage />} />
+        {/* SafeAI Hub — knowledge & community. Public for reading; actions
+            inside pages require login. */}
+        <Route path={ROUTES.hub.root} element={<HubLayout />}>
+          <Route index element={<SafeAIHubHomePage />} />
+        </Route>
 
-        {/* Catch all - 404 */}
-        <Route path="*" element={<NotFound />} />
+        {/* Moved URLs → their new location */}
+        {LEGACY_REDIRECTS.map(({ from, to }) => (
+          <Route key={from} path={from} element={<LegacyRedirect to={to} />} />
+        ))}
+
+        {/* Gateway-level pages, with the global top navigation */}
+        <Route element={<SiteLayout />}>
+          {/* Public Routes */}
+          <Route path={ROUTES.home} element={<LandingPageV2 />} />
+          <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
+
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginForm />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <RegisterForm />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register-success"
+            element={
+              <PublicRoute>
+                <RegisterFormSuccess />
+              </PublicRoute>
+            }
+          />
+
+          <Route path="/verify-email/:token" element={<EmailVerification />} />
+
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
+
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Routes */}
+          <Route
+            path="/api-key-display"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <ApiKeyDisplay />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/safeai-ui"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <SafeAIUIPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/request/:id"
+            element={
+              <ProtectedRoute>
+                <RequestDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/all-requests"
+            element={
+              <ProtectedRoute>
+                <AdminRequestsList />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/forum"
+            element={
+                <ForumPage />
+            }
+          />
+
+          {/* Organization Routes */}
+           <Route
+            path="/ai-news"
+            element={
+             <ProtectedRoute>
+               <AiNewsPage />
+             </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-news/:id"
+            element={
+             <ProtectedRoute>
+               <AiNewsDetailsPage />
+             </ProtectedRoute>
+            }
+          />
+
+          {/* Organization Routes */}
+          <Route
+            path="/organization/users"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <OrganizationUsersPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/organization/invoices"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <OrganizationInvoicesPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/admin/organizations" element={<Navigate to="/safeai-ui" replace />} />
+
+          {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
+          <Route
+            path="/organizations/:id/wallet/payme/success"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <PaymeResultPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/organizations/:id/wallet/payme/fail"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <PaymeResultPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/articles"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <AdminArticlesPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
+
+
+          {/* New Pages Routes */}
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/docs" element={<ArticlesPage />} />
+          <Route path="/docs/:slug" element={<ArticlePage />} />
+          <Route path="/docs-old" element={<DocsPage />} />
+          <Route path="/recommended-guides" element={<RecommendedGuidesPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/activity-log" element={<ActivityLogPage />} />
+          <Route path="/tender-board" element={<TenderBoardPage />} />
+          <Route path="/download-agents" element={<DownloadAgentsPage />} />
+
+          {/* Agents Marketplace — community-submitted agents, separate from the desktop-app download page above */}
+          <Route path="/agents-marketplace" element={<AgentsIndexPage />}>
+            <Route index element={<AgentsMarketplace />} />
+            <Route path="submit" element={<AgentSubmitPage />} />
+            <Route path="stats" element={<AgentStatsPage />} />
+            <Route path=":id" element={<AgentDetailPage />} />
+          </Route>
+
+          <Route path="/forum/post/:id" element={<PostThreadPage />} />
+
+          {/* Catch all - 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Route>
       </Routes>
 
       <Footer />

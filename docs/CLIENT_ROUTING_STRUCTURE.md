@@ -1,234 +1,66 @@
-# מבנה הניתוב החדש של הקליינט (Client Routing Structure)
+# מבנה הניתוב של הקליינט (Client Routing Structure)
 
-## סקירה כללית
+## עיקרון
 
-המערכת עברה ממבנה ניתוב פשוט למבנה מודרני עם אימות מלא, הפרדה בין דפים ציבוריים ומוגנים, וזרימת משתמש משופרת.
+האתר הוא **דף בית אחד (Gateway)** שמציג את SafeAI, וממנו נכנסים לשתי פלטפורמות נפרדות.
+כל פלטפורמה יושבת תחת prefix משלה ומקבלת **layout משלה** (סיידבר, צבעים, ניווט):
 
-## דפים עיקריים
+| אזור | נתיב | מטרה | גישה |
+|------|------|------|------|
+| Gateway | `/` | הסבר על SafeAI ובחירת פלטפורמה | ציבורי |
+| **SafeAI Platform** | `/platform/*` | שימוש ב-SafeAI כספק AI: מפתחות API, שימוש, חיוב, ארגונים | `/platform` — דף היכרות לאורחים; כל השאר דורש התחברות |
+| **SafeAI Hub** | `/hub/*` | שיתוף ידע: חדשות, פורום, מאמרים, קורסים, פרויקטים, סוכנים | קריאה ציבורית; פעולות (פרסום, תגובה, הגשה) דורשות התחברות |
+| משותף | `/login`, `/register`, `/about`, `/contact`, `/privacy`... | התחברות ודפים כלליים | לפי הדף |
 
-### 1. **LandingPageV2** (`/`) — Gateway
-- **תיאור**: דף בית ראשי, שיווקי וניטרלי (SCRUM-227) — אינו משויך לאף אחד משני העולמות. תפקידו היחיד הוא להציג את שני הכרטיסים (SafeAI Hub / SafeAI Platform) ולתת לבוחר להחליט; אין כאן דרופדאון מוצרים, חיפוש או באנר נפרד לפורום/תיעוד — תכנים אלה פנימיים לכל עולם ונגישים דרך ה-sidebar שלו.
-- **גישה**: ציבורי
-- **זרימה**: לחיצה על כרטיס Hub/Platform → אם המשתמש כבר מחובר, ניווט ישיר ל-`/safeai-hub` / `/safeai-platform`; אחרת ניווט ל-"טעימה" הציבורית (`/hub` / `/platform`, ראו 1א)
-- **הערה**: הדף הישן `LandingPage` (`pages/LandingPage.tsx`) הוסר מהניתוב הראשי (עדיין קיים כקובץ יתום); הנתיב `/landing-preview` הפך להפניה (`redirect`) ל-`/`
+זו אפליקציית SPA אחת (build אחד, התחברות אחת). בפרודקשן היא מוגשת תחת `/console/` דרך `VITE_BASE_PATH` — כל הנתיבים כאן יחסיים ל-basename הזה.
 
-### 1א. דפי טעימה ציבוריים (SCRUM-228 / SCRUM-229)
+## קבצים מרכזיים
 
-| נתיב | קומפוננטה | גישה | תוכן |
-|---|---|---|---|
-| `/hub` | `HubTeaserPage` | ציבורי | תצוגה מקדימה של Hub (פוסטי פורום אחרונים) + כפתור "התחבר והמשך ל-Hub" |
-| `/platform` | `PlatformTeaserPage` | ציבורי | תצוגה מקדימה של יכולות Platform + כפתור "התחבר והמשך ל-Platform" |
+| קובץ | תפקיד |
+|------|-------|
+| `apps/client/src/router/paths.ts` | **מקור האמת לכל הנתיבים** (`ROUTES`), טבלת הפניות מנתיבים ישנים (`LEGACY_REDIRECTS`), `safeNextPath()` ו-`loginPath()` |
+| `apps/client/src/router/AppRouter.tsx` | הגדרת ה-routes, מקובצים לפי layout |
+| `apps/client/src/router/guards.tsx` | `ProtectedRoute` ו-`PublicRoute` |
+| `apps/client/src/router/LegacyRedirect.tsx` | הפניה מנתיב ישן לחדש, כולל query ו-hash |
+| `apps/client/src/layout/SiteLayout.tsx` | layout לדפי ה-Gateway: ניווט עליון + באנר בטא |
+| `apps/client/src/layout/PlatformLayout.tsx` | layout של Platform: סיידבר Platform |
+| `apps/client/src/layout/HubLayout.tsx` | layout של Hub: סיידבר Hub + קישור התחברות לאורחים |
 
-שני הדפים צבועים לפי היעד (כתום ל-Hub, כחול ל-Platform, דרך המחלקות `theme-hub`/`theme-platform` ב-`landing-page-v2.css`) וכפתור ההתחברות שלהם מוביל ל-`/login?next=/safeai-hub` (או `/safeai-platform`), שם `LoginForm` מזהה את היעד מתוך `next` ומציג טופס באותו צבע (ראו `styles/auth-form.css`).
+**כלל:** לא כותבים מחרוזת נתיב בתוך קומפוננטה — מייבאים מ-`ROUTES`. כך אפשר להזיז route בלי לחפש כל קישור אליו.
 
-### 1ב. דפי בית פנימיים (SCRUM-228 / SCRUM-229)
+## התחברות וחזרה לדף המקורי (`?next=`)
 
-| נתיב | קומפוננטה | גישה | תוכן |
-|---|---|---|---|
-| `/safeai-hub` | `SafeAIHubHomePage` | ProtectedRoute | פורום/קורסים/מדריכים/פרויקטים/חדשות |
-| `/safeai-platform` | `SafeAIPlatformHomePage` | ProtectedRoute | תיעוד/מפתחות API/אזור אישי/יצירת קשר |
+- `ProtectedRoute` — אורח מועבר ל-`/login?next=<הדף שביקש>`.
+- `LoginForm` — אחרי התחברות מוצלחת חוזר ל-`next`; בלי `next` — לדף הבית `/`.
+- `PublicRoute` — משתמש מחובר שמגיע לדף אורחים (login, register, דף ההיכרות של Platform) מועבר ל-`next`, או ל-`redirectTo` אם הוגדר, או ל-`/`.
+- `safeNextPath()` מקבל רק נתיב יחסי באותו אתר (מתחיל ב-`/` ולא ב-`//`) — הגנה מפני open-redirect.
 
-שני הענפים מיועדים **לאותו קהל משתמשים** — זו הפרדה חזותית/תוכנית בלבד בין שני תחומי עניין, לא פיצול הרשאות. שניהם משתמשים ב-`DashboardSidebar` המשותף (`features/dashboard/`), כל אחד עם המחלקה `theme-hub`/`theme-platform` משלו לצביעת ה-sidebar וה-stat tiles.
+## הפניות מנתיבים ישנים
 
-### 2. **SafeAIUIPage** (`/safeai-ui`)
-- **תיאור**: דשבורד ראשי למשתמשים מחוברים
-- **גישה**: מוגן (Protected Route)
-- **תכונות**:
-  - **למנהלים (Admin)**:
-    - ניהול פרופילים (ProfilesManagement)
-    - ניהול משתמשים (UsersManagement)
-  - **למשתמשים רגילים (User)**:
-    - לוח משתמש (UserDashboard)
-    - מפתחות API (UserApiKeysPage)
-    - סטטיסטיקות (Statistics)
+כשנתיב זז, מוסיפים שורה ל-`LEGACY_REDIRECTS` ב-`paths.ts` במקום למחוק את הנתיב הישן — כך קישורים במיילים, סימניות ומנועי חיפוש ממשיכים לעבוד (המקבילה ב-SPA להפניה קבועה 301).
 
-## דפי אימות (Authentication Pages)
+**לא מזיזים** נתיבים שמערכות חיצוניות שולחות אליהם: `/verify-email/:token`, `/reset-password/:token` (קישורים במייל), ו-`/organizations/:id/wallet/payme/*` (PayMe).
 
-### 3. **LoginForm** (`/login`)
-- **תיאור**: דף התחברות
-- **גישה**: ציבורי (PublicRoute - מפנה לדשבורד אם כבר מחובר)
-- **תכונות**:
-  - טופס התחברות עם אימייל וסיסמה
-  - קישור לשכחתי סיסמה (`/forgot-password`)
-  - קישור להרשמה (`/register`)
-  - שמירת tokens ב-localStorage
-  - ניווט אוטומטי ל-`/safeai-ui` לאחר התחברות מוצלחת
-
-### 4. **RegisterForm** (`/register`)
-- **תיאור**: דף הרשמה
-- **גישה**: ציבורי (PublicRoute - מפנה לדשבורד אם כבר מחובר)
-- **תכונות**:
-  - טופס הרשמה מלא עם:
-    - שם מלא
-    - אימייל
-    - סיסמה (עם אימות חוזק)
-    - אימות סיסמה
-    - ארגון (אופציונלי)
-    - בחירת פרופיל AI (אופציונלי)
-    - מצב שימוש (BYOK/MANAGED)
-  - אימות סיסמה חזק (8+ תווים, אותיות גדולות/קטנות, ספרות)
-  - ניווט ל-`/api-key-display` לאחר הרשמה מוצלחת
-
-### 5. **ApiKeyDisplay** (`/api-key-display`)
-- **תיאור**: הצגת מפתח API חד-פעמי לאחר הרשמה
-- **גישה**: מוגן (Protected Route)
-- **תכונות**:
-  - הצגת מפתח API בצורה בולטת
-  - אזהרה שזו ההזדמנות האחרונה לראות את המפתח
-  - כפתור העתקה ללוח
-  - כפתור הורדה כקובץ טקסט
-  - דוגמאות שימוש (Python)
-  - ניווט ל-`/safeai-ui` לאחר אישור
-
-### 6. **EmailVerification** (`/verify-email/:token`)
-- **תיאור**: אימות כתובת אימייל
-- **גישה**: ציבורי
-- **תכונות**:
-  - אימות אוטומטי של token
-  - הצגת סטטוס (טוען/הצלחה/שגיאה)
-  - ניווט אוטומטי ל-`/login` לאחר 3 שניות במקרה של הצלחה
-  - כפתורים לחזרה להתחברות או הרשמה מחדש במקרה של שגיאה
-
-## רכיבי ניתוב (Route Components)
-
-### ProtectedRoute
-```typescript
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const accessToken = localStorage.getItem("accessToken");
-  const user = localStorage.getItem("user");
-
-  if (!accessToken || !user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
-}
-```
-- **מטרה**: הגנה על דפים שדורשים אימות
-- **לוגיקה**: בודק אם קיימים `accessToken` ו-`user` ב-localStorage
-- **במקרה של כישלון**: מפנה ל-`/login`
-
-### PublicRoute
-```typescript
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const accessToken = localStorage.getItem("accessToken");
-  const user = localStorage.getItem("user");
-
-  if (accessToken && user) {
-    return <Navigate to="/safeai-ui" replace />;
-  }
-
-  return <>{children}</>;
-}
-```
-- **מטרה**: מניעת גישה לדפי אימות למשתמשים מחוברים
-- **לוגיקה**: בודק אם המשתמש כבר מחובר
-- **במקרה של הצלחה**: מפנה ל-`/safeai-ui`
-
-## מבנה הניתוב המלא
+## מפת הנתיבים הנוכחית
 
 ```
-/                           → LandingPageV2 — Gateway (ציבורי)
-/landing-preview            → redirect → /
-/hub                        → HubTeaserPage (ציבורי)
-/platform                   → PlatformTeaserPage (ציבורי)
-/login                      → LoginForm (PublicRoute)
-/register                   → RegisterForm (PublicRoute)
-/verify-email/:token        → EmailVerification (ציבורי)
-/api-key-display            → ApiKeyDisplay (ProtectedRoute)
-/safeai-ui                  → SafeAIUIPage (ProtectedRoute)
-/safeai-hub                 → SafeAIHubHomePage (ProtectedRoute)
-/safeai-platform            → SafeAIPlatformHomePage (ProtectedRoute)
-/*                          → NotFound (404)
+/                         → LandingPageV2 (Gateway)
+
+/platform                 → PlatformTeaserPage (אורחים; מחובר → /platform/dashboard)
+/platform/dashboard       → SafeAIPlatformHomePage (מוגן)
+
+/hub                      → SafeAIHubHomePage (ציבורי)
+
+/safeai-platform          → הפניה ל-/platform/dashboard
+/safeai-hub               → הפניה ל-/hub
+/landing-preview          → הפניה ל-/
 ```
 
-> הרשימה לעיל מתמקדת בדפי הבית ובאימות. ה-router המלא (`apps/client/src/router/AppRouter.tsx`) כולל נתיבים נוספים רבים (פורום, חדשות, לוח פרויקטים, סוכנים, ארגונים ועוד) שאינם מתועדים כאן.
+שאר הדפים עדיין בנתיבים הישנים תחת `SiteLayout`, עד שיועברו לפי התוכנית למטה.
 
-## זרימת משתמש (User Flow)
+## תוכנית ההעברה (PRs הדרגתיים מול `develop`)
 
-### הרשמה חדשה:
-1. משתמש נכנס ל-`/` (LandingPage)
-2. לוחץ על "הרשמה" → מועבר ל-`/register`
-3. ממלא טופס הרשמה
-4. לאחר הרשמה מוצלחת → מועבר ל-`/api-key-display`
-5. שומר את מפתח ה-API
-6. לוחץ "המשך לדשבורד" → מועבר ל-`/safeai-ui`
-
-### התחברות:
-1. משתמש נכנס ל-`/` (LandingPage)
-2. לוחץ על "התחברות" → מועבר ל-`/login`
-3. מזין אימייל וסיסמה
-4. לאחר התחברות מוצלחת → מועבר ל-`/safeai-ui`
-
-### אימות אימייל:
-1. משתמש מקבל מייל עם קישור
-2. לוחץ על הקישור → מועבר ל-`/verify-email/:token`
-3. המערכת מאמתת את ה-token
-4. לאחר 3 שניות → מועבר ל-`/login`
-
-## שינויים עיקריים
-
-### הוסר:
-- ❌ `AuthForm` הישן מ-`LandingPage`
-- ❌ לוגיקת אימות פשוטה (admin@safeai.com)
-- ❌ מבנה ניתוב פשוט ללא הגנה
-
-### נוסף:
-- ✅ `LoginForm` נפרד
-- ✅ `RegisterForm` נפרד עם אימות מלא
-- ✅ `ApiKeyDisplay` להצגת מפתח חד-פעמי
-- ✅ `EmailVerification` לאימות אימייל
-- ✅ `ProtectedRoute` להגנה על דפים
-- ✅ `PublicRoute` למניעת גישה כפולה
-- ✅ ניהול tokens מלא (accessToken, refreshToken)
-- ✅ אימות סיסמה חזק
-- ✅ בחירת פרופיל AI בהרשמה
-
-## קבצים שהשתנו
-
-1. **`client/src/router/AppRouter.tsx`** - מבנה ניתוב חדש לגמרי
-2. **`client/src/pages/LandingPage.tsx`** - הוסר AuthForm, נוספו כפתורי ניווט
-3. **`client/src/styles/landing-page.css`** - נוספו סגנונות:
-   - `.landing-nav-btn-primary` - כפתור הרשמה מודגש
-   - `.auth-title` - כותרת לדפי אימות
-   - `.form-footer` - פוטר לטפסים
-
-## דפים שלא השתנו (לא רלוונטיים כרגע)
-
-הדפים הבאים נשארו במערכת אך לא בשימוש פעיל:
-- `HomePage`
-- `FilterAdminPage`
-- `TasksList`, `AddTask`, `UpdateTask`
-- `TableView`
-- `GrafsCompo`
-
-ניתן לשקול הסרתם או שילובם בעתיד.
-
-## הערות טכניות
-
-### LocalStorage Keys:
-- `accessToken` - JWT token לאימות
-- `refreshToken` - JWT token לרענון
-- `user` - אובייקט משתמש (JSON)
-- `userRole` - תפקיד המשתמש (admin/user)
-
-### API Endpoints בשימוש:
-- `POST /api/auth/login` - התחברות
-- `POST /api/auth/register` - הרשמה
-- `GET /api/auth/verify-email/:token` - אימות אימייל
-- `GET /api/profiles` - קבלת רשימת פרופילים
-
-## המלצות לעתיד
-
-1. **הוספת Forgot Password Flow** - כרגע יש קישור אך אין דף
-2. **Context API או Redux** - במקום localStorage ישיר
-3. **Token Refresh Logic** - רענון אוטומטי של tokens
-4. **Loading States** - מצבי טעינה גלובליים
-5. **Error Boundaries** - טיפול בשגיאות ברמת האפליקציה
-6. **ניקוי דפים לא בשימוש** - הסרת HomePage, Tasks, וכו'
-
----
-
-**תאריך עדכון**: 24/09/2026
-**גרסה**: 2.2
-**מחבר**: AI Assistant
+1. **תשתית** ✅ — `ROUTES`, guards עם `next`, layouts לכל פלטפורמה, מנגנון הפניות, דפי הבית של שתי הפלטפורמות.
+2. **Platform** — העברת האזור האישי (`/safeai-ui` והטאבים שלו), מפתחות API, בקשות, חשבוניות ארגון, ניהול מערכת (`/platform/admin/*`), ו-`/activity-log` כ-changelog של הפלטפורמה (`/platform/changelog`).
+3. **Hub** — העברת חדשות, פורום, מאמרים (`/docs`), קורסים, מדריכים מומלצים, לוח פרויקטים, מרקטפלייס הסוכנים והורדת הסוכנים, וניהול תוכן (`/hub/admin/*`). קריאה ציבורית בכל אלה.
+4. **ניקוי** — הסרת קוד מת (`layout/AppLayout.tsx`, `layout/Sidebar.tsx`, `GoogleAuthCallback`, `DocsPage` הישן), איחוד הניווט העליון, ועדכון המסמך הזה.

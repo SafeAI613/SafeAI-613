@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/landing-page-v2.css";
-import { useAuth } from "../context/authStore";
 import { KeyIcon, ClipboardIcon, DocIcon } from "../features/landing/icons";
+import { ROUTES, loginPath } from "../router/paths";
 
 const FEATURES = [
   {
@@ -23,18 +23,18 @@ const FEATURES = [
 
 // Public "before login" marketing page for SafeAI Platform (SCRUM-229) —
 // reached from the gateway's Platform card, colored to its destination.
+// Guests only: the route sends a logged-in user straight to the dashboard.
 export default function PlatformTeaserPage() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
 
   const continueToPlatform = () => {
-    navigate(isAuthenticated ? "/safeai-platform" : "/login?next=/safeai-platform");
+    navigate(loginPath(ROUTES.platform.dashboard));
   };
 
   return (
     <div className="landing-v2 theme-platform" dir="rtl">
       <header className="lv2-teaser-header">
-        <Link to="/" className="lv2-teaser-back">
+        <Link to={ROUTES.home} className="lv2-teaser-back">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 5l-7 7 7 7" />
           </svg>
