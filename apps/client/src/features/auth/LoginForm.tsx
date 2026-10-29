@@ -43,6 +43,14 @@ export default function LoginForm() {
   const postLoginDestination =
     nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/safeai-ui";
 
+  // Arriving from a gateway world's teaser page (SCRUM-228/229): brand the
+  // form to that destination instead of showing a generic login screen.
+  const flavor: "hub" | "platform" | null = postLoginDestination.startsWith("/safeai-hub")
+    ? "hub"
+    : postLoginDestination.startsWith("/safeai-platform")
+      ? "platform"
+      : null;
+
   // Handle Google OAuth callback
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
@@ -168,8 +176,10 @@ export default function LoginForm() {
       />
       
       <div className="auth-form-container">
-      <div className="auth-form-wrapper">
-        <h2 className="auth-title">{t("nav.login")}</h2>
+      <div className={`auth-form-wrapper${flavor ? ` auth-flavor-${flavor}` : ""}`}>
+        <h2 className="auth-title">
+          {flavor === "hub" ? "כניסה ל-Hub" : flavor === "platform" ? "כניסה ל-Platform" : t("nav.login")}
+        </h2>
 
         {/* Google OAuth Button */}
         <button
