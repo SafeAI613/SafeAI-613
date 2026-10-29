@@ -5,6 +5,7 @@ import { API_ENDPOINTS, apiCall } from "../config/api";
 import ChecklistStep from "../features/dashboard/ChecklistStep";
 import StatTile from "../features/dashboard/StatTile";
 import FeedList, { type FeedItem } from "../features/dashboard/FeedList";
+import { ROUTES } from "../router/paths";
 
 interface UsageStats {
   totalRequests: number;
@@ -124,7 +125,7 @@ export default function SafeAIPlatformHomePage() {
           label="צור מפתח API"
           description="נדרש כדי לבצע קריאות ל-API"
           done={!keysLoading && !!activeKeysCount}
-          path="/api-key-display"
+          path={`${ROUTES.platform.account}/api-keys`}
         />
         <ChecklistStep
           step={2}

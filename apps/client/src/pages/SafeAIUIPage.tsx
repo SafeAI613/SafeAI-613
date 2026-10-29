@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/safeai-ui.css";
 import ProfilesManagement from "../features/safeai-ui/ProfilesManagement";
@@ -16,6 +16,7 @@ import { OrganizationsManagement } from "../features/organizations/Organizations
 import { PendingApprovalScreen } from "../features/organizations/PendingApprovalScreen";
 import { getMyOrganization } from "../features/organizations/api/organizationApi";
 import OrganizationUsersPage from "../pages/OrganizationUsersPage";
+import { ROUTES } from "../router/paths";
 
 type Reply = {
   senderRole: string;
@@ -26,19 +27,30 @@ type Request = {
   replies?: Reply[];
 };
 
+// Each section is a URL: /platform/account/<section> for users and org
+// owners, /platform/admin/<section> for system admins. The first section of
+// each role is its default.
 type Section =
+  | "overview"
+  | "statistics"
+  | "api-keys"
+  | "requests"
+  | "billing"
   | "profiles"
   | "users"
-  | "dashboard"
-  | "statistics"
-  | "apikeys"
   | "organizations"
-  | "requests"
-  | "adminRequests"
-  | "contactTypes"
+  | "all-requests"
+  | "contact-types"
   | "org-statistics"
-  | "org-users"
-  | "billing";
+  | "org-users";
+
+type Role = "admin" | "user" | "org_owner";
+
+const ROLE_SECTIONS: Record<Role, Section[]> = {
+  admin: ["statistics", "profiles", "users", "organizations", "all-requests", "contact-types"],
+  user: ["overview", "statistics", "api-keys", "requests", "billing"],
+  org_owner: ["org-statistics", "org-users"],
+};
 
 type UserData = {
   email: string;
@@ -46,60 +58,42 @@ type UserData = {
   _id?: string;
 };
 
-export default function SafeAIUIPage() {
+function readStoredSession(): { user: UserData | null; role: Role | null } {
+  const storedUser = localStorage.getItem("user");
+  const storedRole = localStorage.getItem("userRole") as Role | null;
+  if (!storedUser || !storedRole || !(storedRole in ROLE_SECTIONS)) {
+    return { user: null, role: null };
+  }
+  return { user: JSON.parse(storedUser), role: storedRole };
+}
+
+export default function SafeAIUIPage({ area }: { area: "account" | "admin" }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { section } = useParams();
 
-  // Initialize state from localStorage
-  const getInitialState = (requestedSection?: Section) => {
-    const storedUser = localStorage.getItem("user");
-    const storedRole = localStorage.getItem("userRole");
+  const [{ user: currentUser, role: userRole }] = useState(readStoredSession);
 
-    if (storedUser && storedRole) {
-      const parsedUser = JSON.parse(storedUser);
-      const defaultSection: Section =
-        storedRole === "org_owner" ? "org-statistics" : storedRole === "user" ? "dashboard" : "statistics";
-      return {
-        user: parsedUser,
-        role: storedRole as "admin" | "user" | "org_owner",
-        section: requestedSection ?? defaultSection,
-      };
-    }
+  // Admins live under /platform/admin, everyone else under /platform/account.
+  const roleArea = userRole === "admin" ? "admin" : "account";
+  const basePath = roleArea === "admin" ? ROUTES.platform.admin : ROUTES.platform.account;
+  const allowedSections = userRole ? ROLE_SECTIONS[userRole] : [];
+  const activeSection = allowedSections.find((s) => s === section);
 
-    return {
-      user: null,
-      role: null,
-      section: "dashboard" as Section,
-    };
-  };
+  const goTo = (target: Section) => navigate(`${basePath}/${target}`);
 
-  // Allows callers to deep-link into a specific section (e.g. redirecting
-  // here right after a contact form submission should land on "requests",
-  // not the default section) via navigate("/safeai-ui", { state: { section } }).
-  const requestedSection = (location.state as { section?: Section } | null)?.section;
-  const initialState = getInitialState(requestedSection);
-  const [activeSection, setActiveSection] = useState<Section>(
-    initialState.section,
-  );
-  const [userRole] = useState<"admin" | "user" | "org_owner" | null>(
-    initialState.role,
-  );
-  const [currentUser] = useState<UserData | null>(
-    initialState.user,
-  );
   const [newRequestCount, setNewRequestCount] = useState(0);
 
   // Gate for org owners: block management until their org is approved
   const [orgGate, setOrgGate] = useState<{ loading: boolean; pending: boolean; orgName?: string }>({
-    loading: initialState.role === "org_owner",
+    loading: userRole === "org_owner",
     pending: false,
   });
 
-  // Redirect to landing page if not authenticated
+  // Redirect to landing page if the stored session is unusable
   useEffect(() => {
     if (!userRole) {
-      navigate("/");
+      navigate(ROUTES.home);
     }
   }, [userRole, navigate]);
 
@@ -156,11 +150,11 @@ export default function SafeAIUIPage() {
         return <ProfilesManagement />;
       case "users":
         return <UsersManagement />;
-      case "dashboard":
-        return <UserDashboard user={currentUser} onNavigateSection={setActiveSection} />;
+      case "overview":
+        return <UserDashboard user={currentUser} onNavigateSection={goTo} />;
       case "statistics":
         return <Statistics user={currentUser} />;
-      case "apikeys":
+      case "api-keys":
         return <UserApiKeysPage />;
       case "billing":
         return <BillingPage />;
@@ -168,9 +162,9 @@ export default function SafeAIUIPage() {
         return <OrganizationsManagement />;
       case "requests":
         return <MyRequestsList activeSection={activeSection} />;
-      case "adminRequests":
+      case "all-requests":
         return <AdminRequestsList />;
-      case "contactTypes":
+      case "contact-types":
         return <ContactTypesManagement />;
       case "org-statistics":
         return <Statistics user={currentUser} />;
@@ -180,6 +174,11 @@ export default function SafeAIUIPage() {
         return <UserDashboard user={currentUser} />;
     }
   };
+
+  // Wrong area for this role, or no/unknown section → the role's default section
+  if (userRole && (area !== roleArea || !activeSection)) {
+    return <Navigate to={`${basePath}/${allowedSections[0]}`} replace />;
+  }
 
   return (
     <div className="safeai-ui-page">
@@ -196,7 +195,7 @@ export default function SafeAIUIPage() {
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("statistics")}
+                  onClick={() => goTo("statistics")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -215,7 +214,7 @@ export default function SafeAIUIPage() {
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("profiles")}
+                  onClick={() => goTo("profiles")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -233,7 +232,7 @@ export default function SafeAIUIPage() {
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("users")}
+                  onClick={() => goTo("users")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -251,7 +250,7 @@ export default function SafeAIUIPage() {
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("organizations")}
+                  onClick={() => goTo("organizations")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -265,11 +264,11 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                   className={
-                    activeSection === "adminRequests"
+                    activeSection === "all-requests"
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("adminRequests")}
+                  onClick={() => goTo("all-requests")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -287,11 +286,11 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                   className={
-                    activeSection === "contactTypes"
+                    activeSection === "contact-types"
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("contactTypes")}
+                  onClick={() => goTo("contact-types")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -312,11 +311,11 @@ export default function SafeAIUIPage() {
               <>
                 <button
                   className={
-                    activeSection === "dashboard"
+                    activeSection === "overview"
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("dashboard")}
+                  onClick={() => goTo("overview")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -335,7 +334,7 @@ export default function SafeAIUIPage() {
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("statistics")}
+                  onClick={() => goTo("statistics")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path
@@ -350,11 +349,11 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                   className={
-                    activeSection === "apikeys"
+                    activeSection === "api-keys"
                       ? "sub-nav-btn active"
                       : "sub-nav-btn"
                   }
-                  onClick={() => setActiveSection("apikeys")}
+                  onClick={() => goTo("api-keys")}
                 >
                   <svg
                     width="16"
@@ -395,7 +394,7 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                     className={activeSection === "requests" ? "sub-nav-btn active" : "sub-nav-btn"}
-                    onClick={() => setActiveSection("requests")}
+                    onClick={() => goTo("requests")}
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M2 4h12v8H2zM2 4l6 4 6-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -404,7 +403,7 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                   className={activeSection === "billing" ? "sub-nav-btn active" : "sub-nav-btn"}
-                  onClick={() => setActiveSection("billing")}
+                  onClick={() => goTo("billing")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <rect x="1" y="4" width="14" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
@@ -421,7 +420,7 @@ export default function SafeAIUIPage() {
               <>
                 <button
                   className={activeSection === "org-statistics" ? "sub-nav-btn active" : "sub-nav-btn"}
-                  onClick={() => setActiveSection("org-statistics")}
+                  onClick={() => goTo("org-statistics")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M2 14V8M8 14V2M14 14V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -430,7 +429,7 @@ export default function SafeAIUIPage() {
                 </button>
                 <button
                   className={activeSection === "org-users" ? "sub-nav-btn active" : "sub-nav-btn"}
-                  onClick={() => setActiveSection("org-users")}
+                  onClick={() => goTo("org-users")}
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M11 7a2 2 0 100-4 2 2 0 000 4zM13 13c0-1.657-1.343-3-3-3M5 7a2 2 0 100-4 2 2 0 000 4zM1 13c0-1.657 1.343-3 3-3s3 1.343 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>

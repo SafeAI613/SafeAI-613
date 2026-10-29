@@ -7,6 +7,7 @@ import {
   type OrganizationInvoice,
 } from "../api/organizationApi";
 import "../../../styles/organization-wallet.css";
+import { ROUTES } from "../../../router/paths";
 
 const STATUS_COLOR: Record<OrganizationInvoice["status"], string> = {
   completed: "var(--color-success)",
@@ -85,7 +86,7 @@ export default function OrganizationInvoicesPage() {
       <h1>{t("orgInvoices.pageTitle")}</h1>
       <p>{t("orgInvoices.pageSubtitle")}</p>
       <p>
-        <Link to="/organization/users">{t("orgInvoices.backToDashboard")}</Link>
+        <Link to={ROUTES.platform.organizationUsers}>{t("orgInvoices.backToDashboard")}</Link>
       </p>
 
       {invoices.length === 0 ? (

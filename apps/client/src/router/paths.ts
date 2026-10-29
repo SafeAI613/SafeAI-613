@@ -19,6 +19,16 @@ export const ROUTES = {
   platform: {
     root: "/platform",
     dashboard: "/platform/dashboard",
+    // Personal area (users, org owners) and system admin — each tab is
+    // `<area>/<section>`, see ROLE_SECTIONS in pages/SafeAIUIPage.tsx.
+    account: "/platform/account",
+    admin: "/platform/admin",
+    requestDetails: "/platform/requests/:id",
+    organizationUsers: "/platform/organization/users",
+    organizationInvoices: "/platform/organization/invoices",
+    changelog: "/platform/changelog",
+    // One-time display of a newly issued API key (the key arrives in navigation state)
+    apiKeyCreated: "/platform/api-key-created",
   },
 
   hub: {
@@ -29,12 +39,22 @@ export const ROUTES = {
 /**
  * Old URLs that moved, mapped to their new location. Kept so links in
  * emails, bookmarks and search results keep working (the SPA equivalent of a
- * permanent 301 redirect). Query string and hash are preserved.
+ * permanent 301 redirect). Query string, hash and navigation state are
+ * preserved, and `:params` in `from` are filled into `to`.
  */
 export const LEGACY_REDIRECTS: ReadonlyArray<{ from: string; to: string }> = [
   { from: "/safeai-platform", to: ROUTES.platform.dashboard },
   { from: "/safeai-hub", to: ROUTES.hub.root },
   { from: "/landing-preview", to: ROUTES.home },
+  // Platform — /safeai-ui is also linked from server emails (utils/email.ts)
+  { from: "/safeai-ui", to: ROUTES.platform.account },
+  { from: "/admin/all-requests", to: `${ROUTES.platform.admin}/all-requests` },
+  { from: "/admin/organizations", to: `${ROUTES.platform.admin}/organizations` },
+  { from: "/request/:id", to: ROUTES.platform.requestDetails },
+  { from: "/organization/users", to: ROUTES.platform.organizationUsers },
+  { from: "/organization/invoices", to: ROUTES.platform.organizationInvoices },
+  { from: "/activity-log", to: ROUTES.platform.changelog },
+  { from: "/api-key-display", to: ROUTES.platform.apiKeyCreated },
 ];
 
 /**

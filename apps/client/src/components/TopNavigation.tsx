@@ -5,6 +5,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/authStore";
 import ThemeToggle from "./ThemeToggle";
+import { ROUTES } from "../router/paths";
 
 export default function TopNavigation() {
   const location = useLocation();
@@ -157,8 +158,8 @@ export default function TopNavigation() {
             <>
               {/* Authenticated Navigation */}
               <Link
-                to="/safeai-ui"
-                className={`top-nav-link ${location.pathname === "/safeai-ui" ? "active" : ""}`}
+                to={ROUTES.platform.account}
+                className={`top-nav-link ${location.pathname.startsWith(ROUTES.platform.root) ? "active" : ""}`}
               >
                {t("nav.personalArea")}
               </Link>
@@ -263,7 +264,7 @@ export default function TopNavigation() {
                     </div>
                     <div className="user-menu-divider"></div>
                     <Link
-                      to="/safeai-ui"
+                      to={ROUTES.platform.account}
                       className="user-menu-item"
                       onClick={() => setShowUserMenu(false)}
                     >
@@ -278,7 +279,7 @@ export default function TopNavigation() {
                       {t("nav.personalArea")}
                     </Link>
                     <Link
-                      to="/api-key-display"
+                      to={`${ROUTES.platform.account}/api-keys`}
                       className="user-menu-item"
                       onClick={() => setShowUserMenu(false)}
                     >

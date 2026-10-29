@@ -1,9 +1,10 @@
 import '../../styles/safeai-ui.css';
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { useState, useEffect } from "react";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
+import { ROUTES } from "../../router/paths";
 
 interface MyRequestsListProps {
   activeSection: string;
@@ -79,7 +80,7 @@ export default function MyRequestsList({ activeSection }: MyRequestsListProps) {
               {requests.filter((req) => req.status !== 'closed').map((req) => (
                 <tr
                   key={req._id}
-                  onClick={() => navigate(`/request/${req._id}`)}
+                  onClick={() => navigate(generatePath(ROUTES.platform.requestDetails, { id: req._id }))}
                   style={{ cursor: 'pointer' }}
                 >
                   <td>

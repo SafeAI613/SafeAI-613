@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAlert } from "../../context/alertStore";
+import { ROUTES } from "../../router/paths";
 
 type Reply = {
   senderRole: string;
@@ -230,16 +231,16 @@ export default function AdminRequestsList() {
                       <span className="request-new-badge request-new-icon">{t("requests.newReplyBadge")}</span>
                     )}
                   </td>
-                  <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
+                  <td onClick={() => navigate(generatePath(ROUTES.platform.requestDetails, { id: req._id }))} style={{ cursor: "pointer" }}>
                     {userInfo?.name || t("requests.unknownValue")}
                   </td>
-                  <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
+                  <td onClick={() => navigate(generatePath(ROUTES.platform.requestDetails, { id: req._id }))} style={{ cursor: "pointer" }}>
                     {userInfo?.email ? <span dir="ltr">{userInfo.email}</span> : t("requests.noEmailValue")}
                   </td>
-                  <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
+                  <td onClick={() => navigate(generatePath(ROUTES.platform.requestDetails, { id: req._id }))} style={{ cursor: "pointer" }}>
                     {req.title || t("requests.noSubject")}
                   </td>
-                  <td onClick={() => navigate(`/request/${req._id}`)} style={{ cursor: "pointer" }}>
+                  <td onClick={() => navigate(generatePath(ROUTES.platform.requestDetails, { id: req._id }))} style={{ cursor: "pointer" }}>
                     {req.status === "closed" ? t("requests.closedStatus") : t("inquiries.statusOpen")}
                     {newBadge && <span className="request-new-badge">{t("requests.newBadge")}</span>}
                   </td>
