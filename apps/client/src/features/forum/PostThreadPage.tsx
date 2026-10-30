@@ -23,7 +23,7 @@ import type { Post, Comment } from './types';
 import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
-import { ROUTES } from "../../router/paths";
+import { ROUTES, loginPath } from "../../router/paths";
 
 // Builds a meta description of roughly 160 characters, without cutting a
 // word in half - post.content is plain text (rendered unescaped as a React
@@ -607,7 +607,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
         </div>
       ) : !currentUser ? (
        <div className="forum-unauthorized-notice">
-        <span>יש <Link to="/login" className="forum-login-link">להתחבר</Link> כדי להגיב כאן</span>
+        <span>יש <Link to={loginPath(location.pathname)} className="forum-login-link">להתחבר</Link> כדי להגיב כאן</span>
       </div>
       ) : (
         <div className="forum-comment-form-wrap">

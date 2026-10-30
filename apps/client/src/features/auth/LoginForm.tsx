@@ -128,7 +128,7 @@ export default function LoginForm() {
 
         if (response.user.mustChangePassword) {
           // Temporary password (e.g. issued when added to an organization) must be replaced first
-          navigate("/change-password");
+          navigate(ROUTES.changePassword);
         } else if (!response.user.profileId) {
           // Show profile selection modal
           setLoggedInUser(response.user);
@@ -271,7 +271,7 @@ export default function LoginForm() {
             <button
               type="button"
               className="link-button"
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => navigate(ROUTES.forgotPassword)}
             >
               {t("login.forgotPassword")}
             </button>
@@ -291,7 +291,7 @@ export default function LoginForm() {
             {t("login.noAccountText")}{" "}
             <button
               className="link-button"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate(ROUTES.register)}
             >
               {t("login.registerNow")}
             </button>

@@ -16,7 +16,7 @@ export default function ApiKeyDisplay() {
   useEffect(() => {
     // If no API key in state, redirect to login
     if (!proxyApiKey) {
-      navigate("/login");
+      navigate(ROUTES.login);
     }
   }, [proxyApiKey, navigate]);
 

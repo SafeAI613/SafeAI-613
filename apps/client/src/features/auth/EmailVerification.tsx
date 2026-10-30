@@ -44,16 +44,16 @@ export default function EmailVerification() {
             setTimeout(() => {
               navigate(
                 response.user!.mustChangePassword
-                  ? "/change-password"
+                  ? ROUTES.changePassword
                   : response.user!.profileId
                     ? ROUTES.home
-                    : "/login",
+                    : ROUTES.login,
               );
             }, 3000);
           } else {
             // Redirect to login after 3 seconds
             setTimeout(() => {
-              navigate("/login");
+              navigate(ROUTES.login);
             }, 3000);
           }
         }
@@ -130,13 +130,13 @@ export default function EmailVerification() {
               style={{ display: "flex", gap: "10px", justifyContent: "center" }}
             >
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate(ROUTES.login)}
                 className="btn btn-primary"
               >
                 {t("emailVerification.backToLoginBtn")}
               </button>
               <button
-                onClick={() => navigate("/register")}
+                onClick={() => navigate(ROUTES.register)}
                 className="btn btn-secondary"
               >
                 {t("emailVerification.registerAgainBtn")}

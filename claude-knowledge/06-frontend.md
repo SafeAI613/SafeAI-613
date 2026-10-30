@@ -7,11 +7,11 @@ React 19 + Vite 7 + TypeScript + React Router 7 + Redux Toolkit. פורט dev `5
 ```
 client/src/
 ├─ main.tsx, App.tsx        # bootstrap
-├─ router/AppRouter.tsx     # כל ה-routes + ProtectedRoute/PublicRoute
+├─ router/                  # AppRouter, paths (ROUTES), guards, LegacyRedirect
 ├─ config/api.ts            # API_BASE_URL, API_ENDPOINTS, apiCall<T>()
 ├─ app/store.ts, hooks.ts   # Redux Toolkit store + typed hooks
 ├─ context/                 # AuthContext (useAuth) — מקור האמת ל-auth
-├─ layout/                  # AppLayout, Sidebar
+├─ layout/                  # SiteLayout, PlatformLayout, HubLayout
 ├─ components/              # TopNavigation, BetaBanner, ProfileSelectionModal...
 ├─ features/                # Redux slices + UI לפי דומיין
 │  ├─ auth/                 # Login/Register/Forgot/Reset/ApiKeyDisplay/Google
@@ -27,13 +27,11 @@ client/src/
 └─ styles/                  # CSS (design-system.css ועוד)
 ```
 
-## Routing (`router/AppRouter.tsx`)
-`BrowserRouter` עם `TopNavigation` + `BetaBanner` גלובליים.
-- **PublicRoute** — אם יש access+refresh+user → redirect ל-`/safeai-ui`.
-- **ProtectedRoute** — בלי accessToken+user → redirect ל-`/login`.
-- ציבוריים: `/`, `/login`, `/register`, `/register-success`, `/verify-email/:token`, `/forgot-password`, `/reset-password/:token`, `/about`, `/contact`, `/docs`, `/recommended-guides`, `/courses`, `/activity-log`.
-- מוגנים: `/api-key-display`, `/safeai-ui` (הדשבורד הראשי), `/organization/users`, `/admin/organizations`.
-- `*` → NotFound.
+## Routing
+האתר הוא דף בית (Gateway) ושתי פלטפורמות: **SafeAI Platform** (`/platform/*`, דורש התחברות) ו-**SafeAI Hub** (`/hub/*`, קריאה ציבורית). המבנה המלא, הכללים ומפת הנתיבים: [CLIENT_ROUTING_STRUCTURE.md](../docs/CLIENT_ROUTING_STRUCTURE.md).
+- `router/paths.ts` — `ROUTES` (מקור אמת לכל הנתיבים — לא כותבים מחרוזת נתיב בקומפוננטה), `LEGACY_REDIRECTS`, `safeNextPath()`, `loginPath()`.
+- `router/guards.tsx` — `ProtectedRoute` (אורח → `/login?next=<הדף>`), `PublicRoute` (מחובר → `next` / `redirectTo` / `/`).
+- `layout/SiteLayout` (ניווט עליון + באנר), `layout/PlatformLayout`, `layout/HubLayout` (סיידבר לכל פלטפורמה + `ErrorBoundary`).
 
 > **production sub-path:** האתר מוגש תחת `/console/`. צריך `basename="/console"` ב-Router. ראה [07-deployment-and-env.md].
 

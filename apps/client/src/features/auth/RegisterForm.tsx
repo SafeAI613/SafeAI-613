@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { AUTH_ERROR_CODE_KEYS } from "../../i18n/authErrorCodes";
+import { ROUTES } from "../../router/paths";
 
 interface RegisterFormData {
   email: string;
@@ -149,7 +150,7 @@ export default function RegisterForm() {
       if (response.success) {
         // Don't store tokens - user must verify email first
         // Navigate to success page with API key and verification message
-        navigate("/register-success", {
+        navigate(ROUTES.registerSuccess, {
           state: {
             proxyApiKey: response.proxyApiKey,
             message: response.message,
@@ -329,7 +330,7 @@ export default function RegisterForm() {
               />
               <span>
                 קראתי ואני מסכימ/ה ל{" "}
-                <Link to="/privacy" target="_blank" rel="noopener noreferrer">
+                <Link to={ROUTES.privacy} target="_blank" rel="noopener noreferrer">
                   מדיניות הפרטיות
                 </Link>
               </span>
@@ -348,7 +349,7 @@ export default function RegisterForm() {
         <div className="auth-footer">
           <p>
             {t("register.haveAccountText")}{" "}
-            <button className="link-button" onClick={() => navigate("/login")}>
+            <button className="link-button" onClick={() => navigate(ROUTES.login)}>
               {t("contact.loginButton")}
             </button>
           </p>

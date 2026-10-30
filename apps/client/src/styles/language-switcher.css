@@ -42,7 +42,7 @@
 .language-switcher-menu {
   position: absolute;
   top: calc(100% + 4px);
-  right: 0;
+  inset-inline-end: 0; /* opens toward the page in both RTL and LTR, never past the screen edge */
   min-width: 150px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);

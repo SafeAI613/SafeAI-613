@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { publicRequestOrganization } from "./api/organizationApi";
 import "../../styles/organizations-admin.css";
+import { ROUTES } from "../../router/paths";
 
 export const PublicOrgOwnerSignup = () => {
   const [ownerName, setOwnerName] = useState("");
@@ -54,7 +55,7 @@ export const PublicOrgOwnerSignup = () => {
             {t("organizations.signupSuccessPrefix")} <strong>{orgName}</strong> {t("organizations.signupSuccessSuffix")}
           </p>
           <p>{t("organizations.signupSuccessFooter")}</p>
-          <Link to="/" className="org-detail-back">
+          <Link to={ROUTES.home} className="org-detail-back">
             {t("organizations.backToHomeLink")}
           </Link>
         </div>

@@ -5,7 +5,6 @@ import SafeAIUIPage from "../pages/SafeAIUIPage";
 import NotFound from "../pages/NotFound";
 import OrganizationUsersPage from "../pages/OrganizationUsersPage";
 import ContactPage from "../pages/ContactPage";
-import DocsPage from "../pages/DocsPage";
 import ArticlesPage from "../pages/ArticlesPage";
 import ArticlePage from "../pages/ArticlePage";
 import AdminArticlesPage from "../pages/AdminArticlesPage";
@@ -129,12 +128,12 @@ export default function AppRouter() {
 
         {/* Gateway-level pages, with the global top navigation */}
         <Route element={<SiteLayout />}>
-          {/* Public Routes */}
           <Route path={ROUTES.home} element={<LandingPageV2 />} />
-          <Route path="/become-org-owner" element={<PublicOrgOwnerSignup />} />
+          <Route path={ROUTES.becomeOrgOwner} element={<PublicOrgOwnerSignup />} />
 
+          {/* Auth — guests only, except email links and change-password */}
           <Route
-            path="/login"
+            path={ROUTES.login}
             element={
               <PublicRoute>
                 <LoginForm />
@@ -143,7 +142,7 @@ export default function AppRouter() {
           />
 
           <Route
-            path="/register"
+            path={ROUTES.register}
             element={
               <PublicRoute>
                 <RegisterForm />
@@ -151,7 +150,7 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="/register-success"
+            path={ROUTES.registerSuccess}
             element={
               <PublicRoute>
                 <RegisterFormSuccess />
@@ -159,10 +158,10 @@ export default function AppRouter() {
             }
           />
 
-          <Route path="/verify-email/:token" element={<EmailVerification />} />
+          <Route path={ROUTES.verifyEmail} element={<EmailVerification />} />
 
           <Route
-            path="/forgot-password"
+            path={ROUTES.forgotPassword}
             element={
               <PublicRoute>
                 <ForgotPassword />
@@ -170,10 +169,10 @@ export default function AppRouter() {
             }
           />
 
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path={ROUTES.resetPassword} element={<ResetPassword />} />
 
           <Route
-            path="/change-password"
+            path={ROUTES.changePassword}
             element={
               <ProtectedRoute>
                 <ChangePassword />
@@ -183,7 +182,7 @@ export default function AppRouter() {
 
           {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
           <Route
-            path="/organizations/:id/wallet/payme/success"
+            path={ROUTES.paymeSuccess}
             element={
               <ProtectedRoute>
                 <ErrorBoundary>
@@ -193,7 +192,7 @@ export default function AppRouter() {
             }
           />
           <Route
-            path="/organizations/:id/wallet/payme/fail"
+            path={ROUTES.paymeFail}
             element={
               <ProtectedRoute>
                 <ErrorBoundary>
@@ -203,12 +202,11 @@ export default function AppRouter() {
             }
           />
 
+          {/* General pages */}
+          <Route path={ROUTES.about} element={<AboutPage />} />
+          <Route path={ROUTES.privacy} element={<PrivacyPolicyPage />} />
+          <Route path={ROUTES.contact} element={<ContactPage />} />
 
-          {/* New Pages Routes */}
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/docs-old" element={<DocsPage />} />
           {/* Catch all - 404 */}
           <Route path="*" element={<NotFound />} />
         </Route>

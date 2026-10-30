@@ -22,11 +22,13 @@
 | `apps/client/src/router/AppRouter.tsx` | הגדרת ה-routes, מקובצים לפי layout |
 | `apps/client/src/router/guards.tsx` | `ProtectedRoute` ו-`PublicRoute` |
 | `apps/client/src/router/LegacyRedirect.tsx` | הפניה מנתיב ישן לחדש, כולל query ו-hash |
-| `apps/client/src/layout/SiteLayout.tsx` | layout לדפי ה-Gateway: ניווט עליון + באנר בטא |
+| `apps/client/src/layout/SiteLayout.tsx` | layout לדפי ה-Gateway: ניווט עליון (`TopNavigation`) + באנר בטא |
 | `apps/client/src/layout/PlatformLayout.tsx` | layout של Platform: סיידבר Platform |
 | `apps/client/src/layout/HubLayout.tsx` | layout של Hub: סיידבר Hub + קישור התחברות לאורחים |
 
-**כלל:** לא כותבים מחרוזת נתיב בתוך קומפוננטה — מייבאים מ-`ROUTES`. כך אפשר להזיז route בלי לחפש כל קישור אליו.
+**כלל:** לא כותבים מחרוזת נתיב בתוך קומפוננטה — מייבאים מ-`ROUTES`. כך אפשר להזיז route בלי לחפש כל קישור אליו. לנתיב עם פרמטר: `generatePath(ROUTES.hub.forumPost, { id })`. לקישור פנימי תמיד `<Link>` / `navigate()` ולא `<a href>` — אחרת ה-basename `/console/` של פרודקשן לא מתווסף.
+
+**ניווט:** `TopNavigation` מוצג רק בדפי ה-Gateway, וזהה לאורח ולמחובר: SafeAI Hub, SafeAI Platform, למה?, צור קשר, ומימין התחברות/הרשמה או תפריט משתמש. בתוך פלטפורמה הסיידבר שלה מחליף אותו.
 
 ## התחברות וחזרה לדף המקורי (`?next=`)
 
@@ -118,4 +120,10 @@
 1. **תשתית** ✅ — `ROUTES`, guards עם `next`, layouts לכל פלטפורמה, מנגנון הפניות, דפי הבית של שתי הפלטפורמות.
 2. **Platform** ✅ — העברת האזור האישי (`/safeai-ui` והטאבים שלו), מפתחות API, בקשות, חשבוניות ארגון, ניהול מערכת (`/platform/admin/*`), ו-`/activity-log` כ-changelog של הפלטפורמה (`/platform/changelog`).
 3. **Hub** ✅ — העברת חדשות, פורום, מאמרים (`/docs`), קורסים, מדריכים מומלצים, לוח פרויקטים, מרקטפלייס הסוכנים והורדת הסוכנים, וניהול תוכן (`/hub/admin/*`). קריאה ציבורית בכל אלה.
-4. **ניקוי** — הסרת קוד מת (`layout/AppLayout.tsx`, `layout/Sidebar.tsx`, `GoogleAuthCallback`, `AuthForm`, `DocsPage` הישן ב-`/docs-old`), איחוד הניווט העליון, ועדכון המסמך הזה.
+4. **ניקוי** ✅ — הסרת קוד מת של ניתוב/layout (`AppLayout`, `Sidebar`, `LandingPage`/`HomePage` הישנים ורכיביהם, `GoogleAuthCallback`, `AuthForm`, `DocsPage` הישן — `/docs-old` מפנה עכשיו למאמרים), איחוד הניווט העליון והסרת הכותרת הכפולה מדף הבית, וכל הנתיבים שנותרו עברו ל-`ROUTES`.
+
+## המשך מומלץ (מחוץ לתוכנית)
+
+- **מיילים בשרת** (`apps/server/src/utils/email.ts`) — לעדכן קישורים ל-`/platform/account` ול-`/hub/projects`. ההפניות מכסות אותם עד אז.
+- **Google OAuth** — ה-`next` לא שורד את ההפניה דרך השרת, ולכן אחרי התחברות עם Google המשתמש מגיע לדף הבית.
+- **קוד מת שאינו קשור לניתוב** — `features/Inquiries`, `tasks`, `data-history`, `tabl_data`, `example`, `FilterManagement`, `pages/FilterAdminPage`, `components/DevelopmentModal` ועוד אינם מיובאים מאף מקום. להחליט אם למחוק.
