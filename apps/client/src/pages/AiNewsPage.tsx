@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, generatePath } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { he } from "date-fns/locale";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { stripMarkdown } from "../utils/markdown";
 import "../styles/news-page.css";
+import { ROUTES } from "../router/paths";
 
 interface NewsItem {
   _id: string;
@@ -468,7 +469,7 @@ export default function AiNewsPage() {
             <div className="news-list">
               {featured && (
                 <article className="news-list-row news-list-row--lead">
-                  <Link to={`/ai-news/${featured._id}`} className="news-list-image-link">
+                  <Link to={generatePath(ROUTES.hub.newsItem, { id: featured._id })} className="news-list-image-link">
                     {featured.imageUrl ? (
                       <img src={featured.imageUrl} alt={featured.title} className="news-list-image" />
                     ) : (
@@ -480,7 +481,7 @@ export default function AiNewsPage() {
                   <div className="news-list-body">
                     <span className="news-lead-badge">הכתבה המובילה</span>
                     {featured.tags?.[0] && <span className="news-card-eyebrow">#{featured.tags[0]}</span>}
-                    <Link to={`/ai-news/${featured._id}`} className="news-article-title">
+                    <Link to={generatePath(ROUTES.hub.newsItem, { id: featured._id })} className="news-article-title">
                       {featured.title}
                     </Link>
                     <p className="news-preview">{stripMarkdown(featured.content)}</p>
@@ -507,7 +508,7 @@ export default function AiNewsPage() {
 
               {rest.map((item) => (
                 <article key={item._id} className="news-list-row">
-                  <Link to={`/ai-news/${item._id}`} className="news-list-image-link">
+                  <Link to={generatePath(ROUTES.hub.newsItem, { id: item._id })} className="news-list-image-link">
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt={item.title} className="news-list-image" />
                     ) : (
@@ -518,7 +519,7 @@ export default function AiNewsPage() {
                   </Link>
                   <div className="news-list-body">
                     {item.tags?.[0] && <span className="news-card-eyebrow">#{item.tags[0]}</span>}
-                    <Link to={`/ai-news/${item._id}`} className="news-article-title">
+                    <Link to={generatePath(ROUTES.hub.newsItem, { id: item._id })} className="news-article-title">
                       {item.title}
                     </Link>
                     <p className="news-preview">{stripMarkdown(item.content)}</p>

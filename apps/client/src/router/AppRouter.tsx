@@ -89,6 +89,37 @@ export default function AppRouter() {
             inside pages require login. */}
         <Route path={ROUTES.hub.root} element={<HubLayout />}>
           <Route index element={<SafeAIHubHomePage />} />
+          <Route path={ROUTES.hub.forum} element={<ForumPage />} />
+          <Route path={ROUTES.hub.forumPost} element={<PostThreadPage />} />
+          <Route path={ROUTES.hub.news} element={<AiNewsPage />} />
+          <Route path={ROUTES.hub.newsItem} element={<AiNewsDetailsPage />} />
+          <Route path={ROUTES.hub.articles} element={<ArticlesPage />} />
+          <Route path={ROUTES.hub.article} element={<ArticlePage />} />
+          <Route path={ROUTES.hub.courses} element={<CoursesPage />} />
+          <Route path={ROUTES.hub.guides} element={<RecommendedGuidesPage />} />
+          <Route path={ROUTES.hub.projects} element={<TenderBoardPage />} />
+          <Route path={ROUTES.hub.agentsDownload} element={<DownloadAgentsPage />} />
+          <Route path={ROUTES.hub.agents} element={<AgentsIndexPage />}>
+            <Route index element={<AgentsMarketplace />} />
+            <Route
+              path={ROUTES.hub.agentsSubmit}
+              element={
+                <ProtectedRoute>
+                  <AgentSubmitPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path={ROUTES.hub.agentsStats} element={<AgentStatsPage />} />
+            <Route path={ROUTES.hub.agent} element={<AgentDetailPage />} />
+          </Route>
+          <Route
+            path={ROUTES.hub.adminArticles}
+            element={
+              <ProtectedRoute>
+                <AdminArticlesPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Moved URLs → their new location */}
@@ -150,33 +181,6 @@ export default function AppRouter() {
             }
           />
 
-          <Route
-            path="/forum"
-            element={
-                <ForumPage />
-            }
-          />
-
-          {/* Organization Routes */}
-           <Route
-            path="/ai-news"
-            element={
-             <ProtectedRoute>
-               <AiNewsPage />
-             </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/ai-news/:id"
-            element={
-             <ProtectedRoute>
-               <AiNewsDetailsPage />
-             </ProtectedRoute>
-            }
-          />
-
-          {/* Organization Routes */}
-
           {/* PayMe wallet top-up result pages (PayMe redirects the browser here) */}
           <Route
             path="/organizations/:id/wallet/payme/success"
@@ -199,41 +203,12 @@ export default function AppRouter() {
             }
           />
 
-          <Route
-            path="/admin/articles"
-            element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <AdminArticlesPage />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            }
-          />
-
-
 
           {/* New Pages Routes */}
           <Route path="/about" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/docs" element={<ArticlesPage />} />
-          <Route path="/docs/:slug" element={<ArticlePage />} />
           <Route path="/docs-old" element={<DocsPage />} />
-          <Route path="/recommended-guides" element={<RecommendedGuidesPage />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/tender-board" element={<TenderBoardPage />} />
-          <Route path="/download-agents" element={<DownloadAgentsPage />} />
-
-          {/* Agents Marketplace — community-submitted agents, separate from the desktop-app download page above */}
-          <Route path="/agents-marketplace" element={<AgentsIndexPage />}>
-            <Route index element={<AgentsMarketplace />} />
-            <Route path="submit" element={<AgentSubmitPage />} />
-            <Route path="stats" element={<AgentStatsPage />} />
-            <Route path=":id" element={<AgentDetailPage />} />
-          </Route>
-
-          <Route path="/forum/post/:id" element={<PostThreadPage />} />
-
           {/* Catch all - 404 */}
           <Route path="*" element={<NotFound />} />
         </Route>

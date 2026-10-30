@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, generatePath, useNavigate } from 'react-router-dom';
 import CreatableSelect from 'react-select/creatable';
 import type { MultiValue } from 'react-select';
 import {
@@ -12,6 +12,7 @@ import {
 } from './api';
 import { validateFileForUpload } from './uploadValidation';
 import '../../styles/forum.css';
+import { ROUTES } from "../../router/paths";
 
 interface AddPostModalProps {
   isOpen: boolean;
@@ -214,7 +215,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
         loadTagsFromServer();
         onClose(); 
         if (onPostCreated) onPostCreated();
-        navigate('/forum');
+        navigate(ROUTES.hub.forum);
       } else {
         console.error('Failed to create post');
       }
@@ -298,9 +299,9 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                   </div>
                   {similarPosts.map((post: { _id: string; title: string }) => (
                     <div key={post._id} className="forum-similar-post-item">
-                      <a href={`/forum/post/${post._id}`} target="_blank" rel="noreferrer" className="forum-similar-post-link">
+                      <Link to={generatePath(ROUTES.hub.forumPost, { id: post._id })} target="_blank" rel="noreferrer" className="forum-similar-post-link">
                         {post.title}
-                      </a>
+                      </Link>
                     </div>
                   ))}
                 </div>

@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, generatePath } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { SEO } from "../components/SEO";
 import "./articles-page.css";
+import { ROUTES } from "../router/paths";
 
 interface Article {
   _id: string;
@@ -96,7 +97,7 @@ export default function ArticlesPage() {
               {catArticles.map((article) => (
                 <Link
                   key={article._id}
-                  to={`/docs/${article.slug}`}
+                  to={generatePath(ROUTES.hub.article, { slug: article.slug })}
                   className="article-card"
                 >
                   <div className="article-card-category">{article.category}</div>

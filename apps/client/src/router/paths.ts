@@ -33,6 +33,23 @@ export const ROUTES = {
 
   hub: {
     root: "/hub",
+    forum: "/hub/forum",
+    forumPost: "/hub/forum/:id",
+    news: "/hub/news",
+    newsItem: "/hub/news/:id",
+    articles: "/hub/articles",
+    article: "/hub/articles/:slug",
+    courses: "/hub/courses",
+    guides: "/hub/guides",
+    projects: "/hub/projects",
+    // Community agents: marketplace (index), submit, stats, a single agent, and the desktop-app download
+    agents: "/hub/agents",
+    agentsSubmit: "/hub/agents/submit",
+    agentsStats: "/hub/agents/stats",
+    agent: "/hub/agents/:id",
+    agentsDownload: "/hub/agents/download",
+    // Content admin (server enforces the admin role)
+    adminArticles: "/hub/admin/articles",
   },
 } as const;
 
@@ -55,6 +72,22 @@ export const LEGACY_REDIRECTS: ReadonlyArray<{ from: string; to: string }> = [
   { from: "/organization/invoices", to: ROUTES.platform.organizationInvoices },
   { from: "/activity-log", to: ROUTES.platform.changelog },
   { from: "/api-key-display", to: ROUTES.platform.apiKeyCreated },
+  // Hub — /tender-board is also linked from server emails (utils/email.ts)
+  { from: "/forum", to: ROUTES.hub.forum },
+  { from: "/forum/post/:id", to: ROUTES.hub.forumPost },
+  { from: "/ai-news", to: ROUTES.hub.news },
+  { from: "/ai-news/:id", to: ROUTES.hub.newsItem },
+  { from: "/docs", to: ROUTES.hub.articles },
+  { from: "/docs/:slug", to: ROUTES.hub.article },
+  { from: "/courses", to: ROUTES.hub.courses },
+  { from: "/recommended-guides", to: ROUTES.hub.guides },
+  { from: "/tender-board", to: ROUTES.hub.projects },
+  { from: "/agents-marketplace", to: ROUTES.hub.agents },
+  { from: "/agents-marketplace/submit", to: ROUTES.hub.agentsSubmit },
+  { from: "/agents-marketplace/stats", to: ROUTES.hub.agentsStats },
+  { from: "/agents-marketplace/:id", to: ROUTES.hub.agent },
+  { from: "/download-agents", to: ROUTES.hub.agentsDownload },
+  { from: "/admin/articles", to: ROUTES.hub.adminArticles },
 ];
 
 /**

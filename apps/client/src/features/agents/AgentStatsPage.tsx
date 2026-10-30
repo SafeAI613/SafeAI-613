@@ -5,10 +5,11 @@
  */
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { fetchStats } from "./api/agentsApi";
 import type { Agent, AgentStatsResponse } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
+import { ROUTES } from "../../router/paths";
 
 export default function AgentStatsPage() {
   const navigate = useNavigate();
@@ -50,19 +51,19 @@ export default function AgentStatsPage() {
           title="🏆 הכי פופולרים"
           agents={stats.topByDownloads}
           renderMeta={(a) => `⬇ ${a.downloads.toLocaleString()}`}
-          onSelect={(id) => navigate(`/agents-marketplace/${id}`)}
+          onSelect={(id) => navigate(generatePath(ROUTES.hub.agent, { id }))}
         />
         <AgentRankList
           title="🆕 חדשים ביותר"
           agents={stats.newest}
           renderMeta={(a) => new Date(a.createdAt).toLocaleDateString("he-IL")}
-          onSelect={(id) => navigate(`/agents-marketplace/${id}`)}
+          onSelect={(id) => navigate(generatePath(ROUTES.hub.agent, { id }))}
         />
         <AgentRankList
           title="⭐ הכי מדורגים"
           agents={stats.topByRating}
           renderMeta={(a) => `⭐ ${a.rating.toFixed(1)} (${a.ratingCount})`}
-          onSelect={(id) => navigate(`/agents-marketplace/${id}`)}
+          onSelect={(id) => navigate(generatePath(ROUTES.hub.agent, { id }))}
         />
       </div>
 

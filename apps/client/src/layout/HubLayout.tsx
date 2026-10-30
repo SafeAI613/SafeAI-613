@@ -2,18 +2,19 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import "../styles/landing-page-v2.css";
 import "../styles/dashboard-pages.css";
 import { useAuth } from "../context/authStore";
-import { ChatIcon, BookIcon, CompassIcon, ClipboardIcon, NewsIcon, ShieldIcon, UserIcon } from "../features/landing/icons";
+import { ChatIcon, BookIcon, BoxIcon, CompassIcon, ClipboardIcon, DocIcon, NewsIcon, ShieldIcon, UserIcon } from "../features/landing/icons";
+import ErrorBoundary from "../components/ErrorBoundary";
 import DashboardSidebar from "../features/dashboard/DashboardSidebar";
 import { ROUTES, loginPath } from "../router/paths";
 
-// TODO(routing): these still point at the pre-split URLs; they move under
-// /hub/* together with their pages.
 const SIDEBAR_ITEMS = [
-  { key: "forum", icon: <ChatIcon size={18} />, label: "פורום", path: "/forum" },
-  { key: "courses", icon: <BookIcon size={18} />, label: "קורסים", path: "/courses" },
-  { key: "guides", icon: <CompassIcon size={18} />, label: "מדריכים מומלצים", path: "/recommended-guides" },
-  { key: "tenders", icon: <ClipboardIcon size={18} />, label: "לוח פרויקטים", path: "/tender-board" },
-  { key: "news", icon: <NewsIcon size={18} />, label: "חדשות AI", path: "/ai-news" },
+  { key: "news", icon: <NewsIcon size={18} />, label: "חדשות AI", path: ROUTES.hub.news },
+  { key: "forum", icon: <ChatIcon size={18} />, label: "פורום", path: ROUTES.hub.forum },
+  { key: "articles", icon: <DocIcon size={18} />, label: "מאמרים", path: ROUTES.hub.articles },
+  { key: "courses", icon: <BookIcon size={18} />, label: "קורסים", path: ROUTES.hub.courses },
+  { key: "guides", icon: <CompassIcon size={18} />, label: "מדריכים מומלצים", path: ROUTES.hub.guides },
+  { key: "projects", icon: <ClipboardIcon size={18} />, label: "לוח פרויקטים", path: ROUTES.hub.projects },
+  { key: "agents", icon: <BoxIcon size={18} />, label: "סוכנים", path: ROUTES.hub.agents },
 ];
 
 /**
@@ -43,7 +44,10 @@ export default function HubLayout() {
       />
 
       <div className="dash-main">
-        <Outlet />
+        {/* Resets on navigation, so a crashed page recovers when the user moves on */}
+        <ErrorBoundary resetKey={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </div>
     </div>
   );

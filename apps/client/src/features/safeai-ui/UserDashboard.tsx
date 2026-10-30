@@ -7,6 +7,7 @@ import { useProfiles, type Profile } from "../../hooks/useProfiles";
 import { useAuth } from "../../context/authStore";
 import BudgetCard from "./BudgetCard";
 import UsageChart from "./UsageChart";
+import { ROUTES } from "../../router/paths";
 
 type InAppSection = "requests" | "api-keys" | "billing";
 
@@ -19,7 +20,7 @@ interface UserDashboardProps {
   } | null;
   // Switches SafeAIUIPage's own active tab - the quick links below need this
   // for "requests"/"apikeys"/"billing" since those are tabs within this page,
-  // not standalone routes (unlike "/ai-news" and "/contact" below, which are).
+  // not standalone routes (unlike the news page and "/contact" below, which are).
   onNavigateSection?: (section: InAppSection) => void;
 }
 
@@ -110,7 +111,7 @@ export default function UserDashboard({ user, onNavigateSection }: UserDashboard
         <button className="btn btn-secondary" onClick={() => onNavigateSection?.("billing")}>
           {t("safeaiNav.billing")}
         </button>
-        <button className="btn btn-secondary" onClick={() => navigate("/ai-news")}>
+        <button className="btn btn-secondary" onClick={() => navigate(ROUTES.hub.news)}>
           {t("userDashboard.quickLinkNews")}
         </button>
         <button className="btn btn-secondary" onClick={() => navigate("/contact")}>

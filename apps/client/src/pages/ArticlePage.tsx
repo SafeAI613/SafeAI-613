@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { SEO } from "../components/SEO";
 import "./article-page.css";
+import { ROUTES } from "../router/paths";
 
 interface Article {
   _id: string;
@@ -55,7 +56,7 @@ export default function ArticlePage() {
     return (
       <div className="article-page-error" dir="rtl">
         <p>{error || "מאמר לא נמצא"}</p>
-        <Link to="/docs" className="article-back-link">← חזרה ל-Docs</Link>
+        <Link to={ROUTES.hub.articles} className="article-back-link">← חזרה ל-Docs</Link>
       </div>
     );
 
@@ -68,7 +69,7 @@ export default function ArticlePage() {
         canonicalUrl={`https://safeai613.com/docs/${article.slug}`}
       />
       <div className="article-container">
-        <Link to="/docs" className="article-back-link">← חזרה ל-Docs</Link>
+        <Link to={ROUTES.hub.articles} className="article-back-link">← חזרה ל-Docs</Link>
 
         <div className="article-header">
           <span className="article-category">{article.category}</span>

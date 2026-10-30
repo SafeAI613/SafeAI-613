@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, generatePath, useNavigate } from 'react-router-dom';
 import { AddPostModal } from './AddPostModal';
 import { fetchPosts as fetchPostsFromApi, fetchSimilarPosts, moderatePost as moderatePostApi } from './api';
 import type { Post } from './types';
 import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
+import { ROUTES, loginPath } from "../../router/paths";
 
 export const ForumPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -247,7 +248,7 @@ export const ForumPage: React.FC = () => {
         </button>
         {!currentUser && (
         <span className="forum-login-hint">
-        יש <Link to="/login">להתחבר</Link> כדי להוסיף פוסט חדש
+        יש <Link to={loginPath(ROUTES.hub.forum)}>להתחבר</Link> כדי להוסיף פוסט חדש
         </span>
         )}
         </div>
@@ -300,7 +301,7 @@ export const ForumPage: React.FC = () => {
               return (
                 <div
                   key={post._id}
-                  onClick={() => navigate(`/forum/post/${post._id}`)}
+                  onClick={() => navigate(generatePath(ROUTES.hub.forumPost, { id: post._id }))}
                   className={`forum-card ${post.isBlocked ? 'forum-card-blocked' : ''}`}
                 >
                   <div className={`forum-card-avatar-col ${post.isBlocked ? 'forum-card-avatar-col-blocked' : ''}`}>
@@ -364,7 +365,7 @@ export const ForumPage: React.FC = () => {
                     </div>
 
                     {post.lastComment && (
-                      <div onClick={(e) => { e.stopPropagation(); navigate(`/forum/post/${post._id}?scroll=bottom`); }} className="forum-last-comment">
+                      <div onClick={(e) => { e.stopPropagation(); navigate(`${generatePath(ROUTES.hub.forumPost, { id: post._id })}?scroll=bottom`); }} className="forum-last-comment">
                         <div className="forum-last-comment-text">
                           <strong className="forum-last-comment-author">{post.lastComment.authorName}: </strong>
                           {(() => {
@@ -401,7 +402,7 @@ export const ForumPage: React.FC = () => {
                         )}
                       </div>
                       <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/forum/post/${post._id}`); }}
+                        onClick={(e) => { e.stopPropagation(); navigate(generatePath(ROUTES.hub.forumPost, { id: post._id })); }}
                         className="forum-comments-btn"
                       >
                         לכל התגובות
@@ -456,7 +457,7 @@ export const ForumPage: React.FC = () => {
                   <div
                     key={p._id}
                     onClick={() => {
-                      navigate(`/forum/post/${p._id}`);
+                      navigate(generatePath(ROUTES.hub.forumPost, { id: p._id }));
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     className="forum-recommendation-card"

@@ -7,12 +7,11 @@ import { useAuth } from "../context/authStore";
 import DashboardSidebar from "../features/dashboard/DashboardSidebar";
 import { ROUTES } from "../router/paths";
 
-// TODO(routing): "docs" still points at its pre-split URL; it moves with the Hub pages.
 // System admins manage the platform from /platform/admin; everyone else has a
 // personal area (API keys are one of its tabs).
 function sidebarItems(isAdmin: boolean) {
   return [
-    { key: "docs", icon: <DocIcon size={18} />, label: "תיעוד", path: "/docs" },
+    { key: "docs", icon: <DocIcon size={18} />, label: "תיעוד", path: ROUTES.hub.articles },
     isAdmin
       ? { key: "admin", icon: <UserIcon size={18} />, label: "ניהול מערכת", path: ROUTES.platform.admin }
       : { key: "personal-area", icon: <KeyIcon size={18} />, label: "אזור אישי ומפתחות API", path: ROUTES.platform.account },

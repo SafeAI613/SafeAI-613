@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link, generatePath } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import "./admin-articles-page.css";
+import { ROUTES } from "../router/paths";
 
 interface Article {
   _id: string;
@@ -253,14 +255,14 @@ export default function AdminArticlesPage() {
                   >
                     מחק
                   </button>
-                  <a
-                    href={`/docs/${a.slug}`}
+                  <Link
+                    to={generatePath(ROUTES.hub.article, { slug: a.slug })}
                     target="_blank"
                     rel="noreferrer"
                     className="admin-articles-view-link"
                   >
                     צפה
-                  </a>
+                  </Link>
                 </td>
               </tr>
             ))}

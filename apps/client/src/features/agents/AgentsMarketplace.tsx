@@ -5,10 +5,11 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { generatePath, useNavigate } from "react-router-dom";
 import { fetchAgents } from "./api/agentsApi";
 import type { Agent, AgentFilters } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
+import { ROUTES } from "../../router/paths";
 
 const SORT_OPTIONS = [
   { value: "downloads", label: "🔥 הכי פופולרי" },
@@ -137,7 +138,7 @@ export default function AgentsMarketplace() {
             <div
               key={agent._id}
               className="agent-card"
-              onClick={() => navigate(`/agents-marketplace/${agent._id}`)}
+              onClick={() => navigate(generatePath(ROUTES.hub.agent, { id: agent._id }))}
             >
               <div className="agent-card-icon">
                 <AgentIcon svg={agent.icon} />
