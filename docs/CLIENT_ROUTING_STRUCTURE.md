@@ -81,7 +81,7 @@
 /hub/agents/submit              → AgentSubmitPage (מוגן)
 /hub/agents/stats               → AgentStatsPage
 /hub/agents/:id                 → AgentDetailPage
-/hub/agents/download            → AgentDownloadsPage (הורדת אפליקציית הסוכנים)
+/hub/agents/download            → AgentDownloadsPage (טאב "אפליקציית Desktop"; קישורי ההורדה ב-DESKTOP_DOWNLOADS)
 /hub/admin/articles             → AdminArticlesPage (מוגן; השרת אוכף admin)
 
 כל `/hub/*` ציבורי לקריאה, חוץ מהגשת סוכן וניהול מאמרים (מוגנים). `HubLayout` עוטף את התוכן ב-`ErrorBoundary` שמתאפס במעבר דף, ומציג לאורחים קישור "התחברות" שמחזיר לאותו דף.

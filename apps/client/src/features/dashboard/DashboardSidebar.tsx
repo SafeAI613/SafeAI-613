@@ -2,6 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
 import { HomeIcon } from "../landing/icons";
 import { ROUTES } from "../../router/paths";
+import ThemeToggle from "../../components/ThemeToggle";
 
 export interface SidebarItem {
   key: string;
@@ -55,6 +56,9 @@ export default function DashboardSidebar({ homeLabel, homePath, items, crossLink
         <span>{crossLink.label}</span>
       </Link>
       {footer}
+      <div className="dash-sidebar-tools">
+        <ThemeToggle />
+      </div>
     </nav>
   );
 }

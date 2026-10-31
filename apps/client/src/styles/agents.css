@@ -29,12 +29,14 @@
 .agents-tabs {
   display: flex;
   gap: 4px;
+  overflow-x: auto; /* tabs scroll sideways on narrow screens instead of widening the page */
   border-bottom: 2px solid var(--border-default);
   margin-bottom: 28px;
 }
 
 .agents-tab {
   padding: 10px 20px;
+  white-space: nowrap;
   font-size: var(--font-md);
   color: var(--text-muted);
   text-decoration: none;
