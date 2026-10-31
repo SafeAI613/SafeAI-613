@@ -40,7 +40,8 @@ import PaymeResultPage from '../features/organizations/PaymeResultPage';
 import OrganizationInvoicesPage from '../features/organizations/pages/OrganizationInvoicesPage';
 import SafeAIHubHomePage from "../pages/SafeAIHubHomePage";
 import SafeAIPlatformHomePage from "../pages/SafeAIPlatformHomePage";
-import PlatformTeaserPage from "../pages/PlatformTeaserPage";
+import HubIntroPage from "../pages/HubIntroPage";
+import PlatformIntroPage from "../pages/PlatformIntroPage";
 import SiteLayout from "../layout/SiteLayout";
 import PlatformLayout from "../layout/PlatformLayout";
 import HubLayout from "../layout/HubLayout";
@@ -55,14 +56,19 @@ export default function AppRouter() {
     <HelmetProvider>
     <BrowserRouter basename={ROUTER_BASE}>
       <Routes>
-        {/* SafeAI Platform — using SafeAI as an AI provider. The index is a
-            public teaser for guests; everything else requires login. */}
+        {/* Intro pages for each platform, linked from the gateway. Full-bleed
+            pages with their own header — outside SiteLayout's top navigation. */}
+        <Route path={ROUTES.welcome.hub} element={<HubIntroPage />} />
+        <Route path={ROUTES.welcome.platform} element={<PlatformIntroPage />} />
+
+        {/* SafeAI Platform — using SafeAI as an AI provider. The index is the
+            intro page for guests; everything else requires login. */}
         <Route path={ROUTES.platform.root}>
           <Route
             index
             element={
               <PublicRoute redirectTo={ROUTES.platform.dashboard}>
-                <PlatformTeaserPage />
+                <PlatformIntroPage />
               </PublicRoute>
             }
           />

@@ -1,0 +1,1289 @@
+/* =====================================================================
+   Showcase pages — the gateway (/) and the Hub / Platform intro pages
+   (/welcome/hub, /welcome/platform).
+
+   Clean white canvas + one accent per page:
+     .sx            → SafeAI green  (gateway)
+     .sx.sx-hub     → Hub copper
+     .sx.sx-platform→ Platform blue
+   Every color comes from the --sx-* tokens below, so dark mode only
+   re-declares the tokens. All motion is switched off for visitors who ask
+   for reduced motion (bottom of the file).
+   ===================================================================== */
+
+.sx {
+  --sx-bg: #ffffff;
+  --sx-bg-soft: #f6f8f7;
+  --sx-card: #ffffff;
+  --sx-ink: #0f1d22;
+  --sx-ink-soft: #3d4d54;
+  --sx-muted: #66767c;
+  --sx-line: #e4e9e7;
+
+  --sx-accent: #10a37f;
+  --sx-accent-strong: #0b8466;
+  --sx-accent-2: #2f5d8a;
+  --sx-accent-soft: rgba(16, 163, 127, 0.1);
+  --sx-glow-1: rgba(16, 163, 127, 0.28);
+  --sx-glow-2: rgba(47, 93, 138, 0.2);
+  --sx-glow-3: rgba(194, 112, 61, 0.16);
+
+  --sx-terminal-bg: #0f1d22;
+  --sx-terminal-ink: #d6e2e0;
+
+  --sx-radius: 22px;
+  --sx-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--sx-bg);
+  color: var(--sx-ink);
+  font-family: "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.7;
+  overflow-x: clip;
+}
+
+.sx.sx-hub,
+.sx .sx-hub {
+  --sx-accent: #c2703d;
+  --sx-accent-strong: #a35a2c;
+  --sx-accent-2: #d99a2b;
+  --sx-accent-soft: rgba(194, 112, 61, 0.1);
+  --sx-glow-1: rgba(194, 112, 61, 0.26);
+  --sx-glow-2: rgba(217, 154, 43, 0.2);
+  --sx-glow-3: rgba(16, 163, 127, 0.12);
+}
+
+.sx.sx-platform,
+.sx .sx-platform {
+  --sx-accent: #2f5d8a;
+  --sx-accent-strong: #234a70;
+  --sx-accent-2: #10a37f;
+  --sx-accent-soft: rgba(47, 93, 138, 0.1);
+  --sx-glow-1: rgba(47, 93, 138, 0.26);
+  --sx-glow-2: rgba(16, 163, 127, 0.2);
+  --sx-glow-3: rgba(108, 155, 201, 0.18);
+}
+
+[data-theme="dark"] .sx {
+  --sx-bg: #0d1315;
+  --sx-bg-soft: #121a1d;
+  --sx-card: #141c1f;
+  --sx-ink: #eef3f1;
+  --sx-ink-soft: #c3cdd0;
+  --sx-muted: #8d999d;
+  --sx-line: #233034;
+  --sx-accent: #2fd6a7;
+  --sx-accent-strong: #2fd6a7;
+  --sx-accent-2: #7fb0e0;
+  --sx-accent-soft: rgba(47, 214, 167, 0.12);
+  --sx-terminal-bg: #081012;
+}
+
+[data-theme="dark"] .sx.sx-hub,
+[data-theme="dark"] .sx .sx-hub {
+  --sx-accent: #e09a6c;
+  --sx-accent-strong: #e09a6c;
+  --sx-accent-2: #f0c060;
+  --sx-accent-soft: rgba(224, 154, 108, 0.14);
+}
+
+[data-theme="dark"] .sx.sx-platform,
+[data-theme="dark"] .sx .sx-platform {
+  --sx-accent: #7fb0e0;
+  --sx-accent-strong: #7fb0e0;
+  --sx-accent-2: #2fd6a7;
+  --sx-accent-soft: rgba(127, 176, 224, 0.14);
+}
+
+.sx *,
+.sx *::before,
+.sx *::after {
+  box-sizing: border-box;
+}
+
+.sx a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Link-buttons: beat the `.sx a` color reset above. */
+.sx .sx-btn-primary {
+  color: #ffffff;
+}
+
+.sx .sx-btn-ghost {
+  color: var(--sx-ink);
+}
+
+.sx-wrap {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.sx-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Typography ---------- */
+
+.sx-gradient-text {
+  background: linear-gradient(90deg, var(--sx-accent), var(--sx-accent-2) 55%, var(--sx-accent));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sx-shine 7s linear infinite;
+}
+
+.sx-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--sx-ink-soft);
+}
+
+.sx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: var(--sx-accent-strong);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sx-eyebrow b {
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--sx-accent-soft);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+
+.sx-h1 {
+  margin: 0 0 26px;
+  font-size: clamp(2.8rem, 9vw, 6.2rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--sx-ink);
+}
+
+.sx-h2 {
+  margin: 0 0 20px;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--sx-ink);
+}
+
+.sx-h3 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--sx-ink);
+}
+
+.sx-lead {
+  max-width: 640px;
+  margin: 0 0 40px;
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  font-weight: 300;
+  color: var(--sx-ink-soft);
+}
+
+.sx-lead strong {
+  font-weight: 600;
+  color: var(--sx-ink);
+}
+
+/* design-system.css gives every <p> 14px; inside cards and steps use the
+   page's base size instead (leads and the statement set their own). */
+.sx-card p,
+.sx-step p {
+  font-size: 1rem;
+}
+
+/* ---------- Buttons & chips ---------- */
+
+.sx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.sx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.25s var(--sx-ease), box-shadow 0.25s, background-color 0.25s, border-color 0.25s, color 0.25s;
+}
+
+.sx-btn:focus-visible,
+.sx-card-link:focus-visible,
+.sx-dots button:focus-visible {
+  outline: 3px solid var(--sx-accent);
+  outline-offset: 3px;
+}
+
+.sx-btn-primary {
+  background: var(--sx-accent);
+  color: #ffffff;
+  box-shadow: 0 10px 30px -10px var(--sx-glow-1);
+}
+
+[data-theme="dark"] .sx .sx-btn-primary {
+  color: #0d1315;
+}
+
+.sx-btn-primary:hover {
+  transform: translateY(-2px);
+  background: var(--sx-accent-strong);
+  box-shadow: 0 16px 40px -12px var(--sx-glow-1);
+}
+
+.sx-btn-ghost {
+  background: var(--sx-card);
+  border-color: var(--sx-line);
+  color: var(--sx-ink);
+}
+
+.sx .sx-btn-ghost:hover {
+  border-color: var(--sx-accent);
+  color: var(--sx-accent-strong);
+}
+
+.sx-btn-sm {
+  padding: 10px 18px;
+  font-size: 0.92rem;
+}
+
+.sx-btn-arrow {
+  transition: transform 0.25s var(--sx-ease);
+}
+
+.sx-btn:hover .sx-btn-arrow {
+  transform: translateX(-4px);
+}
+
+.sx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+  padding: 7px 18px;
+  border: 1px solid var(--sx-accent-soft);
+  border-radius: 999px;
+  background: var(--sx-accent-soft);
+  color: var(--sx-accent-strong);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.sx-chip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sx-accent);
+  animation: sx-pulse 2s ease-in-out infinite;
+}
+
+/* ---------- Decorative background ---------- */
+
+.sx-grid-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--sx-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--sx-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 15%, transparent 65%);
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 15%, transparent 65%);
+  opacity: 0.7;
+}
+
+.sx-orb {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: sx-float 16s ease-in-out infinite;
+}
+
+.sx-orb-1 {
+  width: 460px;
+  height: 460px;
+  top: -140px;
+  right: -120px;
+  background: var(--sx-glow-1);
+}
+
+.sx-orb-2 {
+  width: 400px;
+  height: 400px;
+  top: 220px;
+  left: -160px;
+  background: var(--sx-glow-2);
+  animation-delay: -6s;
+}
+
+.sx-orb-3 {
+  width: 320px;
+  height: 320px;
+  bottom: -80px;
+  right: 30%;
+  background: var(--sx-glow-3);
+  animation-delay: -11s;
+}
+
+/* ---------- Sections ---------- */
+
+.sx-section {
+  position: relative;
+  padding: 120px 0;
+  scroll-margin-top: 70px;
+}
+
+.sx-section-soft {
+  background: var(--sx-bg-soft);
+}
+
+.sx-section-head {
+  max-width: 760px;
+  margin-bottom: 56px;
+}
+
+.sx-section-head-center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+.sx-section-head-center .sx-lead {
+  margin-inline: auto;
+}
+
+/* Hero */
+.sx-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: calc(100vh - 110px);
+  padding: 90px 0 110px;
+  scroll-margin-top: 70px;
+}
+
+.sx-hero-center {
+  text-align: center;
+}
+
+.sx-hero-center .sx-lead {
+  margin-inline: auto;
+}
+
+.sx-hero-center .sx-actions {
+  justify-content: center;
+}
+
+.sx-scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  width: 26px;
+  height: 42px;
+  margin-left: -13px;
+  border: 2px solid var(--sx-line);
+  border-radius: 14px;
+  background: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.sx-scroll-hint::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--sx-accent);
+  animation: sx-scroll 1.8s ease-in-out infinite;
+}
+
+/* Split layout: text + visual. The headline shares the row, so it is smaller. */
+.sx-split .sx-h1 {
+  font-size: clamp(2.6rem, 6.4vw, 5.2rem);
+}
+
+/* Split layout: text + visual */
+.sx-split {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.sx-split > * {
+  min-width: 0;
+}
+
+/* ---------- Stats ---------- */
+
+.sx-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--sx-line);
+  border-radius: 26px;
+  background: var(--sx-line);
+}
+
+.sx-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  padding: 36px 26px;
+  background: var(--sx-card);
+  text-align: center;
+}
+
+.sx-stat-value {
+  margin: 0 0 8px;
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.sx-stat-label {
+  color: var(--sx-muted);
+  font-size: 0.98rem;
+}
+
+/* Spacing helpers for the few one-off gaps between blocks */
+.sx-space-top {
+  margin-top: 72px;
+}
+
+.sx-actions-center {
+  justify-content: center;
+  margin-top: 48px;
+}
+
+/* ---------- Marquee ---------- */
+
+.sx-marquee {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  padding: 20px 0;
+  border-block: 1px solid var(--sx-line);
+  background: var(--sx-bg-soft);
+}
+
+.sx-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: sx-marquee 40s linear infinite;
+}
+
+.sx-marquee-track span {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding-inline-end: 48px;
+  white-space: nowrap;
+  color: var(--sx-muted);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.sx-marquee-track span::after {
+  content: "✦";
+  color: var(--sx-accent);
+}
+
+/* ---------- Big statement ---------- */
+
+.sx-statement {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: clamp(2rem, 5.5vw, 4.4rem);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--sx-ink);
+}
+
+.sx-statement .sx-dim {
+  color: var(--sx-line);
+}
+
+[data-theme="dark"] .sx-statement .sx-dim {
+  color: #34444a;
+}
+
+/* ---------- Cards ---------- */
+
+.sx-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.sx-cards-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.sx-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 30px 28px;
+  overflow: hidden;
+  border: 1px solid var(--sx-line);
+  border-radius: var(--sx-radius);
+  background: var(--sx-card);
+  transition: transform 0.35s var(--sx-ease), border-color 0.35s, box-shadow 0.35s;
+}
+
+.sx-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px circle at 100% 0%, var(--sx-accent-soft), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+
+.sx-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--sx-accent);
+  box-shadow: 0 24px 50px -28px var(--sx-glow-1);
+}
+
+.sx-card:hover::before {
+  opacity: 1;
+}
+
+.sx-card p {
+  position: relative;
+  margin: 0;
+  color: var(--sx-ink-soft);
+}
+
+.sx-card .sx-h3 {
+  position: relative;
+}
+
+.sx-card-num {
+  position: absolute;
+  top: 12px;
+  left: 22px;
+  font-size: 4.4rem;
+  font-weight: 900;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--sx-line);
+  direction: ltr;
+  transition: -webkit-text-stroke-color 0.35s;
+  pointer-events: none;
+}
+
+.sx-card:hover .sx-card-num {
+  -webkit-text-stroke-color: var(--sx-accent);
+}
+
+.sx-card-icon {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: var(--sx-accent-soft);
+  color: var(--sx-accent-strong);
+  transition: transform 0.35s var(--sx-ease);
+}
+
+.sx-card:hover .sx-card-icon {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.sx-card-link {
+  cursor: pointer;
+}
+
+.sx-card-more {
+  position: relative;
+  margin-top: 14px;
+  color: var(--sx-accent-strong);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+/* Compact grid of numbered areas (gateway Hub section) */
+.sx-mini-grid {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.sx-mini {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--sx-line);
+  border-radius: 16px;
+  background: var(--sx-card);
+  transition: transform 0.3s var(--sx-ease), border-color 0.3s;
+}
+
+.sx-mini:hover {
+  transform: translateX(-4px);
+  border-color: var(--sx-accent);
+}
+
+.sx-mini-num {
+  margin-inline-start: auto;
+  color: var(--sx-accent-strong);
+  font-size: 0.85rem;
+  font-weight: 800;
+  direction: ltr;
+  font-variant-numeric: tabular-nums;
+}
+
+.sx-mini-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: var(--sx-accent-soft);
+  color: var(--sx-accent-strong);
+}
+
+.sx-mini-title {
+  font-weight: 700;
+  color: var(--sx-ink);
+}
+
+.sx-mini-wide {
+  grid-column: 1 / -1;
+}
+
+/* Check list */
+.sx-checklist {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 36px;
+  padding: 0;
+  list-style: none;
+}
+
+.sx-checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--sx-ink-soft);
+  font-size: 1.05rem;
+}
+
+.sx-checklist-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--sx-accent-soft);
+  color: var(--sx-accent-strong);
+}
+
+/* ---------- Terminal ---------- */
+
+.sx-terminal {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--sx-line);
+  border-radius: 18px;
+  background: var(--sx-terminal-bg);
+  box-shadow: 0 40px 80px -40px var(--sx-glow-1), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  text-align: left;
+}
+
+.sx-terminal-bar {
+  display: flex;
+  gap: 7px;
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sx-terminal-bar span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.sx-terminal-bar span:nth-child(2) {
+  background: #febc2e;
+}
+
+.sx-terminal-bar span:nth-child(3) {
+  background: #28c840;
+}
+
+.sx-terminal-body {
+  min-height: 210px;
+  margin: 0;
+  padding: 20px 22px 24px;
+  color: var(--sx-terminal-ink);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86rem;
+  line-height: 1.85;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sx-terminal-command {
+  color: #7fe3c6;
+}
+
+.sx-terminal-output {
+  color: #9fb0b5;
+}
+
+.sx-terminal-success {
+  color: #8be28b;
+}
+
+.sx-terminal-caret {
+  display: inline-block;
+  width: 9px;
+  height: 17px;
+  margin-left: 2px;
+  vertical-align: -3px;
+  background: #7fe3c6;
+  animation: sx-blink 1s steps(1) infinite;
+}
+
+/* ---------- Steps ---------- */
+
+.sx-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sx-step {
+  position: relative;
+  padding: 28px 4px 0;
+}
+
+.sx-step::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--sx-line);
+}
+
+.sx-step::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 2px;
+  background: var(--sx-accent);
+  transition: width 0.6s var(--sx-ease);
+}
+
+.sx-step:hover::after,
+.sx-step.is-revealed::after {
+  width: 100%;
+}
+
+.sx-step-num {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--sx-accent-strong);
+  font-size: 0.9rem;
+  font-weight: 800;
+  direction: ltr;
+  text-align: right;
+}
+
+.sx-step p {
+  margin: 0;
+  color: var(--sx-ink-soft);
+}
+
+.sx-steps-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ---------- Bento ---------- */
+
+.sx-bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.sx-bento .sx-card-wide {
+  grid-column: span 2;
+  background: linear-gradient(135deg, var(--sx-accent-soft), transparent 70%), var(--sx-card);
+}
+
+/* ---------- Floating visual (Hub hero) ---------- */
+
+.sx-float-stack {
+  position: relative;
+  height: 440px;
+}
+
+.sx-float-card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(330px, 86%);
+  padding: 18px 20px;
+  border: 1px solid var(--sx-line);
+  border-radius: 18px;
+  background: var(--sx-card);
+  box-shadow: 0 30px 60px -30px var(--sx-glow-1);
+  animation: sx-bob 7s ease-in-out infinite;
+}
+
+.sx-float-card:nth-child(1) {
+  top: 10px;
+  right: 0;
+}
+
+.sx-float-card:nth-child(2) {
+  top: 120px;
+  left: 0;
+  animation-delay: -2s;
+}
+
+.sx-float-card:nth-child(3) {
+  top: 240px;
+  right: 8%;
+  animation-delay: -4s;
+}
+
+.sx-float-card:nth-child(4) {
+  top: 350px;
+  left: 6%;
+  animation-delay: -5.5s;
+}
+
+.sx-float-card strong {
+  display: block;
+  color: var(--sx-ink);
+  font-size: 1rem;
+}
+
+.sx-float-card small {
+  color: var(--sx-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- CTA band ---------- */
+
+.sx-cta-band {
+  position: relative;
+  overflow: hidden;
+  padding: 70px 56px;
+  border: 1px solid var(--sx-line);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 85% 0%, var(--sx-glow-1), transparent 50%),
+    radial-gradient(circle at 10% 100%, var(--sx-glow-2), transparent 50%),
+    var(--sx-card);
+}
+
+.sx-cta-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.sx-contact-options {
+  display: grid;
+  gap: 12px;
+}
+
+.sx-contact-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--sx-line);
+  border-radius: 18px;
+  background: var(--sx-bg);
+  transition: transform 0.3s var(--sx-ease), border-color 0.3s;
+}
+
+.sx-contact-option:hover {
+  transform: translateX(-4px);
+  border-color: var(--sx-accent);
+}
+
+.sx-contact-option .sx-card-icon {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.sx-contact-option strong {
+  display: block;
+  color: var(--sx-ink);
+}
+
+.sx-contact-option small {
+  display: block;
+  color: var(--sx-muted);
+  font-size: 0.88rem;
+}
+
+.sx-cta-band .sx-lead {
+  margin-bottom: 28px;
+}
+
+.sx-mail {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--sx-accent-strong);
+  font-weight: 600;
+  direction: ltr;
+}
+
+.sx-cta-center {
+  text-align: center;
+}
+
+.sx-cta-center .sx-lead {
+  margin-inline: auto;
+}
+
+.sx-cta-center .sx-actions {
+  justify-content: center;
+}
+
+/* ---------- Side section dots (gateway) ---------- */
+
+.sx-dots {
+  position: fixed;
+  top: 50%;
+  left: 22px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: translateY(-50%);
+}
+
+.sx-dots button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: var(--sx-muted);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  direction: ltr;
+}
+
+.sx-dots button::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--sx-line);
+  border-radius: 50%;
+  transition: all 0.3s var(--sx-ease);
+}
+
+.sx-dots button span {
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.3s var(--sx-ease);
+}
+
+.sx-dots button:hover span,
+.sx-dots button[aria-current="true"] span {
+  opacity: 1;
+  transform: none;
+}
+
+.sx-dots button[aria-current="true"] {
+  color: var(--sx-accent-strong);
+}
+
+.sx-dots button[aria-current="true"]::before {
+  height: 26px;
+  border-color: var(--sx-accent);
+  border-radius: 6px;
+  background: var(--sx-accent);
+}
+
+/* ---------- Intro page header ---------- */
+
+.sx-header {
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  padding-top: 12px;
+}
+
+.sx-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 10px 8px 20px;
+  border: 1px solid var(--sx-line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sx-bg) 78%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px -20px rgba(15, 29, 34, 0.25);
+}
+
+.sx-header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-inline-start: 10px;
+  color: var(--sx-ink-soft);
+}
+
+.sx-header-back:hover {
+  color: var(--sx-accent-strong);
+}
+
+.sx-logo {
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--sx-ink);
+}
+
+.sx-logo span {
+  color: var(--sx-accent);
+}
+
+.sx-header-brand {
+  color: var(--sx-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.sx-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- Scroll reveal ----------
+   Elements marked data-reveal start hidden and play the reveal animation
+   once useRevealOnScroll adds .is-revealed. fill-mode "backwards" (not
+   "both") so the animation lets go afterwards and hover transforms work. */
+
+.sx [data-reveal]:not(.is-revealed) {
+  opacity: 0;
+}
+
+.sx [data-reveal].is-revealed {
+  animation: sx-reveal 0.85s var(--sx-ease) backwards;
+  animation-delay: calc(var(--reveal-index, 0) * 90ms);
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes sx-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sx-shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@keyframes sx-pulse {
+  50% {
+    box-shadow: 0 0 0 6px var(--sx-accent-soft);
+  }
+}
+
+@keyframes sx-float {
+  50% {
+    transform: translate(36px, -44px) scale(1.08);
+  }
+}
+
+@keyframes sx-bob {
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes sx-scroll {
+  to {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+
+@keyframes sx-marquee {
+  to {
+    transform: translateX(50%);
+  }
+}
+
+@keyframes sx-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 980px) {
+  .sx-split,
+  .sx-cta-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+
+  .sx-steps,
+  .sx-steps-3 {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 32px;
+  }
+
+  .sx-bento,
+  .sx-cards-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .sx-bento .sx-card-wide {
+    grid-column: auto;
+  }
+
+  .sx-dots {
+    display: none;
+  }
+
+  .sx-header-brand {
+    display: none;
+  }
+
+  .sx-section {
+    padding: 88px 0;
+  }
+
+  .sx-cta-band {
+    padding: 44px 24px;
+  }
+
+  .sx-float-stack {
+    height: 420px;
+  }
+}
+
+@media (max-width: 560px) {
+  .sx-mini-grid,
+  .sx-steps,
+  .sx-steps-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .sx-hero {
+    min-height: auto;
+    padding: 64px 0 90px;
+  }
+
+  .sx-header-bar {
+    padding-inline-start: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sx *,
+  .sx *::before,
+  .sx *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .sx [data-reveal]:not(.is-revealed) {
+    opacity: 1;
+  }
+}

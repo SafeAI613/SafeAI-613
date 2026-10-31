@@ -9,6 +9,8 @@ import { ROUTES } from "../router/paths";
 
 // Shown only on gateway-level pages (SiteLayout); inside a platform its own
 // sidebar takes over, so this lists just the two platforms and general pages.
+// The home page itself is built from these same five topics as sections, so
+// there the links are hidden and only the brand and account actions remain.
 const PRIMARY_LINKS = [
   { to: ROUTES.hub.root, labelKey: "nav.safeaiHub" },
   { to: ROUTES.platform.root, labelKey: "nav.safeaiPlatform" },
@@ -24,6 +26,7 @@ export default function TopNavigation() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [prevLocationKey, setPrevLocationKey] = useState(location.key);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isHomePage = location.pathname === ROUTES.home;
 
   // Close menus on navigation
   if (location.key !== prevLocationKey) {
@@ -96,7 +99,7 @@ export default function TopNavigation() {
 
         {/* Navigation Links — the same for guests and logged-in users */}
         <div className="top-nav-links">
-          {PRIMARY_LINKS.map((link) => (
+          {!isHomePage && PRIMARY_LINKS.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}

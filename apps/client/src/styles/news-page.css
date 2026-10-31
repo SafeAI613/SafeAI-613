@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap');
+/* Heebo is loaded once for the whole site in index.html. */
 
 .news-page {
   --news-fg: #111827;
