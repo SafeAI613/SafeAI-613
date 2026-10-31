@@ -109,6 +109,7 @@
 
 .preview-list li {
   padding: 12px 0;
+  color: #cbd5e1; /* fixed: sits on the always-dark hero background */
   border-bottom: 1px solid rgba(203, 213, 225, 0.08);
 }
 
@@ -219,6 +220,41 @@
   background: var(--brand-secondary);
 }
 
+/* Download cards per operating system (design: Tamar Ben Chaim) */
+.download-os-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 420px));
+  gap: 24px;
+  justify-content: center;
+}
+
+.download-os-cards .download-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.os-icon {
+  color: var(--brand-secondary);
+  margin-bottom: 14px;
+  line-height: 1;
+}
+
+/* Shown instead of a download link while no build is published */
+.card-btn--disabled,
+.card-btn--disabled:hover {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Section links in the page's sub-navigation are anchors, not buttons */
+a.sub-nav-btn {
+  text-decoration: none;
+}
+
 .card-btn:hover {
   background: var(--brand-secondary-hover);}
 
@@ -230,6 +266,17 @@
 }
 
 @media (max-width: 640px) {
+  .download-os-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Let the hero's grid items and preview card shrink to the screen */
+  .hero-copy,
+  .hero-preview,
+  .preview-card {
+    min-width: 0;
+  }
+
   .hero-section,
   .page-section {
     padding: 40px 16px;

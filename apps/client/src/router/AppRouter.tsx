@@ -97,7 +97,6 @@ export default function AppRouter() {
           <Route path={ROUTES.hub.courses} element={<CoursesPage />} />
           <Route path={ROUTES.hub.guides} element={<RecommendedGuidesPage />} />
           <Route path={ROUTES.hub.projects} element={<TenderBoardPage />} />
-          <Route path={ROUTES.hub.agentsDownload} element={<DownloadAgentsPage />} />
           <Route path={ROUTES.hub.agents} element={<AgentsIndexPage />}>
             <Route index element={<AgentsMarketplace />} />
             <Route
@@ -109,6 +108,7 @@ export default function AppRouter() {
               }
             />
             <Route path={ROUTES.hub.agentsStats} element={<AgentStatsPage />} />
+            <Route path={ROUTES.hub.agentsDownload} element={<DownloadAgentsPage />} />
             <Route path={ROUTES.hub.agent} element={<AgentDetailPage />} />
           </Route>
           <Route

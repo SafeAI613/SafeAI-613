@@ -1,201 +1,171 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../styles/agent-downloads-page.css";
-// import { initialState } from "recharts/types/state/rootPropsSlice";
+
+// Design and copy by Tamar Ben Chaim (branch featur/agents-downloads), ported
+// to the current app structure.
+
+/**
+ * Installer URL per operating system. `null` = no build published yet, and
+ * the button shows "coming soon" instead of linking nowhere. Once a build is
+ * published (e.g. a GitHub Release asset), put its URL here.
+ */
+const DESKTOP_DOWNLOADS: Record<"windows" | "linux", string | null> = {
+  windows: null,
+  linux: null,
+};
+
+type Section = "home" | "downloads" | "guide" | "pricing";
+
+function WindowsIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M0 3.449L9.75 2.1v9.45H0V3.449zM0 12.45h9.75v9.45L0 20.551v-8.1zM10.8 1.95L24 0v11.55H10.8V1.95zM10.8 12.45H24v11.55l-13.2-1.95v-9.6z" />
+    </svg>
+  );
+}
+
+function LinuxIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M6 9l3 3-3 3M12 15h5" />
+    </svg>
+  );
+}
+
+function DownloadButton({ url, label }: { url: string | null; label: string }) {
+  const { t } = useTranslation();
+  if (!url) {
+    return (
+      <span className="card-btn card-btn--disabled" aria-disabled="true">
+        {t("agentDownloads.comingSoon")}
+      </span>
+    );
+  }
+  return (
+    <a className="card-btn" href={url} download>
+      {label}
+    </a>
+  );
+}
 
 export default function AgentDownloadsPage() {
-    const { t } = useTranslation();
-
-    type Section =
-  | "home"
-  | "downloads"
-  | "guide"
-  | "pricing";
-
+  const { t } = useTranslation();
   const [activeSection, setActiveSection] = useState<Section>("home");
 
-    return (<>
-        <nav className="dashboard-sub-nav">
-          <div className="sub-nav-container">
-            {/* {userRole === "user" && ( */}
-              <>
-                <a href="#home" style={{ textDecoration: "none" }}>
-                  <button
-                    className={
-                      activeSection === "home"
-                        ? "sub-nav-btn active"
-                        : "sub-nav-btn"
-                    }
-                  onClick={() => setActiveSection("home")}
-                >
-                  {t("nav.homePage")}
-                  </button>
-                </a>
-                <a href="#downloads" style={{ textDecoration: "none" }}>
-                  <button
-                    className={
-                      activeSection === "downloads"
-                        ? "sub-nav-btn active"
-                        : "sub-nav-btn"
-                    }
-                    onClick={() => setActiveSection("downloads")}
-                  >
-                    {t("agentDownloads.navDownloads")}
-                  </button>
-                </a>
-                <a href="#guide" style={{ textDecoration: "none" }}>
-                  <button
-                    className={
-                      activeSection === "guide"
-                        ? "sub-nav-btn active"
-                        : "sub-nav-btn"
-                    }
-                    onClick={() => setActiveSection("guide")}
-                  >
-                    {t("agentDownloads.navGuide")}
-                  </button>
-                </a>
-                <a href="#pricing" style={{ textDecoration: "none" }}>
-                  <button
-                    className={
-                      activeSection === "pricing"
-                        ? "sub-nav-btn active"
-                        : "sub-nav-btn"
-                    }
-                    onClick={() => setActiveSection("pricing")}
-                  >
-                    {t("agentDownloads.navPricing")}
-                  </button>
-                </a>
-              </>
-            {/* )} */}
-            </div>
-        </nav>
-        <div id="home" className="page-section hero-section">
-          <div className="hero-copy">
-            <span className="eyebrow">Desktop Agent Suite</span>
-            <h1>{t("agentDownloads.heroTitle")}</h1>
-            <p>{t("agentDownloads.heroSubtitle")}</p>
-            <div className="hero-actions">
-              <a href="#downloads" className="primary-btn">{t("agentDownloads.downloadNowBtn")}</a>
-              <a href="#guide" className="secondary-btn">{t("agentDownloads.learnMoreBtn")}</a>
-            </div>
-          </div>
-          <div className="hero-preview">
-            <div className="preview-card">
-              <p className="preview-label">Profiles</p>
-              <ul className="preview-list">
-                <li>{t("agentDownloads.profileProgram")}</li>
-                <li>{t("agentDownloads.profileArchitect")}</li>
-                <li>{t("agentDownloads.profileAnalyst")}</li>
-                <li>{t("agentDownloads.profileWriter")}</li>
-              </ul>
-            </div>
+  const navItems: { id: Section; label: string }[] = [
+    { id: "home", label: t("nav.homePage") },
+    { id: "downloads", label: t("agentDownloads.navDownloads") },
+    { id: "guide", label: t("agentDownloads.navGuide") },
+    { id: "pricing", label: t("agentDownloads.navPricing") },
+  ];
+
+  return (
+    <>
+      <nav className="dashboard-sub-nav">
+        <div className="sub-nav-container">
+          {navItems.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={activeSection === item.id ? "sub-nav-btn active" : "sub-nav-btn"}
+              onClick={() => setActiveSection(item.id)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </nav>
+
+      {/* ===== HOME ===== */}
+      <div id="home" className="page-section hero-section">
+        <div className="hero-copy">
+          <span className="eyebrow">SafeAI Desktop</span>
+          <h1>{t("agentDownloads.heroTitle")}</h1>
+          <p>{t("agentDownloads.heroSubtitle")}</p>
+          <div className="hero-actions">
+            <a href="#downloads" className="primary-btn">{t("agentDownloads.downloadNowBtn")}</a>
+            <a href="#guide" className="secondary-btn">{t("agentDownloads.learnMoreBtn")}</a>
           </div>
         </div>
-        <div id="downloads" className="page-section download-section">
-          <div className="section-header">
-            <span className="section-label">{t("agentDownloads.navDownloads")}</span>
-            <h2>{t("agentDownloads.downloadsSectionTitle")}</h2>
-            <p>{t("agentDownloads.downloadsSectionDesc")}</p>
-          </div>
-          <div className="download-cards">
-            <article className="download-card">
-              <h3>Program</h3>
-              <p>{t("agentDownloads.programCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.programFeature1")}</li>
-                <li>{t("agentDownloads.programFeature2")}</li>
-                <li>{t("agentDownloads.programFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.downloadDesktopBtn")}</a>
-            </article>
-            <article className="download-card">
-              <h3>Architect</h3>
-              <p>{t("agentDownloads.architectCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.architectFeature1")}</li>
-                <li>{t("agentDownloads.architectFeature2")}</li>
-                <li>{t("agentDownloads.architectFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.downloadDesktopBtn")}</a>
-            </article>
-            <article className="download-card">
-              <h3>Analyst</h3>
-              <p>{t("agentDownloads.analystCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.analystFeature1")}</li>
-                <li>{t("agentDownloads.analystFeature2")}</li>
-                <li>{t("agentDownloads.analystFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.downloadDesktopBtn")}</a>
-            </article>
+        <div className="hero-preview">
+          <div className="preview-card">
+            <p className="preview-label">{t("agentDownloads.profilesLabel")}</p>
+            <ul className="preview-list">
+              <li>{t("agentDownloads.profileProgram")}</li>
+              <li>{t("agentDownloads.profileArchitect")}</li>
+              <li>{t("agentDownloads.profileAnalyst")}</li>
+              <li>{t("agentDownloads.profileWriter")}</li>
+            </ul>
           </div>
         </div>
-        <div id="guide" className="page-section guide-section">
-          <div className="section-header">
-            <span className="section-label">{t("agentDownloads.navGuide")}</span>
-            <h2>{t("agentDownloads.guideSectionTitle")}</h2>
-            <p>{t("agentDownloads.guideSectionDesc")}</p>
-          </div>
-          <div className="guide-grid">
-            <div className="guide-card">
-              <h3>{t("agentDownloads.guideStep1Title")}</h3>
-              <p>{t("agentDownloads.guideStep1Desc")}</p>
-            </div>
-            <div className="guide-card">
-              <h3>{t("agentDownloads.guideStep2Title")}</h3>
-              <p>{t("agentDownloads.guideStep2Desc")}</p>
-            </div>
-            <div className="guide-card">
-              <h3>{t("agentDownloads.guideStep3Title")}</h3>
-              <p>{t("agentDownloads.guideStep3Desc")}</p>
-            </div>
-            <div className="guide-card">
-              <h3>{t("agentDownloads.guideStep4Title")}</h3>
-              <p>{t("agentDownloads.guideStep4Desc")}</p>
-            </div>
-          </div>
+      </div>
+
+      {/* ===== DOWNLOADS — one card per operating system ===== */}
+      <div id="downloads" className="page-section download-section">
+        <div className="section-header">
+          <span className="section-label">{t("agentDownloads.navDownloads")}</span>
+          <h2>{t("agentDownloads.downloadsSectionTitle")}</h2>
+          <p>{t("agentDownloads.downloadsSectionDesc")}</p>
         </div>
-        <div id="pricing" className="page-section pricing-section">
-          <div className="section-header">
-            <span className="section-label">{t("agentDownloads.navPricing")}</span>
-            <h2>{t("agentDownloads.pricingSectionTitle")}</h2>
-            <p>{t("agentDownloads.pricingSectionDesc")}</p>
-          </div>
-          <div className="pricing-grid">
-            <article className="pricing-card">
-              <h3>Free</h3>
-              <p>{t("agentDownloads.freeCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.freeFeature1")}</li>
-                <li>{t("agentDownloads.freeFeature2")}</li>
-                <li>{t("agentDownloads.freeFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.chooseFreeBtn")}</a>
-            </article>
-            <article className="pricing-card featured-card">
-              <h3>Pro</h3>
-              <p>{t("agentDownloads.proCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.proFeature1")}</li>
-                <li>{t("agentDownloads.proFeature2")}</li>
-                <li>{t("agentDownloads.proFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.chooseProBtn")}</a>
-            </article>
-            <article className="pricing-card">
-              <h3>Team</h3>
-              <p>{t("agentDownloads.teamCardDesc")}</p>
-              <ul>
-                <li>{t("agentDownloads.teamFeature1")}</li>
-                <li>{t("agentDownloads.teamFeature2")}</li>
-                <li>{t("agentDownloads.teamFeature3")}</li>
-              </ul>
-              <a className="card-btn" href="#download">{t("agentDownloads.chooseTeamBtn")}</a>
-            </article>
-          </div>
+        <div className="download-os-cards">
+          <article className="download-card">
+            <div className="os-icon"><WindowsIcon /></div>
+            <h3>{t("agentDownloads.windowsTitle")}</h3>
+            <p>{t("agentDownloads.windowsDesc")}</p>
+            <DownloadButton url={DESKTOP_DOWNLOADS.windows} label={t("agentDownloads.downloadWindowsBtn")} />
+          </article>
+          <article className="download-card">
+            <div className="os-icon"><LinuxIcon /></div>
+            <h3>{t("agentDownloads.linuxTitle")}</h3>
+            <p>{t("agentDownloads.linuxDesc")}</p>
+            <DownloadButton url={DESKTOP_DOWNLOADS.linux} label={t("agentDownloads.downloadLinuxBtn")} />
+          </article>
         </div>
-        </>
-      )
+      </div>
+
+      {/* ===== GUIDE ===== */}
+      <div id="guide" className="page-section guide-section">
+        <div className="section-header">
+          <span className="section-label">{t("agentDownloads.navGuide")}</span>
+          <h2>{t("agentDownloads.guideSectionTitle")}</h2>
+          <p>{t("agentDownloads.guideSectionDesc")}</p>
+        </div>
+        <div className="guide-grid">
+          {[1, 2, 3, 4].map((step) => (
+            <div className="guide-card" key={step}>
+              <h3>{t(`agentDownloads.guideStep${step}Title`)}</h3>
+              <p>{t(`agentDownloads.guideStep${step}Desc`)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== PRICING ===== */}
+      <div id="pricing" className="page-section pricing-section">
+        <div className="section-header">
+          <span className="section-label">{t("agentDownloads.navPricing")}</span>
+          <h2>{t("agentDownloads.pricingSectionTitle")}</h2>
+          <p>{t("agentDownloads.pricingSectionDesc")}</p>
+        </div>
+        <div className="pricing-grid">
+          {(["free", "pro", "team"] as const).map((plan) => (
+            <article key={plan} className={plan === "pro" ? "pricing-card featured-card" : "pricing-card"}>
+              <h3>{plan === "free" ? "Free" : plan === "pro" ? "Pro" : "Team"}</h3>
+              <p>{t(`agentDownloads.${plan}CardDesc`)}</p>
+              <ul>
+                {[1, 2, 3].map((n) => (
+                  <li key={n}>{t(`agentDownloads.${plan}Feature${n}`)}</li>
+                ))}
+              </ul>
+              <a className="card-btn" href="#downloads">
+                {t(`agentDownloads.choose${plan[0].toUpperCase()}${plan.slice(1)}Btn`)}
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </>
+  );
 }

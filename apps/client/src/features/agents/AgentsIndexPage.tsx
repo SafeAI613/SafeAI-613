@@ -3,7 +3,7 @@
  *
  * Layout wrapper for the entire agents marketplace feature.
  * Renders tab navigation + outlet for sub-pages.
- * Registered in AppRouter as the parent route for /agents-marketplace/*
+ * Registered in AppRouter as the parent route for /hub/agents/*
  */
 
 import { NavLink, Outlet } from "react-router-dom";
@@ -14,6 +14,7 @@ const TABS = [
   { to: ROUTES.hub.agents, label: "🏠 גלריה", end: true },
   { to: ROUTES.hub.agentsSubmit, label: "➕ הוסיפי אייג'נט" },
   { to: ROUTES.hub.agentsStats, label: "📊 סטטיסטיקות" },
+  { to: ROUTES.hub.agentsDownload, label: "⬇️ אפליקציית Desktop" },
 ];
 
 export default function AgentsIndexPage() {
