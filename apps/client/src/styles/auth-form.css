@@ -3,6 +3,7 @@
    same class names (features/safeai-ui/AuthSection.tsx,
    features/safeai-ui/ContactTypesManagement.tsx). Loaded globally (from
    App.tsx) since these components have no other stylesheet of their own.
+   Built on the design-system tokens (see docs/UI_STYLE_GUIDE.md).
 
    .form-group itself is intentionally NOT redefined here — design-system.css
    already styles it (and the bare label/input/select/textarea elements)
@@ -12,100 +13,121 @@
    forms without touching any other .form-group usage. */
 
 .auth-form-container {
-  margin-top: 40px;
+  margin: 40px 0 56px;
+  padding: 0 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 500px;
 }
 
+/* Centered card */
 .auth-form-wrapper {
   width: 100%;
-  max-width: 450px;
-  background: var(--bg-page);
+  max-width: 440px;
+  background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 32px;
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-md);
 }
 
 .auth-title {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--text-primary);
   margin: 0 0 24px 0;
   text-align: center;
 }
 
 /* Arriving from the Hub/Platform teaser pages (SCRUM-228/229) brands this
-   otherwise-generic form to the destination the visitor chose. Colors
-   mirror --hub-accent / --platform-accent in landing-page-v2.css — keep
-   both in sync if the palette changes. Scoped under .auth-flavor-* so they
-   never affect the shared .btn-primary used elsewhere. */
+   otherwise-generic form to the destination the visitor chose. Uses the
+   Hub copper / Platform blue brand tokens from design-system.css. Scoped
+   under .auth-flavor-* so they never affect the shared .btn-primary used
+   elsewhere. */
 .auth-form-wrapper.auth-flavor-hub {
-  border-top: 4px solid #c2703d;
+  border-top: 4px solid var(--brand-hub);
 }
 
 .auth-form-wrapper.auth-flavor-hub .auth-title {
-  color: #c2703d;
+  color: var(--brand-hub);
 }
 
 .auth-form-wrapper.auth-flavor-hub .btn-primary {
-  background: #c2703d;
+  background: var(--brand-hub);
 }
 
-.auth-form-wrapper.auth-flavor-hub .btn-primary:hover {
-  background: #a85f32;
+.auth-form-wrapper.auth-flavor-hub .btn-primary:hover:not(:disabled) {
+  /* no --brand-hub-hover token: darken the brand color slightly */
+  background: color-mix(in srgb, var(--brand-hub) 86%, var(--text-primary));
 }
 
 .auth-form-wrapper.auth-flavor-platform {
-  border-top: 4px solid #2f5d8a;
+  border-top: 4px solid var(--brand-secondary);
 }
 
 .auth-form-wrapper.auth-flavor-platform .auth-title {
-  color: #2f5d8a;
+  color: var(--brand-secondary);
 }
 
 .auth-form-wrapper.auth-flavor-platform .btn-primary {
-  background: #2f5d8a;
+  background: var(--brand-secondary);
 }
 
-.auth-form-wrapper.auth-flavor-platform .btn-primary:hover {
-  background: #274d72;
+.auth-form-wrapper.auth-flavor-platform .btn-primary:hover:not(:disabled) {
+  background: var(--brand-secondary-hover);
 }
 
 .auth-tabs {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 24px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-pill);
 }
 
 .auth-tab {
   flex: 1;
-  padding: 12px;
-  border: 1px solid var(--border-default);
-  background: var(--bg-surface);
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--text-secondary);
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out),
+    border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
 .auth-tab:hover {
-  border-color: var(--brand-primary);
+  color: var(--text-primary);
+}
+
+.auth-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .auth-tab.active {
   background: var(--brand-primary);
   color: var(--text-inverse);
   border-color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+}
+
+.auth-form .form-group {
+  margin-bottom: 0;
 }
 
 .auth-form .form-group label {
@@ -115,45 +137,56 @@
 }
 
 .auth-form .form-group input {
-  padding: 12px;
+  padding: 11px 12px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  font-size: 14px;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  transition: all 0.2s;
+  font-size: 15px;
+  /* background/color come from design-system.css (surface in light,
+     elevated in dark so fields stand out from the card) */
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
 .auth-form .form-group input:focus {
   outline: none;
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  box-shadow: var(--focus-ring);
+}
+
+/* In-form links (e.g. the privacy-policy link next to the consent box) */
+.auth-form a {
+  color: var(--link-color);
+  text-underline-offset: 2px;
+}
+
+.auth-form a:hover {
+  color: var(--link-color-hover);
 }
 
 .form-info {
   background: var(--color-info-bg);
   border: 1px solid var(--color-info-border);
   border-radius: var(--radius-sm);
-  padding: 12px;
+  padding: 12px 14px;
 }
 
 .form-info p {
   margin: 0;
   font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .form-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
+/* Full-width primary action */
 .btn-full {
   width: 100%;
-  padding: 14px;
+  padding: 13px;
   font-size: 16px;
   font-weight: 600;
 }
@@ -161,8 +194,8 @@
 .auth-footer {
   margin-top: 24px;
   text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-default);
+  padding-top: 20px;
+  border-top: 1px solid var(--border-muted);
 }
 
 .auth-footer p {
@@ -175,12 +208,39 @@
   background: none;
   border: none;
   color: var(--brand-primary);
+  font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s var(--ease-out);
 }
 
 .link-button:hover {
-  color: var(--color-info);
+  color: var(--brand-primary-hover);
+}
+
+.link-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (max-width: 480px) {
+  .auth-form-container {
+    margin-top: 24px;
+  }
+
+  .auth-form-wrapper {
+    padding: 28px 20px;
+    border-radius: var(--radius-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-tab,
+  .auth-form .form-group input,
+  .link-button {
+    transition: none;
+  }
 }

@@ -219,7 +219,7 @@ export default function RegisterForm() {
               autoComplete="email"
             />
             {emailError && (
-              <span style={{ color: "#dc3545", fontSize: "12px" }}>{emailError}</span>
+              <span style={{ color: "var(--color-danger)", fontSize: "12px" }}>{emailError}</span>
             )}
           </div>
 
@@ -325,7 +325,7 @@ export default function RegisterForm() {
                   border: "1px solid var(--border-default)",
                   borderRadius: "3px",
                   background: "var(--bg-surface)",
-                  accentColor: "var(--brand-secondary)",
+                  accentColor: "var(--brand-primary)",
                 }}
               />
               <span>

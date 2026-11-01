@@ -1,23 +1,34 @@
+/* Contact page — built on the global design-system tokens
+   (see docs/UI_STYLE_GUIDE.md).
+
+   Every rule is scoped under .contact-page. ContactPage is imported eagerly
+   by the router, so unscoped .btn / .form-group / .message rules here used
+   to leak onto every page (e.g. turning the login button blue). The shared
+   .btn / input styles come from design-system.css; this file only refines
+   them inside the contact form. */
+
 .contact-page {
-  max-width: 900px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 48px 24px 64px;
 }
 
 .contact-container {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+  padding: 44px 48px;
+  box-shadow: var(--shadow-sm);
 }
 
 .contact-container h1 {
   text-align: center;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin: 0 0 8px;
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .contact-subtitle {
@@ -29,32 +40,34 @@
 
 /* Design Partner Banner */
 .design-partner-banner {
-  background: linear-gradient(135deg, rgba(28, 122, 166, 0.08) 0%, rgba(19, 84, 113, 0.08) 100%);
-  border: 2px solid var(--brand-secondary);
-  border-radius: 12px;
+  background: var(--brand-primary-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   padding: 24px;
   margin-bottom: 32px;
   display: flex;
-  gap: 20px;
+  gap: 18px;
   align-items: flex-start;
 }
 
 .design-partner-icon {
-  font-size: 48px;
+  font-size: 40px;
   flex-shrink: 0;
   line-height: 1;
 }
 
 .design-partner-content h3 {
-  font-size: 20px;
-  color: var(--brand-secondary);  margin: 0 0 12px 0;
+  font-size: 19px;
+  color: var(--text-primary);
+  margin: 0 0 10px 0;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .design-partner-content p {
   font-size: 15px;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.8;
   margin: 0 0 12px 0;
 }
 
@@ -65,16 +78,18 @@
 .design-partner-highlight {
   background: var(--bg-surface);
   padding: 12px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--brand-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  border-inline-start: 3px solid var(--brand-primary);
   font-weight: 600;
-  color: var(--brand-secondary) !important;}
+  color: var(--text-primary) !important;
+}
 
 /* Guides Link Section */
 .guides-link-section {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid rgba(28, 122, 166, 0.2);
+  border-top: 1px solid var(--border-default);
 }
 
 .guides-link-section p {
@@ -86,140 +101,126 @@
 
 .guides-link-button {
   display: inline-block;
-  background: var(--brand-secondary);
-  color: var(--text-inverse);  padding: 10px 20px;
-  border-radius: 8px;
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--brand-primary);
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
-  margin-right: 12px;
+  transition: background-color 0.25s var(--ease-out), border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+  margin-inline-end: 10px;
   margin-bottom: 8px;
 }
 
 .guides-link-button:hover {
-  background: var(--brand-secondary-hover);  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(28, 122, 166, 0.3);
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.guides-link-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .guides-link-button.secondary {
   background: var(--bg-surface);
-  color: var(--brand-secondary);
-  border: 2px solid var(--brand-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 .guides-link-button.secondary:hover {
-  background: var(--color-success-bg);  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(28, 122, 166, 0.2);
+  background: var(--bg-surface);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
+  box-shadow: none;
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
-.form-group {
+.contact-page .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
+  margin-bottom: 0;
 }
 
-.form-group label {
+.contact-page .form-group label {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 14px;
 }
 
-.form-group input,
-.form-group textarea {
-  padding: 12px;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  font-size: 14px;
+.contact-page .form-group input,
+.contact-page .form-group select,
+.contact-page .form-group textarea {
+  padding: 11px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
   background: var(--bg-surface);
   color: var(--text-primary);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.contact-page .form-group input:focus,
+.contact-page .form-group select:focus,
+.contact-page .form-group textarea:focus {
   outline: none;
-  border-color: var(--brand-secondary);
-  box-shadow: 0 0 0 3px rgba(28, 122, 166, 0.1);
+  border-color: var(--brand-primary);
+  box-shadow: var(--focus-ring);
 }
 
-.form-group textarea {
+.contact-page .form-group textarea {
   resize: vertical;
   min-height: 120px;
+  line-height: 1.7;
 }
 
-.message {
-  padding: 1rem;
-  border-radius: 8px;
+.contact-page .message {
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
   text-align: center;
   font-weight: 500;
 }
 
-.message.success {
+.contact-page .message.success {
   background-color: var(--color-success-bg);
   color: var(--color-success);
-  border: 1px solid var(--brand-secondary);}
+  border: 1px solid var(--color-success-border);
+}
 
-.message.error {
+.contact-page .message.error {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
   border: 1px solid var(--color-danger-border);
 }
 
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
+/* Buttons: base look comes from design-system.css (.btn, .btn-primary,
+   .btn-secondary, .btn-danger); only the size is refined here. */
+.contact-page .btn {
+  padding: 11px 22px;
   font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.btn-primary {
-  background: var(--brand-secondary);
+.contact-page .btn-danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
   color: var(--text-inverse);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background: var(--brand-secondary-hover);  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(28, 122, 166, 0.3);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: white;
-  color: #10a37f;
-  border: 2px solid #10a37f;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #f0fdf4;
-}
-
-.btn-danger {
-  background: #dc2626;
-  color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #b91c1c;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.contact-page .btn-danger:hover:not(:disabled) {
+  background: var(--color-danger);
+  filter: brightness(0.92);
 }
 
 .screen-capture-buttons {
@@ -230,7 +231,7 @@
 .capture-hint {
   display: block;
   margin-top: 6px;
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -258,8 +259,8 @@
 .attachment-preview video {
   max-width: 100%;
   max-height: 260px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
   display: block;
 }
 
@@ -269,15 +270,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+  border-radius: var(--radius-sm);
 }
 
 .attachment-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid rgba(16, 163, 127, 0.25);
-  border-top-color: #10a37f;
+  border: 3px solid var(--brand-primary-soft);
+  border-top-color: var(--brand-primary);
   border-radius: 50%;
   animation: attachment-spin 0.8s linear infinite;
 }
@@ -292,37 +293,60 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #991b1b;
+  color: var(--color-danger);
   font-size: 13px;
 }
 
 .login-required {
   text-align: center;
-  padding: 2rem;
+  padding: 24px 0 8px;
 }
 
 .login-required p {
   font-size: 16px;
   color: var(--text-muted);
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .contact-page {
-    padding: 24px 16px;
+    padding: 24px 16px 48px;
   }
 
   .contact-container {
-    padding: 24px;
+    padding: 28px 22px;
+    border-radius: var(--radius-md);
+  }
+
+  .contact-container h1 {
+    font-size: 28px;
   }
 
   .design-partner-banner {
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
   .design-partner-icon {
-    font-size: 36px;
+    font-size: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guides-link-button,
+  .contact-page .form-group input,
+  .contact-page .form-group select,
+  .contact-page .form-group textarea {
+    transition: none;
+  }
+
+  .guides-link-button:hover {
+    transform: none;
+  }
+
+  /* Keep the upload spinner as a static ring instead of spinning */
+  .attachment-spinner {
+    animation: none;
   }
 }

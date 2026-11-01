@@ -26,9 +26,9 @@ export default function RegisterFormSuccess() {
         <div
           className="alert alert-info"
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
             padding: "30px",
-            borderRadius: "10px",
+            borderRadius: "var(--radius-md)",
             marginBottom: "20px",
             color: "var(--text-inverse)",
           }}
@@ -53,7 +53,7 @@ export default function RegisterFormSuccess() {
             style={{
               background: "var(--color-warning-bg)",
               border: "2px solid var(--color-warning-border)",
-              borderRadius: "8px",
+              borderRadius: "var(--radius-sm)",
               padding: "20px",
               marginBottom: "25px",
             }}
@@ -80,7 +80,7 @@ export default function RegisterFormSuccess() {
                   style={{
                     background: "var(--bg-surface)",
                     padding: "20px",
-                    borderRadius: "8px",
+                    borderRadius: "var(--radius-sm)",
                     fontFamily: "monospace",
                     fontSize: "14px",
                     wordBreak: "break-all",
