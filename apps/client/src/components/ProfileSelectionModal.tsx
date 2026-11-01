@@ -105,7 +105,7 @@ export default function ProfileSelectionModal({
       <div
         style={{
           backgroundColor: "var(--bg-surface)",
-          borderRadius: "8px",
+          borderRadius: "var(--radius-sm)",
           padding: "32px",
           maxWidth: "500px",
           width: "90%",
@@ -120,7 +120,7 @@ export default function ProfileSelectionModal({
 
         <div
           className="alert alert-warning"
-          style={{ marginBottom: "24px", padding: "16px", borderRadius: "6px" }}
+          style={{ marginBottom: "24px", padding: "16px", borderRadius: "var(--radius-sm)" }}
         >
           <strong>{t("profileModal.warning")}</strong>
           <p style={{ marginTop: "8px", marginBottom: 0 }}>
@@ -157,7 +157,7 @@ export default function ProfileSelectionModal({
                   width: "100%",
                   padding: "12px",
                   fontSize: "16px",
-                  borderRadius: "5px",
+                  borderRadius: "var(--radius-sm)",
                   border: "1px solid var(--border-default)",
                   backgroundColor: "var(--bg-elevated)",
                 }}
@@ -176,7 +176,7 @@ export default function ProfileSelectionModal({
                 style={{
                   padding: "16px",
                   backgroundColor: "var(--color-info-bg)",
-                  borderRadius: "6px",
+                  borderRadius: "var(--radius-sm)",
                   marginBottom: "24px",
                 }}
               >
@@ -204,7 +204,7 @@ export default function ProfileSelectionModal({
             {error && (
               <div
                 className="alert alert-error"
-                style={{ marginBottom: "24px", padding: "12px", borderRadius: "6px" }}
+                style={{ marginBottom: "24px", padding: "12px", borderRadius: "var(--radius-sm)" }}
               >
                 {error}
               </div>

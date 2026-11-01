@@ -89,7 +89,7 @@ export default function PaymeResultPage() {
           <div style={{ textAlign: "center", padding: "40px" }}>
             <div className="spinner" style={{ margin: "0 auto 20px" }}></div>
             <h2>בודק את סטטוס התשלום...</h2>
-            <p style={{ color: "#666" }}>אנא המתן</p>
+            <p style={{ color: "var(--text-muted)" }}>אנא המתן</p>
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function PaymeResultPage() {
       <div className="auth-form-wrapper">
         <div style={{ textAlign: "center", padding: "40px" }}>
           <h2>הטעינה נכשלה</h2>
-          <p style={{ color: "#666" }}>
+          <p style={{ color: "var(--text-muted)" }}>
             {view.phase === "error" ? view.message : "התשלום לא הושלם או בוטל."}
           </p>
           <button className="btn-primary" onClick={() => navigate(ROUTES.platform.organizationUsers)}>

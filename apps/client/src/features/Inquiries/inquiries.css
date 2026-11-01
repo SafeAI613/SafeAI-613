@@ -23,13 +23,13 @@ textarea {
   background-color: var(--bg-surface);
   box-sizing: border-box;
 }
-.email-textarea { width: 100%; height: 130px; padding: 10px 12px; border-radius: 10px; border:1px solid var(--border-muted); font-size:14px }
+.email-textarea { width: 100%; height: 130px; padding: 10px 12px; border-radius: var(--radius-sm); border:1px solid var(--border-default); font-family: inherit; font-size:14px }
 .inquiry-buttons { display:flex; gap:10px }
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+  border-color: var(--brand-primary);
+  box-shadow: var(--focus-ring);
 }
 
 /* כרטיסי סינון ורשימה */
@@ -48,44 +48,17 @@ input:focus, textarea:focus {
   gap: 8px;
   align-items: center;
   padding: 6px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
 }
 
 .filter-buttons .btn { padding: 8px 12px; }
 
-/* Neutralize primary/secondary button colors within Inquiries feature to monochrome */
-.filters-card .btn.btn-primary,
-.inquiries-card .btn.btn-primary,
-.inquiry-details .btn.btn-primary,
-.inquiry-compact .btn.btn-primary {
-  background: var(--text-primary);
-  color: var(--text-inverse);
-  border-color: transparent;
-}
-
-.filters-card .btn.btn-secondary,
-.inquiries-card .btn.btn-secondary,
-.inquiry-details .btn.btn-secondary,
-.inquiry-compact .btn.btn-secondary {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-}
-
-/* Make local primary/secondary neutral (black/white) to match monochrome theme */
-.filters-card .btn.btn-primary {
-  background: var(--text-primary);
-  color: var(--text-inverse);
-  border-color: transparent;
-}
-
-.filters-card .btn.btn-secondary {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-}
+/* Buttons inside the Inquiries feature use the global brand colors from
+   design-system.css (.btn-primary green / .btn-secondary outline). The old
+   monochrome (black/white) overrides were removed so the feature matches
+   the rest of the site. */
 
 .inquiry-add-btn { margin-bottom: 12px; display:inline-flex }
 
@@ -143,7 +116,7 @@ input:focus, textarea:focus {
   align-items: center;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-default);
-  transition: background 0.12s ease;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
 }
 
 .inquiry-compact:hover { background: var(--bg-elevated) }
@@ -158,22 +131,23 @@ input:focus, textarea:focus {
   padding: 20px;
   margin-bottom: 18px;
   background: var(--bg-surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .inquiries-status.open {
-  background: var(--border-muted);
-  color: var(--text-primary);
+  background: var(--color-info-bg);
+  color: var(--color-info);
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
+  border: 1px solid var(--color-info-border);
 }
 
 .inquiries-status.closed {
   background: transparent;
   color: var(--text-muted);
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
   border: 1px solid var(--border-default);
 }
@@ -197,7 +171,7 @@ input:focus, textarea:focus {
 .inquiry-details p strong { display:inline-block; width: 110px; color: var(--text-muted) }
 
 .details-images { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap }
-.details-images img { max-width:160px; border-radius:8px; border:1px solid var(--border-default) }
+.details-images img { max-width:160px; border-radius: var(--radius-sm); border:1px solid var(--border-default) }
 
 .email-modal-content { padding: 20px; }
 .email-modal {
@@ -216,8 +190,15 @@ input:focus, textarea:focus {
 .email-modal-content {
   background: var(--bg-surface);
   padding: 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
   width: 90%;
   max-width: 500px;
   box-shadow: var(--shadow-lg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inquiry-compact {
+    transition: none;
+  }
 }

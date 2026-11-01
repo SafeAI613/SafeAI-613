@@ -68,7 +68,7 @@ export default function ProfileCard({ profile, onEdit, onDelete }: Props) {
             <span className="item-detail-value">{profile.blockedCategories!.length}</span>
           </div>
         )}
-        <div style={{ marginTop: "10px", padding: "10px", backgroundColor: "var(--bg-elevated)", borderRadius: "5px" }}>
+        <div style={{ marginTop: "10px", padding: "10px", backgroundColor: "var(--bg-elevated)", borderRadius: "var(--radius-sm)" }}>
           <strong style={{ display: "block", marginBottom: "5px" }}>📝 Prompts:</strong>
           <PromptSection label="Content" prompts={profile.contentPrompts ?? []} />
           <PromptSection label="Behavior" prompts={profile.behaviorPrompts ?? []} />

@@ -218,7 +218,7 @@ export default function UserDashboard({ user, onNavigateSection }: UserDashboard
                   width: "100%",
                   padding: "12px",
                   fontSize: "16px",
-                  borderRadius: "5px",
+                  borderRadius: "var(--radius-sm)",
                   border: "1px solid var(--border-default)",
                   marginTop: "8px",
                   backgroundColor: "var(--bg-elevated)",

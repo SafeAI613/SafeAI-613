@@ -9,8 +9,8 @@ function ProgressBar({ used, limit }: { used: number; limit: number }) {
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
   const color = pct > 90 ? "var(--color-danger)" : pct > 70 ? "var(--color-warning)" : "var(--color-success)";
   return (
-    <div style={{ width: "100%", height: "12px", backgroundColor: "var(--gray-200)", borderRadius: "6px", overflow: "hidden" }}>
-      <div style={{ width: `${pct}%`, height: "100%", backgroundColor: color, transition: "width 0.4s ease", borderRadius: "6px" }} />
+    <div style={{ width: "100%", height: "12px", backgroundColor: "var(--gray-200)", borderRadius: "var(--radius-pill)", overflow: "hidden" }}>
+      <div style={{ width: `${pct}%`, height: "100%", backgroundColor: color, transition: "width 0.4s var(--ease-out)", borderRadius: "var(--radius-pill)" }} />
     </div>
   );
 }
@@ -55,7 +55,7 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
       display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
     }} onClick={onClose}>
       <div style={{
-        backgroundColor: "var(--bg-surface)", borderRadius: "16px", padding: "40px", maxWidth: "480px",
+        backgroundColor: "var(--bg-surface)", borderRadius: "var(--radius-lg)", padding: "40px", maxWidth: "480px",
         width: "90%", boxShadow: "var(--shadow-lg)", direction: "rtl",
       }} onClick={(e) => e.stopPropagation()}>
         {!submitted ? (
@@ -74,7 +74,7 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
                   type="email"
                   value={user?.email ?? ""}
                   readOnly
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-default)", backgroundColor: "var(--bg-elevated)", fontSize: "15px", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-default)", backgroundColor: "var(--bg-elevated)", fontSize: "15px", boxSizing: "border-box" }}
                 />
               </div>
               <div>
@@ -87,7 +87,7 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-default)", fontSize: "15px", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-default)", fontSize: "15px", boxSizing: "border-box" }}
                 />
               </div>
               <div>
@@ -97,7 +97,7 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid var(--border-default)", fontSize: "15px", resize: "vertical", boxSizing: "border-box" }}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-default)", fontSize: "15px", resize: "vertical", boxSizing: "border-box" }}
                 />
               </div>
               {error && <div className="alert alert-error">{error}</div>}
@@ -105,7 +105,7 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
                 type="submit"
                 className="btn btn-primary"
                 disabled={submitting}
-                style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "10px" }}
+                style={{ marginTop: "8px", padding: "14px", fontSize: "16px", borderRadius: "var(--radius-sm)" }}
               >
                 {submitting ? t("billing.topUpModal.submittingButton") : t("billing.topUpModal.submitButton")}
               </button>
@@ -168,8 +168,8 @@ export default function BillingPage() {
 
       {/* Main balance card */}
       <div style={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        borderRadius: "20px", padding: "36px 40px", color: "var(--text-inverse)",
+        background: "var(--brand-secondary)",
+        borderRadius: "var(--radius-lg)", padding: "36px 40px", color: "var(--text-inverse)",
         marginBottom: "24px", display: "flex", justifyContent: "space-between", alignItems: "center",
         flexWrap: "wrap", gap: "24px",
       }}>
@@ -187,10 +187,10 @@ export default function BillingPage() {
         <button
           onClick={() => setShowModal(true)}
           style={{
-            backgroundColor: "var(--bg-surface)", color: "#764ba2", border: "none",
-            borderRadius: "12px", padding: "16px 32px", fontSize: "16px",
+            backgroundColor: "var(--bg-surface)", color: "var(--brand-secondary)", border: "none",
+            borderRadius: "var(--radius-sm)", padding: "16px 32px", fontSize: "16px",
             fontWeight: 700, cursor: "pointer", boxShadow: "var(--shadow-md)",
-            transition: "transform 0.1s, box-shadow 0.1s",
+            transition: "transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out)",
           }}
           onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "var(--shadow-lg)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "var(--shadow-md)"; }}
@@ -205,15 +205,15 @@ export default function BillingPage() {
           <h3 style={{ marginTop: 0, marginBottom: "24px" }}>{t("billing.budgetBreakdownTitle")}</h3>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px", marginBottom: "28px" }}>
-            <div style={{ background: "var(--bg-elevated)", borderRadius: "12px", padding: "20px", textAlign: "center" }}>
+            <div style={{ background: "var(--bg-elevated)", borderRadius: "var(--radius-md)", padding: "20px", textAlign: "center" }}>
               <p style={{ margin: "0 0 8px", color: "var(--text-muted)", fontSize: "13px" }}>{t("billing.monthlyBudgetLabel")}</p>
               <p style={{ margin: 0, fontSize: "26px", fontWeight: 700, color: "var(--text-secondary)" }}>${budget.monthlyLimit.toFixed(2)}</p>
             </div>
-            <div style={{ background: "var(--color-warning-bg)", borderRadius: "12px", padding: "20px", textAlign: "center" }}>
+            <div style={{ background: "var(--color-warning-bg)", borderRadius: "var(--radius-md)", padding: "20px", textAlign: "center" }}>
               <p style={{ margin: "0 0 8px", color: "var(--color-warning)", fontSize: "13px" }}>{t("billing.usedSoFarLabel")}</p>
               <p style={{ margin: 0, fontSize: "26px", fontWeight: 700, color: "var(--color-warning)" }}>${budget.currentSpent.toFixed(4)}</p>
             </div>
-            <div style={{ background: "var(--color-success-bg)", borderRadius: "12px", padding: "20px", textAlign: "center" }}>
+            <div style={{ background: "var(--color-success-bg)", borderRadius: "var(--radius-md)", padding: "20px", textAlign: "center" }}>
               <p style={{ margin: "0 0 8px", color: "var(--color-success)", fontSize: "13px" }}>{t("billing.remainingLabel")}</p>
               <p style={{ margin: 0, fontSize: "26px", fontWeight: 700, color: "var(--color-success)" }}>${budget.remaining.toFixed(4)}</p>
             </div>
