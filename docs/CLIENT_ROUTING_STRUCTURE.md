@@ -8,6 +8,7 @@
 | אזור | נתיב | מטרה | גישה |
 |------|------|------|------|
 | Gateway | `/` | הסבר על SafeAI ובחירת פלטפורמה | ציבורי |
+| דפי היכרות | `/welcome/hub`, `/welcome/platform` | דף נחיתה לכל פלטפורמה לפני הכניסה אליה | ציבורי |
 | **SafeAI Platform** | `/platform/*` | שימוש ב-SafeAI כספק AI: מפתחות API, שימוש, חיוב, ארגונים | `/platform` — דף היכרות לאורחים; כל השאר דורש התחברות |
 | **SafeAI Hub** | `/hub/*` | שיתוף ידע: חדשות, פורום, מאמרים, קורסים, פרויקטים, סוכנים | קריאה ציבורית; פעולות (פרסום, תגובה, הגשה) דורשות התחברות |
 | משותף | `/login`, `/register`, `/about`, `/contact`, `/privacy`... | התחברות ודפים כלליים | לפי הדף |
@@ -28,7 +29,7 @@
 
 **כלל:** לא כותבים מחרוזת נתיב בתוך קומפוננטה — מייבאים מ-`ROUTES`. כך אפשר להזיז route בלי לחפש כל קישור אליו. לנתיב עם פרמטר: `generatePath(ROUTES.hub.forumPost, { id })`. לקישור פנימי תמיד `<Link>` / `navigate()` ולא `<a href>` — אחרת ה-basename `/console/` של פרודקשן לא מתווסף.
 
-**ניווט:** `TopNavigation` מוצג רק בדפי ה-Gateway, וזהה לאורח ולמחובר: SafeAI Hub, SafeAI Platform, למה?, צור קשר, ומימין התחברות/הרשמה או תפריט משתמש. בתוך פלטפורמה הסיידבר שלה מחליף אותו.
+**ניווט:** `TopNavigation` מוצג רק בדפי ה-Gateway, וזהה לאורח ולמחובר: SafeAI Hub, SafeAI Platform, למה?, צור קשר, ומימין התחברות/הרשמה או תפריט משתמש. בדף הבית עצמו הקישורים מוסתרים — הדף בנוי מחמישה מקטעים באותם נושאים, ומקטעי Hub ו-Platform מובילים לדפי ההיכרות (`/welcome/*`) ורק משם לפלטפורמה. בתוך פלטפורמה הסיידבר שלה מחליף אותו.
 
 ## התחברות וחזרה לדף המקורי (`?next=`)
 
@@ -58,9 +59,11 @@
 ## מפת הנתיבים הנוכחית
 
 ```
-/                         → LandingPageV2 (Gateway)
+/                         → LandingPageV2 (Gateway — 5 מקטעים)
+/welcome/hub              → HubIntroPage
+/welcome/platform         → PlatformIntroPage
 
-/platform                       → PlatformTeaserPage (אורחים; מחובר → /platform/dashboard)
+/platform                       → PlatformIntroPage (אורחים; מחובר → /platform/dashboard)
 /platform/dashboard             → SafeAIPlatformHomePage
 /platform/account/:section      → SafeAIUIPage — אזור אישי (user, org_owner)
 /platform/admin/:section        → SafeAIUIPage — ניהול מערכת (admin)

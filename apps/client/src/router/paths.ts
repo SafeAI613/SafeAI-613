@@ -23,6 +23,13 @@ export const ROUTES = {
   privacy: "/privacy",
   becomeOrgOwner: "/become-org-owner",
 
+  // Showcase pages for each platform, linked from the gateway: they
+  // introduce the platform before the visitor steps into it.
+  welcome: {
+    hub: "/welcome/hub",
+    platform: "/welcome/platform",
+  },
+
   // Linked from outside the app — never move these: emails (verify / reset)
   // and PayMe's redirect after a wallet top-up.
   verifyEmail: "/verify-email/:token",
