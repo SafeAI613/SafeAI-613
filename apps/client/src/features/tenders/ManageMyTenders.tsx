@@ -108,7 +108,7 @@ export default function ManageMyTenders({
           style={{
             marginTop: '16px',
             padding: '14px 18px',
-            borderRadius: '10px',
+            borderRadius: 'var(--radius-md)',
             backgroundColor: 'var(--color-warning-bg)',
             border: '1px solid var(--color-warning-border)',
             display: 'flex',

@@ -414,7 +414,7 @@ export default function TenderBoardPage() {
                   onChange={(e) => setSmartSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSmartSearch() }}
                   placeholder={t('tenders.smartSearchInputPlaceholder')}
-                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', flex: 1, maxWidth: '400px' }}
+                  style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', flex: 1, maxWidth: '400px' }}
                 />
                 <button type="button" className="tab-button" onClick={handleSmartSearch} style={{ backgroundColor: 'var(--gray-100)' }}>
                   {t('tenders.searchBtn')}
@@ -441,7 +441,7 @@ export default function TenderBoardPage() {
 
           {isSmartSearching && (
             <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
-              <AiThinkingLoader color="#1C7AA6" />
+              <AiThinkingLoader color="var(--brand-primary)" />
             </div>
           )}
           {errorMessage && (
@@ -553,7 +553,7 @@ export default function TenderBoardPage() {
                   }
                 }}
                 placeholder={t('tenders.budgetExamplePlaceholder')}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '140px' }}
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: '140px' }}
               />
             </div>
 
@@ -565,7 +565,7 @@ export default function TenderBoardPage() {
                 value={maxTimeDays}
                 onChange={(e) => setMaxTimeDays(e.target.value)}
                 placeholder={t('tenders.timeExamplePlaceholder')}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '140px' }}
+                style={{ padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: '140px' }}
               />
             </div>
 

@@ -151,7 +151,7 @@ export default function Card({
                   minWidth: '18px',
                   height: '18px',
                   padding: '0 4px',
-                  borderRadius: '9px',
+                  borderRadius: 'var(--radius-pill)',
                   backgroundColor: 'var(--color-danger)',
                   color: 'var(--text-inverse)',
                   fontSize: '11px',

@@ -159,13 +159,13 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
 
           {/* אפיון ראשוני והמלצת פיתוח - מוצג למועמדים רק אם בעל המכרז בחר לפרסם אותו (SCRUM-291) */}
           {tender.specification?.status === 'ready' && tender.specification.isPublished && (
-            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ borderTop: '1px solid var(--border-muted)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <strong>אפיון ראשוני והמלצת פיתוח:</strong>
 
               {tender.specification.techStackRecommendation && (
                 <div>
                   <span style={{ color: 'var(--text-muted)' }}>המלצה טכנולוגית: </span>
-                  <span style={{ color: '#475569' }}>{tender.specification.techStackRecommendation}</span>
+                  <span style={{ color: 'var(--text-secondary)' }}>{tender.specification.techStackRecommendation}</span>
                 </div>
               )}
 

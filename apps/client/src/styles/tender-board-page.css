@@ -2,15 +2,25 @@
    TENDER BOARD SYSTEM - COMPLETE UNITED STYLESHEET
    ========================================================================== */
 
+/* Page-level aliases. They stay on :root because news-page.css also reads
+   --primary-color; the radius tokens come from design-system.css and must
+   not be redefined here (doing so used to shrink corners site-wide). */
 :root {
-  --primary-color: var(--brand-secondary);        /* ירוק מנטה אחיד לכל המערכת */
+  --primary-color: var(--brand-secondary);
   --primary-hover: var(--brand-secondary-hover);
   --secondary-bg: var(--bg-elevated);
   --text-main: var(--text-primary);
   --border-color: var(--border-default);
-  --border-focused: var(--border-strong);  --radius-lg: 20px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+  --border-focused: var(--border-strong);
+}
+
+/* Inside the tender board (all three screens + their modals) the main
+   action color is the SafeAI green, per docs/UI_STYLE_GUIDE.md; the Hub
+   copper marks navigation state. */
+.dashboard-shell {
+  --primary-color: var(--brand-primary);
+  --primary-hover: var(--brand-primary-hover);
+  --primary-soft: var(--brand-primary-soft);
 }
 
 /* אתחול בסיסי והגדרות דף גלובליות */
@@ -19,7 +29,7 @@
   margin: 0 auto;
   padding: 24px 26px 40px;
   color: var(--text-main);
-  font-family: System-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: inherit;
 }
 
 .dashboard-shell, .page-shell, .manage-shell {
@@ -65,22 +75,32 @@
   align-items: center;
   gap: 8px;
   padding: 14px 20px;
-  border-radius: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: transparent;
   border: 1px solid transparent;
+  margin-bottom: -1px;
   color: var(--text-secondary);
-  font-weight: 600;  cursor: pointer;
-  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
 }
 
 .dashboard-link:hover {
-  background: var(--color-info-bg);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.dashboard-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .dashboard-link.active {
-  background: var(--primary-color);
-  color: var(--text-inverse);
-  border-color: var(--primary-color);}
+  background: var(--brand-hub-soft);
+  color: var(--brand-hub);
+  border-bottom-color: var(--brand-hub);
+}
 
 /* אזור ה-Hero הראשי */
 .dashboard-hero {
@@ -96,15 +116,18 @@
 }
 
 .dashboard-hero h1 {
-  font-size: clamp(2.2rem, 2.8vw, 3rem);
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--text-primary);
 }
 
 .dashboard-hero .lead-copy {
   margin-top: 4px;
   max-width: 600px;
-  font-size: 1.1rem;
+  font-size: var(--font-md);
+  line-height: 1.7;
   color: var(--text-muted);
 }
 
@@ -128,18 +151,21 @@
   border-radius: var(--radius-md);
   background: var(--color-success-bg);
   border: 1px solid var(--color-success-border);
-  color: var(--color-success);  font-size: 1.05rem;
+  color: var(--color-success);
+  font-size: 1.05rem;
   font-weight: 600;
   box-sizing: border-box;
 }
 
 .metric-card p, .manage-summary strong {
   margin: 0;
-  color: var(--color-success);}
+  color: var(--color-success);
+}
 
 .metric-card strong {
-  font-size: 2.2rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 /* --- השינוי המבוקש מיושם כאן --- */
@@ -147,8 +173,9 @@
   margin-bottom: 32px;
   display: flex;
   justify-content: center;
-  background-color: var(--color-success-bg); /* רקע ירקרק עדין התואם למונה המכרזים */
-  border: 2px solid var(--color-success);  /* מסגרת ירוקה נקייה כמו בתמונה השנייה */  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   padding: 16px 24px;
   box-shadow: var(--shadow-sm);
 }
@@ -198,6 +225,7 @@
 .autocomplete-input:focus,
 .filters-row input[type="number"]:focus {
   border-color: var(--primary-color) !important;
+  box-shadow: var(--focus-ring) !important;
   outline: none;
 }
 
@@ -232,11 +260,13 @@
   background: transparent;
   border: none;
   text-align: start;
+  font-family: inherit;
   cursor: pointer;
+  transition: background-color 0.2s var(--ease-out);
 }
 
 .autocomplete-item:hover, .domains-option:hover {
-  background: var(--gray-100);
+  background: var(--bg-elevated);
 }
 
 /* ========================================== */
@@ -247,24 +277,39 @@
   align-items: center;
   justify-content: center;
   padding: 12px 18px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
+  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
   cursor: pointer;
 }
 
+.tab-button:focus-visible, .primary-button:focus-visible, .secondary-button:focus-visible,
+.button-primary:focus-visible, .details-button:focus-visible, .submit-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.tab-button:disabled, .primary-button:disabled, .secondary-button:disabled,
+.button-primary:disabled, .details-button:disabled, .submit-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .tab-button {
-  background: var(--gray-100);
-  color: var(--text-muted);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
   padding: 6px 14px;
   border-radius: var(--radius-sm);
 }
 
 .tab-button:hover {
-  background: var(--gray-200);
-  color: var(--text-secondary);
+  border-color: var(--primary-color);
+  color: var(--primary-hover);
 }
 
 .secondary-button {
@@ -282,31 +327,34 @@
   color: var(--text-inverse);
 }
 
-.primary-button:hover, .button-primary:hover, .submit-button:hover, .details-button:hover {
+.primary-button:hover:not(:disabled), .button-primary:hover:not(:disabled),
+.submit-button:hover:not(:disabled), .details-button:hover:not(:disabled) {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(28, 122, 166, 0.24);
+  box-shadow: var(--shadow-md);
 }
 
-/* אינפוטים וטקסט-ארפיס גלובליים */
+/* אינפוטים וטקסט-ארפיס גלובליים
+   NOTE: these selectors are unscoped (they apply site-wide once this
+   stylesheet has loaded), so they mirror the design-system field look. */
 .input, .textarea, textarea, input {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--secondary-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 0.95rem;
   text-align: start;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s var(--ease-out);
 }
 
 .input:focus, .textarea:focus, textarea:focus, input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(28, 122, 166, 0.12);
+  box-shadow: var(--focus-ring);
   background: var(--bg-surface);
 }
 
@@ -330,24 +378,24 @@
   justify-content: space-between;
   min-height: 260px;
   padding: 24px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
-  box-shadow: var(--shadow-lg);
+  box-shadow: none;
   word-break: break-word;
   overflow-wrap: anywhere;
-  transition: transform 200ms cubic-bezier(.2,.9,.2,1), border-color 180ms ease, box-shadow 200ms ease;
+  transition: transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
 
 .tender-card:hover,
 .tender-card:focus-within {
-  transform: translateY(-6px);
-  border-color: #239AD1; /* כחול בוהק קל */
-  box-shadow: 0 14px 34px rgba(28,122,166,0.12);
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .tender-card:active {
-  transform: translateY(-2px);
+  transform: translateY(0);
 }
 
 .tender-card--applied {
@@ -357,9 +405,9 @@
 .view-application__value {
   margin: 0;
   padding: 10px 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(16, 163, 127, 0.35);
-  background: rgba(16, 163, 127, 0.14);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-success-border);
+  background: var(--brand-primary-soft);
   color: var(--text-main);
 }
 
@@ -370,8 +418,8 @@
   gap: 6px;
   margin-bottom: 12px;
   padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(16, 163, 127, 0.1);
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary-soft);
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
   font-size: 0.78rem;
@@ -380,14 +428,15 @@
 
 .applied-filter-toggle {
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border-color);
-  background: #fff;
+  background: var(--bg-surface);
   color: var(--text-muted);
+  font-family: inherit;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
 .applied-filter-toggle:hover {
@@ -395,14 +444,21 @@
   color: var(--primary-color);
 }
 
+.applied-filter-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .applied-filter-toggle.active {
-  background: rgba(16, 163, 127, 0.12);
+  background: var(--brand-primary-soft);
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
 
 .tender-card__header h3 {
   font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1.4;
   margin-bottom: 10px;
   text-align: start;
@@ -447,10 +503,11 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-success-bg);
   color: var(--color-success);
-  border: 1px solid var(--color-success-border);  font-size: 0.85rem;
+  border: 1px solid var(--color-success-border);
+  font-size: 0.85rem;
   font-weight: 600;
   gap: 6px;
 }
@@ -466,7 +523,7 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-header {
@@ -479,8 +536,10 @@
 }
 
 .form-header h1 {
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .form-group {
@@ -511,7 +570,7 @@
 }
 
 .sidebar-card {
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
   background: var(--secondary-bg);
   padding: 24px;
@@ -537,25 +596,33 @@
 
 .domain-chip {
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-secondary);
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
   text-align: center;
 }
 
 .domain-chip:hover:not(:disabled) {
-  background: var(--gray-100);
+  border-color: var(--primary-color);
+  color: var(--text-primary);
+}
+
+.domain-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .domain-chip.selected {
   background: var(--color-success-bg);
   border-color: var(--primary-color);
-  color: var(--color-success);  font-weight: 600;
+  color: var(--color-success);
+  font-weight: 600;
 }
 
 .domain-chip:disabled {
@@ -593,17 +660,24 @@
   border: none;
   width: 38px;
   height: 38px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 0.9rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 4px;
+  transition: opacity 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
 .remove-agent:hover {
   background: var(--color-danger);
+  opacity: 0.88;
+}
+
+.remove-agent:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .tender-form .bottom-row {
@@ -645,9 +719,9 @@
   position: relative;
   width: 44px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--border-strong);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s var(--ease-out);
 }
 
 .toggle-pill::after {
@@ -659,7 +733,12 @@
   height: 18px;
   border-radius: 50%;
   background: var(--bg-surface);
-  transition: transform 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s var(--ease-out);
+}
+
+.toggle-input:focus-visible + .toggle-pill {
+  box-shadow: var(--focus-ring);
 }
 
 .toggle-input:checked + .toggle-pill {
@@ -693,8 +772,10 @@
 }
 
 .manage-header h1 {
-  font-size: 1.85rem;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
@@ -733,7 +814,7 @@
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .detail-panel__header {
@@ -773,8 +854,8 @@
 .domains-select {
   position: relative;
   background: var(--bg-surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -791,13 +872,15 @@
 .domain-pill--editable {
   background: var(--color-success-bg);
   border: 1px solid var(--color-success-border);
-  color: var(--color-success);  padding: 4px 10px 4px 6px;
+  color: var(--color-success);
+  padding: 4px 10px 4px 6px;
 }
 
 .domain-remove {
   background: transparent;
   border: none;
-  color: var(--color-success);  margin-right: 4px;
+  color: var(--color-success);
+  margin-right: 4px;
   cursor: pointer;
   font-size: 1.1rem;
   display: inline-flex;
@@ -814,7 +897,7 @@
   overflow-y: auto;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   z-index: 50;
 }
@@ -840,7 +923,7 @@
 
 .applicant-card {
   padding: 14px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--secondary-bg);
   border: 1px solid var(--border-color);
   margin-bottom: 10px;
@@ -899,8 +982,8 @@
   align-items: center;
   text-align: center;
   padding: 48px 24px;
-  border-radius: var(--radius-lg);
-  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-strong);
   background: var(--secondary-bg);
 }
 
@@ -915,7 +998,7 @@
 /* ========================================== */
 .success-banner, .success-message {
   padding: 12px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-success-bg);
   border: 1px solid var(--color-success-border);
   color: var(--color-success);
@@ -936,7 +1019,7 @@
 .success-modal {
   width: min(520px, 100%);
   background: var(--bg-surface);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-lg);
   padding: 30px 28px;
@@ -958,7 +1041,7 @@
 
 .error-message {
   padding: 12px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-danger-bg);
   border: 1px solid var(--color-danger-border);
   color: var(--color-danger);
@@ -982,7 +1065,7 @@
   max-height: 90vh;
   overflow-y: auto;
   background: var(--bg-surface);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
   padding: 32px;
@@ -1022,7 +1105,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -1035,6 +1118,7 @@
 .apply-form .form-textarea:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: var(--focus-ring);
 }
 
 .apply-form .form-textarea {
@@ -1053,7 +1137,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background: var(--secondary-bg);
 }
@@ -1097,7 +1181,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--secondary-bg);
   font-size: 0.9rem;
 }
@@ -1175,4 +1259,28 @@
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-link,
+  .tab-button, .primary-button, .secondary-button, .button-primary, .details-button, .submit-button,
+  .tender-card,
+  .applied-filter-toggle,
+  .domain-chip,
+  .toggle-pill,
+  .toggle-pill::after,
+  .remove-agent {
+    transition: none;
+  }
+
+  .tender-card:hover,
+  .tender-card:focus-within,
+  .primary-button:hover, .button-primary:hover, .submit-button:hover, .details-button:hover {
+    transform: none;
+  }
+
+  .ai-thinking-dots span {
+    animation: none;
+    opacity: 0.8;
+  }
 }
