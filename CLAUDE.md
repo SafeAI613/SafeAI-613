@@ -195,6 +195,7 @@ When a task touches multiple layers (e.g., "add user management" spans backend C
 - [docs/PROJECT_SPECIFICATION.md](docs/PROJECT_SPECIFICATION.md) — Full system design
 - [docs/TOKEN_MANAGEMENT.md](docs/TOKEN_MANAGEMENT.md) — Token refresh & session management
 - [docs/CLIENT_ROUTING_STRUCTURE.md](docs/CLIENT_ROUTING_STRUCTURE.md) — Frontend routes and guards
+- [docs/UI_STYLE_GUIDE.md](docs/UI_STYLE_GUIDE.md) — Design tokens and UI rules (colors, radii, motion) every page must follow
 - [docs/CODE_DOCUMENTATION_GUIDE.md](docs/CODE_DOCUMENTATION_GUIDE.md) — Documentation standards
 - [docs/CLIENT_URGENT_TASKS.md](docs/CLIENT_URGENT_TASKS.md) — Backlog of outstanding work
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — CI/CD, the real staging/production AWS topology, and every deploy bug hit so far with its fix. Read this before touching `.github/workflows/cd-*.yml` or `docker-compose.prod.yml`.

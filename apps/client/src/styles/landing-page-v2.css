@@ -11,20 +11,20 @@
 
   /* Color tokens — kept as the existing site green for now (per request);
      revisit once a final brand color is chosen for the whole site. */
-  --lv2-ink: #16232a;
+  --lv2-ink: #0f1d22;
   --lv2-ink-soft: #3d4d54;
-  --lv2-muted: #6b7a80;
-  --lv2-line: #dcdcd5;
-  --lv2-line-soft: #eceae3;
+  --lv2-muted: #66767c;
+  --lv2-line: #e4e9e7;
+  --lv2-line-soft: #eef2f0;
   --lv2-surface: #ffffff;
-  --lv2-canvas: #f6f5f1;
+  --lv2-canvas: #f7f9f8;
   --lv2-accent: #10a37f;
   --lv2-accent-hover: #0d8f6f;
   --lv2-accent-soft: rgba(16, 163, 127, 0.08);
   --lv2-gold: #10a37f;
   --lv2-gold-hover: #0d8f6f;
   --lv2-gold-soft: rgba(16, 163, 127, 0.1);
-  --lv2-dark-panel: #16232a;
+  --lv2-dark-panel: #0f1d22;
   --lv2-dark-panel-2: #1e2f37;
 
   /* SafeAI Hub / SafeAI Platform each keep their own identity (SCRUM-228/229)
@@ -60,13 +60,13 @@
 
 /* Dark mode */
 [data-theme="dark"] .landing-v2 {
-  --lv2-ink: #eef1ef;
+  --lv2-ink: #eef3f1;
   --lv2-ink-soft: #c3cdd0;
   --lv2-muted: #8b979b;
-  --lv2-line: #2a3338;
-  --lv2-line-soft: #23292c;
-  --lv2-surface: #1a2226;
-  --lv2-canvas: #14191c;
+  --lv2-line: #233034;
+  --lv2-line-soft: #1b2629;
+  --lv2-surface: #141c1f;
+  --lv2-canvas: #0d1315;
   --lv2-accent: #2fd6a7;
   --lv2-accent-hover: #24b088;
   --lv2-accent-soft: rgba(47, 214, 167, 0.14);
