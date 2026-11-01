@@ -7,9 +7,9 @@
 .courses-container {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 40px;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .courses-header {
@@ -20,13 +20,15 @@
 .courses-header h1 {
   color: var(--text-primary);
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin-bottom: 8px;
 }
 
 .courses-subtitle {
-  color: var(--text-muted);
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: var(--font-md);
 }
 
 .courses-content {
@@ -50,7 +52,7 @@
 
 .coming-soon-card h2 {
   color: var(--text-primary);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 16px;
 }
@@ -70,15 +72,14 @@
 }
 
 .course-preview {
-  background: var(--bg-page);
+  background: var(--bg-surface);
   border: 1px solid var(--border-default);
   padding: 24px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--radius-md);
+  transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
 }
 
 .course-preview:hover {
-  background: var(--gray-100);
   border-color: var(--border-strong);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -92,7 +93,7 @@
 .course-preview h3 {
   color: var(--text-primary);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
@@ -124,11 +125,12 @@
 .notify-form input {
   flex: 1;
   padding: 12px;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: 14px;
-  background: var(--bg-page);
-  color: var(--gray-400);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
 }
 
 .notify-form input:disabled {
@@ -139,9 +141,10 @@
 .notify-form button {
   padding: 12px 24px;
   border: none;
-  border-radius: 6px;
-  background: var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
   color: var(--text-muted);
+  font-family: inherit;
   font-size: 14px;
   font-weight: 600;
   cursor: not-allowed;
@@ -168,5 +171,15 @@
 
   .notify-form {
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .course-preview {
+    transition: none;
+  }
+
+  .course-preview:hover {
+    transform: none;
   }
 }
