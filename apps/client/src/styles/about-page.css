@@ -1,29 +1,35 @@
+/* About page — a calm, article-style reading column built on the global
+   design-system tokens (see docs/UI_STYLE_GUIDE.md). The page entrance
+   animation comes from SiteLayout (.site-page), so none is added here. */
+
 .about-page {
-  max-width: 900px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 48px 24px 64px;
 }
 
 .about-container {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+  padding: 48px 56px;
+  box-shadow: var(--shadow-sm);
 }
 
 .about-container h1 {
   text-align: center;
   color: var(--text-primary);
-  margin-bottom: 2rem;
-  font-size: 36px;
-  font-weight: 700;
+  margin: 0 0 40px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .about-section {
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 40px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border-muted);
 }
 
 .about-section:last-of-type {
@@ -32,134 +38,175 @@
   padding-bottom: 0;
 }
 
+/* Section heading with a short brand accent bar */
 .about-section h2 {
-  color: var(--brand-secondary);  font-size: 24px;
+  position: relative;
+  color: var(--text-primary);
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  padding-top: 14px;
+}
+
+.about-section h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 32px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary);
 }
 
 .about-section h3 {
-  color: var(--text-secondary);
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 28px;
+  margin-bottom: 10px;
 }
 
 .about-section p {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
   text-align: start;
 }
 
 .about-section ul {
   list-style: none;
   padding-inline-start: 0;
-  margin: 1rem 0;
+  margin: 16px 0;
 }
 
 .about-section ul li {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
-  margin-bottom: 0.5rem;
-  padding-inline-start: 1.5rem;
+  margin-bottom: 8px;
+  padding-inline-start: 22px;
   position: relative;
   text-align: start;
 }
 
 .about-section ul li::before {
-  content: "•";
-  color: var(--brand-secondary);  font-weight: bold;
+  content: "";
   position: absolute;
-  inset-inline-start: 0;
+  inset-inline-start: 4px;
+  top: calc(0.9em - 3.5px); /* centered on the first 1.8 line */
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-primary);
+}
+
+/* The provider illustration is a fixed-size inline SVG — keep it inside
+   the reading column on narrow screens. */
+.about-section svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .about-cta {
-  background: linear-gradient(135deg, rgba(28, 122, 166, 0.08) 0%, rgba(19, 84, 113, 0.08) 100%);
-  border: 2px solid var(--brand-secondary);
-  border-radius: 12px;
-  padding: 32px;
+  background: var(--brand-primary-soft);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 40px;
 }
 
 .about-cta h2 {
-  color: var(--brand-secondary);  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
 }
 
 .about-cta h3 {
-  color: var(--text-secondary);
-  font-size: 22px;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 28px;
+  margin-bottom: 12px;
 }
 
 .about-cta p {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .about-cta .btn {
-  display: inline-block;
-  padding: 12px 32px;
-  border-radius: 8px;
+  display: inline-flex;
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s ease;
-  margin: 0.5rem;
+  font-size: 15px;
+  transition: background-color 0.25s var(--ease-out), border-color 0.25s var(--ease-out),
+    color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+  margin: 0;
+}
+
+.about-cta .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .about-cta .btn-primary {
-  background: var(--brand-secondary);
-  color: var(--text-inverse);  border: none;
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+  border: 1px solid var(--brand-primary);
 }
 
 .about-cta .btn-primary:hover {
-  background: var(--brand-secondary-hover);  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(28, 122, 166, 0.3);
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .about-cta .btn-secondary {
   background: var(--bg-surface);
-  color: var(--brand-secondary);
-  border: 2px solid var(--brand-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 .about-cta .btn-secondary:hover {
-  background: var(--color-success-bg);  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(28, 122, 166, 0.2);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
+  transform: translateY(-1px);
 }
 
 .cta-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 1.5rem;
+  margin-top: 20px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .about-page {
-    padding: 24px 16px;
+    padding: 24px 16px 48px;
   }
 
   .about-container {
-    padding: 24px;
+    padding: 28px 22px;
+    border-radius: var(--radius-md);
   }
 
   .about-container h1 {
     font-size: 28px;
+    margin-bottom: 28px;
   }
 
   .about-section h2 {
@@ -167,7 +214,7 @@
   }
 
   .about-section h3 {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   .about-section p,
@@ -176,15 +223,15 @@
   }
 
   .about-cta {
-    padding: 24px;
+    padding: 24px 20px;
   }
 
   .about-cta h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .about-cta h3 {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .cta-buttons {
@@ -193,5 +240,15 @@
 
   .about-cta .btn {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-cta .btn {
+    transition: none;
+  }
+
+  .about-cta .btn:hover {
+    transform: none;
   }
 }

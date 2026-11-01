@@ -12,31 +12,37 @@
 }
 
 .admin-articles-header h1 {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .admin-articles-new-btn {
-  background: var(--link-color);
+  background: var(--brand-primary);
   color: var(--text-inverse);
   border: none;
   padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
 }
 
 .admin-articles-new-btn:hover {
-  background: var(--link-color-hover);
+  background: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .admin-articles-error {
   background: var(--color-danger-bg);
   color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -51,25 +57,25 @@
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-surface);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 0 0 1px var(--border-default), var(--shadow-sm);
 }
 
 .admin-articles-table th {
-  background: var(--bg-page);
+  background: var(--bg-elevated);
   padding: 0.75rem 1rem;
   text-align: right;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   border-bottom: 1px solid var(--border-default);
 }
 
 .admin-articles-table td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid var(--border-muted);
   color: var(--text-secondary);
 }
 
@@ -79,7 +85,7 @@
 
 .admin-articles-empty {
   text-align: center;
-  color: var(--gray-400);
+  color: var(--text-muted);
   padding: 2rem;
 }
 
@@ -92,19 +98,30 @@
 .admin-articles-actions button,
 .admin-articles-view-link {
   padding: 0.3rem 0.7rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: 0.8rem;
   cursor: pointer;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-default);
   background: var(--bg-surface);
   color: var(--text-secondary);
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
 .admin-articles-actions button:hover,
 .admin-articles-view-link:hover {
-  background: var(--gray-100);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
+}
+
+.admin-articles-actions button:focus-visible,
+.admin-articles-view-link:focus-visible,
+.admin-articles-new-btn:focus-visible,
+.admin-articles-save-btn:focus-visible,
+.admin-articles-cancel-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .admin-articles-delete-btn {
@@ -131,7 +148,9 @@
 
 .admin-articles-form {
   background: var(--bg-surface);
-  border-radius: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   padding: 2rem;
   width: 100%;
   max-width: 680px;
@@ -141,7 +160,7 @@
 }
 
 .admin-articles-form h2 {
-  font-size: 1.3rem;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
@@ -157,24 +176,28 @@
 .admin-articles-form textarea {
   width: 100%;
   padding: 0.6rem 0.9rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 0.95rem;
   outline: none;
   font-family: inherit;
   box-sizing: border-box;
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
 .admin-articles-form textarea {
   resize: vertical;
-  font-family: monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; /* markdown editor */
   font-size: 0.88rem;
   line-height: 1.5;
 }
 
 .admin-articles-form input:focus,
 .admin-articles-form textarea:focus {
-  border-color: var(--link-color);
+  border-color: var(--brand-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .admin-articles-checkbox-label {
@@ -192,14 +215,20 @@
 }
 
 .admin-articles-save-btn {
-  background: var(--link-color);
+  background: var(--brand-primary);
   color: var(--text-inverse);
   border: none;
   padding: 0.65rem 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s var(--ease-out);
+}
+
+.admin-articles-save-btn:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
 }
 
 .admin-articles-save-btn:disabled {
@@ -208,11 +237,28 @@
 }
 
 .admin-articles-cancel-btn {
-  background: var(--gray-100);
+  background: var(--bg-surface);
   color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-default);
   padding: 0.65rem 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: 0.95rem;
   cursor: pointer;
+  transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.admin-articles-cancel-btn:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-articles-new-btn {
+    transition: none;
+  }
+
+  .admin-articles-new-btn:hover {
+    transform: none;
+  }
 }

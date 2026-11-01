@@ -28,7 +28,7 @@
 }
 
 .dash-sidebar-brand {
-  font-family: 'Heebo', sans-serif;
+  font-family: inherit;
   font-size: 17px;
   font-weight: 800;
   color: var(--lv2-ink);
@@ -60,7 +60,7 @@
   width: 100%;
   text-align: right;
   padding: 9px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -92,8 +92,8 @@
 
 .dash-eyebrow {
   display: inline-block;
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
   background: var(--lv2-accent-soft);
   color: var(--lv2-accent);
   font-size: 13px;
@@ -105,6 +105,8 @@
 .dash-title {
   font-size: 28px;
   font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--lv2-ink);
   margin: 0 0 6px 0;
 }
@@ -134,7 +136,7 @@
   gap: 4px;
   border: 1px solid var(--lv2-line);
   background: linear-gradient(135deg, var(--lv2-accent-soft), transparent 65%);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 8px;
   margin-bottom: 32px;
 }
@@ -148,13 +150,14 @@
   width: 100%;
   text-align: right;
   padding: 12px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: inherit;
+  transition: background-color 0.2s var(--ease-out);
 }
 
 .dash-getstarted-step:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--lv2-surface);
 }
 
 .dash-getstarted-marker {
@@ -175,7 +178,7 @@
 .dash-getstarted-step-done .dash-getstarted-marker {
   background: var(--lv2-accent);
   border-color: var(--lv2-accent);
-  color: #ffffff;
+  color: var(--text-inverse);
 }
 
 .dash-getstarted-text {
@@ -211,13 +214,14 @@
 .dash-stat-tile {
   border: 1px solid var(--lv2-line);
   background: var(--lv2-surface);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 18px 20px;
 }
 
 .dash-stat-value {
   font-size: 26px;
   font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--lv2-ink);
   margin-bottom: 4px;
   font-variant-numeric: tabular-nums;
@@ -241,7 +245,7 @@
 .dash-stat-skeleton-value {
   width: 60%;
   height: 26px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--lv2-line-soft);
   margin-bottom: 8px;
   animation: dash-skeleton-pulse 1.4s ease-in-out infinite;
@@ -250,7 +254,7 @@
 .dash-stat-skeleton-label {
   width: 80%;
   height: 13px;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   background: var(--lv2-line-soft);
   animation: dash-skeleton-pulse 1.4s ease-in-out infinite;
 }
@@ -310,7 +314,7 @@
   text-align: right;
   border: 1px solid var(--lv2-line);
   background: var(--lv2-surface);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   font-family: inherit;
   cursor: pointer;
@@ -353,7 +357,7 @@
   gap: 10px;
   border: 1px solid var(--lv2-line);
   background: var(--lv2-surface);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 16px;
   text-align: right;
   cursor: pointer;
@@ -474,7 +478,7 @@
    never becomes a containing block for fixed-position children (modals). */
 
 .dash-main > * {
-  animation: dash-enter 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation: dash-enter 0.5s var(--ease-out) backwards;
 }
 
 .dash-main > :nth-child(2) { animation-delay: 0.05s; }
@@ -495,7 +499,7 @@
 }
 
 .dash-sidebar-item > svg {
-  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 0.25s var(--ease-out);
 }
 
 .dash-sidebar-item:hover > svg {
@@ -504,23 +508,58 @@
 
 .dash-stat-tile,
 .dash-getstarted-card,
-.dash-feed-item {
-  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s, border-color 0.25s;
+.dash-feed-item,
+.dash-card {
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 
 .dash-stat-tile:hover,
-.dash-feed-item:hover {
+.dash-feed-item:hover,
+.dash-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -18px rgba(15, 29, 34, 0.35);
+  box-shadow: var(--shadow-md);
+}
+
+.dash-update-title {
+  transition: color 0.2s var(--ease-out);
+}
+
+.dash-update-item:hover .dash-update-title {
+  color: var(--lv2-accent);
+}
+
+/* Keyboard focus for every interactive element in the shell */
+.dash-sidebar-item:focus-visible,
+.dash-getstarted-step:focus-visible,
+.dash-feed-item:focus-visible,
+.dash-card:focus-visible,
+.dash-update-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.dash-update-item:focus-visible {
+  border-radius: var(--radius-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dash-main > *,
+  .dash-sidebar-item,
   .dash-sidebar-item > svg,
+  .dash-getstarted-step,
   .dash-stat-tile,
   .dash-getstarted-card,
-  .dash-feed-item {
+  .dash-feed-item,
+  .dash-card,
+  .dash-update-title {
     animation: none;
     transition: none;
+  }
+
+  .dash-sidebar-item:hover > svg,
+  .dash-stat-tile:hover,
+  .dash-feed-item:hover,
+  .dash-card:hover {
+    transform: none;
   }
 }

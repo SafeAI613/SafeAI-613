@@ -394,7 +394,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
       iconColor = 'var(--color-warning)';
     } else if (['ts', 'tsx', 'js', 'jsx', 'html', 'css', 'json'].includes(fileExtension)) {
       iconClass = 'fa-solid fa-file-code';
-      iconColor = '#8b5cf6';
+      iconColor = 'var(--brand-hub)';
     }
 
     return (

@@ -195,6 +195,7 @@ export default function LoginForm() {
             backgroundColor: "var(--bg-surface)",
             color: "var(--text-secondary)",
             border: "1px solid var(--border-default)",
+            borderRadius: "var(--radius-sm)",
             padding: "12px",
             fontSize: "16px",
             fontWeight: "500",

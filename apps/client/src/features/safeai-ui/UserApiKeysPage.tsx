@@ -191,10 +191,10 @@ export default function UserApiKeysPage() {
           <div>
             <div
               style={{
-                border: "2px solid #667eea",
-                borderRadius: "8px",
+                border: "2px solid var(--brand-secondary)",
+                borderRadius: "var(--radius-sm)",
                 padding: "20px",
-                backgroundColor: proxyKey.isActive ? "#f8f9ff" : "var(--bg-elevated)",
+                backgroundColor: proxyKey.isActive ? "var(--brand-secondary-soft)" : "var(--bg-elevated)",
                 marginBottom: "15px",
               }}
             >
@@ -279,7 +279,7 @@ export default function UserApiKeysPage() {
                     key={key._id} 
                     style={{
                       border: "1px solid var(--border-default)",
-                      borderRadius: "8px",
+                      borderRadius: "var(--radius-sm)",
                       padding: "15px",
                       backgroundColor: key.isActive ? "var(--bg-surface)" : "var(--bg-elevated)",
                     }}
@@ -358,7 +358,7 @@ export default function UserApiKeysPage() {
           <div
             style={{
               backgroundColor: "var(--bg-surface)",
-              borderRadius: "12px",
+              borderRadius: "var(--radius-md)",
               padding: "30px",
               maxWidth: "600px",
               width: "100%",
@@ -373,9 +373,9 @@ export default function UserApiKeysPage() {
 
             <div
               style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "var(--brand-secondary)",
                 padding: "25px",
-                borderRadius: "10px",
+                borderRadius: "var(--radius-sm)",
                 marginBottom: "20px",
               }}
             >
@@ -393,7 +393,7 @@ export default function UserApiKeysPage() {
                 style={{
                   background: "var(--bg-surface)",
                   padding: "15px",
-                  borderRadius: "8px",
+                  borderRadius: "var(--radius-sm)",
                   fontFamily: "monospace",
                   fontSize: "13px",
                   wordBreak: "break-all",
@@ -410,7 +410,7 @@ export default function UserApiKeysPage() {
               style={{
                 background: "var(--color-warning-bg)",
                 border: "2px solid var(--color-warning-border)",
-                borderRadius: "8px",
+                borderRadius: "var(--radius-sm)",
                 padding: "15px",
                 marginBottom: "20px",
               }}

@@ -1,4 +1,4 @@
-/* Inquiries Card and List Styling - OpenAI-like design tokens */
+/* Inquiries card and list — design-system tokens only (docs/UI_STYLE_GUIDE.md). */
 
 .inquiries-card {
   background: var(--bg-surface);
@@ -6,13 +6,14 @@
   border-radius: var(--radius-md);
   padding: 18px;
   margin-bottom: 14px;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
   box-shadow: var(--shadow-sm);
 }
 
 .inquiries-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
 }
 
 .inquiries-card-header {
@@ -25,7 +26,7 @@
 
 .inquiries-card-title {
   font-size: var(--font-lg);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 6px 0;
 }
@@ -44,7 +45,7 @@
 
 .inquiries-status {
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--font-sm);
   font-weight: 600;
   white-space: nowrap;
@@ -52,8 +53,9 @@
 }
 
 .inquiries-status.open {
-  background: var(--border-muted);
-  color: var(--text-primary);
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  border-color: var(--color-info-border);
 }
 
 .inquiries-status.closed {
@@ -92,7 +94,7 @@
 .inquiry-compact {
   background: var(--bg-surface);
   border: 1px solid var(--border-muted);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   display: flex;
   justify-content: space-between;
@@ -107,4 +109,14 @@
 
 .inquiry-time { font-size:12px; color:var(--text-muted) }
 
-.inquiry-actions .btn { padding:6px 10px; border-radius:8px }
+.inquiry-actions .btn { padding:6px 10px; border-radius: var(--radius-sm) }
+
+@media (prefers-reduced-motion: reduce) {
+  .inquiries-card {
+    transition: none;
+  }
+
+  .inquiries-card:hover {
+    transform: none;
+  }
+}

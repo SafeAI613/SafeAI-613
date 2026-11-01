@@ -15,7 +15,7 @@ export default function NewApiKeyModal({ apiKey, onClose }: Props) {
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <div style={{ padding: "20px" }}>
-          <div style={{ backgroundColor: "var(--color-warning-bg)", border: "1px solid var(--color-warning-border)", borderRadius: "4px", padding: "15px", marginBottom: "20px" }}>
+          <div style={{ backgroundColor: "var(--color-warning-bg)", border: "1px solid var(--color-warning-border)", borderRadius: "var(--radius-sm)", padding: "15px", marginBottom: "20px" }}>
             <strong>⚠️ אזהרה חשובה:</strong>
             <p style={{ margin: "10px 0 0 0" }}>זוהי ההזדמנות היחידה שלך לשמור את המפתח הזה. לא תוכל לראות אותו שוב!</p>
           </div>

@@ -8,7 +8,7 @@ function ProgressBar({ used, limit }: { used: number; limit: number }) {
   const pct = limit > 0 ? (used / limit) * 100 : 0;
   const color = pct > 90 ? "var(--color-danger)" : pct > 70 ? "var(--color-warning)" : "var(--color-success)";
   return (
-    <div style={{ width: "100%", height: "20px", backgroundColor: "var(--gray-200)", borderRadius: "10px", overflow: "hidden" }}>
+    <div style={{ width: "100%", height: "20px", backgroundColor: "var(--gray-200)", borderRadius: "var(--radius-pill)", overflow: "hidden" }}>
       <div style={{ width: `${pct}%`, height: "100%", backgroundColor: color, transition: "width 0.3s ease" }} />
     </div>
   );

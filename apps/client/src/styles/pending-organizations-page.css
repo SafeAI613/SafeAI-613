@@ -1,17 +1,53 @@
+/* Admin: pending organizations — design-system tokens only (docs/UI_STYLE_GUIDE.md). */
 .pending-orgs-container { padding: 24px; }
-.pending-orgs-title { font-size: 24px; font-weight: bold; margin-bottom: 16px; }
+.pending-orgs-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; color: var(--text-primary); }
 .pending-orgs-subtitle { margin-bottom: 24px; color: var(--text-muted); }
-.pending-orgs-empty { padding: 16px; background: var(--bg-elevated); border-radius: 4px; }
-.pending-orgs-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.pending-orgs-table th { background-color: var(--bg-elevated); border-bottom: 2px solid var(--border-default); text-align: right; padding: 12px; }
-.pending-orgs-table tr { border-bottom: 1px solid var(--border-default); }
+.pending-orgs-empty { padding: 16px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--text-muted); }
+.pending-orgs-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: var(--bg-surface); }
+.pending-orgs-table th { background-color: var(--bg-elevated); border-bottom: 1px solid var(--border-default); text-align: right; padding: 12px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.pending-orgs-table tr { border-bottom: 1px solid var(--border-muted); }
 .pending-orgs-table td { padding: 12px; }
+.pending-orgs-table tbody tr { transition: background-color 0.2s var(--ease-out); }
+.pending-orgs-table tbody tr:hover { background-color: var(--bg-elevated); }
 .pending-orgs-name { font-weight: 500; }
-.status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+.status-badge { padding: 4px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; }
 .status-badge.pending { background-color: var(--color-warning-bg); color: var(--color-warning); }
-.btn { padding: 4px 12px; border: none; border-radius: 4px; cursor: pointer; }
-.btn-view-details { margin-right: 8px; background-color: var(--bg-elevated); border: 1px solid var(--border-default); color: var(--text-primary); }
+
+/* Row action buttons. (This used to restyle the global `.btn` class, which
+   leaked into every page once this route loaded; the buttons here never used
+   `.btn`, so the shared shape is now scoped to these three classes.) */
+.btn-view-details,
+.btn-approve,
+.btn-reject {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.btn-view-details:focus-visible,
+.btn-approve:focus-visible,
+.btn-reject:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.btn-view-details { margin-right: 8px; background-color: var(--bg-surface); border-color: var(--border-default); color: var(--text-primary); }
+.btn-view-details:hover:not(:disabled) { border-color: var(--brand-secondary); color: var(--brand-secondary); }
 .btn-approve { margin-right: 8px; background-color: var(--color-success); color: var(--text-inverse); }
-.btn-reject { background-color: var(--color-danger); color: var(--text-inverse); }
-.pending-orgs-loading { padding: 20px; text-align: center; }
+.btn-approve:hover:not(:disabled) { box-shadow: var(--shadow-md); }
+.btn-reject { background-color: var(--bg-surface); border-color: var(--color-danger-border); color: var(--color-danger); }
+.btn-reject:hover:not(:disabled) { background-color: var(--color-danger-bg); }
+.btn-view-details:disabled,
+.btn-approve:disabled,
+.btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
+.pending-orgs-loading { padding: 20px; text-align: center; color: var(--text-muted); }
 .pending-orgs-error { padding: 20px; color: var(--color-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pending-orgs-table tbody tr,
+  .btn-view-details,
+  .btn-approve,
+  .btn-reject {
+    transition: none;
+  }
+}

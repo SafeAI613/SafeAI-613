@@ -73,9 +73,9 @@ export default function ApiKeyDisplay() {
         <div
           className="api-key-box"
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
             padding: "30px",
-            borderRadius: "10px",
+            borderRadius: "var(--radius-md)",
             marginBottom: "20px",
           }}
         >
@@ -94,7 +94,7 @@ export default function ApiKeyDisplay() {
             style={{
               background: "var(--bg-surface)",
               padding: "20px",
-              borderRadius: "8px",
+              borderRadius: "var(--radius-sm)",
               fontFamily: "monospace",
               fontSize: "14px",
               wordBreak: "break-all",
@@ -112,7 +112,7 @@ export default function ApiKeyDisplay() {
           style={{
             background: "var(--color-warning-bg)",
             border: "2px solid var(--color-warning-border)",
-            borderRadius: "8px",
+            borderRadius: "var(--radius-sm)",
             padding: "20px",
             marginBottom: "25px",
           }}
@@ -175,7 +175,7 @@ export default function ApiKeyDisplay() {
           style={{
             background: "var(--bg-elevated)",
             padding: "20px",
-            borderRadius: "8px",
+            borderRadius: "var(--radius-sm)",
             marginBottom: "25px",
           }}
         >
@@ -188,10 +188,10 @@ export default function ApiKeyDisplay() {
             </p>
             <pre
               style={{
-                background: "#2d2d2d",
-                color: "#f8f8f2",
+                background: "#0f1d22", // always-dark code block (matches showcase terminal)
+                color: "#d6e2e0",
                 padding: "15px",
-                borderRadius: "5px",
+                borderRadius: "var(--radius-sm)",
                 overflow: "auto",
                 fontSize: "12px",
                 direction: "ltr"

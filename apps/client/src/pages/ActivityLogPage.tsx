@@ -12,7 +12,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockLoginDescription"),
       timestamp: t("activityLog.mockLoginTimestamp"),
       icon: "🔐",
-      color: "#4caf50"
+      color: "var(--color-success-bg)"
     },
     {
       id: 2,
@@ -21,7 +21,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockNewProfileDescription"),
       timestamp: t("activityLog.mockNewProfileTimestamp"),
       icon: "✨",
-      color: "#2196f3"
+      color: "var(--color-info-bg)"
     },
     {
       id: 3,
@@ -30,7 +30,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockApiRequestDescription"),
       timestamp: t("activityLog.mockApiRequestTimestamp"),
       icon: "📡",
-      color: "#ff9800"
+      color: "var(--color-warning-bg)"
     },
     {
       id: 4,
@@ -39,7 +39,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockFilterUpdatedDescription"),
       timestamp: t("activityLog.mockFilterUpdatedTimestamp"),
       icon: "🔧",
-      color: "#9c27b0"
+      color: "var(--brand-secondary-soft)"
     },
     {
       id: 5,
@@ -48,7 +48,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockNewUserDescription"),
       timestamp: t("activityLog.mockNewUserTimestamp"),
       icon: "👤",
-      color: "#00bcd4"
+      color: "var(--brand-primary-soft)"
     },
     {
       id: 6,
@@ -57,7 +57,7 @@ export default function ActivityLogPage() {
       description: t("activityLog.mockSystemUpdateDescription"),
       timestamp: t("activityLog.mockSystemUpdateTimestamp"),
       icon: "🚀",
-      color: "#f44336"
+      color: "var(--color-danger-bg)"
     }
   ];
 

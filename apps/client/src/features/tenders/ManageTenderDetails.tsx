@@ -259,12 +259,12 @@ export default function ManageTenderDetails({
       {/* אפיון אוטומטי + המלצת פיתוח (SCRUM-291) */}
       <section
         className="spec-generation-panel"
-        style={{ marginBottom: '30px', padding: '20px', border: '1px solid #e2e8f0', borderRadius: '10px', background: '#f8fafc' }}
+        style={{ marginBottom: '30px', padding: '20px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h3 style={{ margin: 0 }}>אפיון ראשוני והמלצת פיתוח</h3>
-            <p className="helper-text" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#666' }}>
+            <p className="helper-text" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               הפקה אוטומטית של המלצה טכנולוגית, פרויקטים דומים בקוד פתוח, מקורות קריאה ומסמך אפיון ראשוני
             </p>
           </div>
@@ -277,18 +277,18 @@ export default function ManageTenderDetails({
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-              color: 'white',
+              background: 'linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-primary) 100%)',
+              color: 'var(--text-inverse)',
               border: 'none',
               padding: '10px 16px',
-              borderRadius: '20px',
+              borderRadius: 'var(--radius-pill)',
               cursor: isRequestingSpecification || isSpecificationBusy ? 'default' : 'pointer',
               fontWeight: 'bold',
               opacity: isRequestingSpecification || isSpecificationBusy ? 0.7 : 1,
             }}
           >
             {isSpecificationBusy ? (
-              <AiThinkingLoader color="#ffffff" />
+              <AiThinkingLoader color="var(--text-inverse)" />
             ) : (
               <>
                 {specification?.status === 'ready' || specification?.status === 'failed'
@@ -300,14 +300,14 @@ export default function ManageTenderDetails({
         </div>
 
         {specificationError && (
-          <div className="error-message" style={{ color: 'red', background: '#ffebee', padding: '8px 12px', borderRadius: '4px', marginTop: '12px' }}>
+          <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginTop: '12px' }}>
             {specificationError}
           </div>
         )}
 
         {isSpecificationBusy && (
           <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <p style={{ margin: 0, color: '#666' }}>ה-agent מפיק את האפיון, זה עשוי לקחת מספר דקות...</p>
+            <p style={{ margin: 0, color: 'var(--text-muted)' }}>ה-agent מפיק את האפיון, זה עשוי לקחת מספר דקות...</p>
             <button
               type="button"
               className="secondary-button"
@@ -315,7 +315,7 @@ export default function ManageTenderDetails({
               disabled={isCancellingSpecification}
               style={{
                 padding: '6px 16px',
-                borderRadius: '16px',
+                borderRadius: 'var(--radius-pill)',
                 cursor: isCancellingSpecification ? 'default' : 'pointer',
                 opacity: isCancellingSpecification ? 0.6 : 1,
               }}
@@ -326,7 +326,7 @@ export default function ManageTenderDetails({
         )}
 
         {specification?.status === 'failed' && (
-          <div className="error-message" style={{ color: 'red', background: '#ffebee', padding: '12px', borderRadius: '6px', marginTop: '12px' }}>
+          <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '12px', borderRadius: 'var(--radius-sm)', marginTop: '12px' }}>
             <strong>הפקת האפיון נכשלה.</strong>
             {specification.errorMessage && <p style={{ margin: '6px 0 0' }}>{specification.errorMessage}</p>}
           </div>
@@ -335,7 +335,7 @@ export default function ManageTenderDetails({
         {specification?.status === 'ready' && (
           <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {specification.errorMessage && (
-              <div style={{ color: '#92400e', background: '#fef3c7', padding: '8px 12px', borderRadius: '4px', fontSize: '0.9rem' }}>
+              <div style={{ color: 'var(--color-warning)', background: 'var(--color-warning-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem' }}>
                 {specification.errorMessage}
               </div>
             )}
@@ -343,7 +343,7 @@ export default function ManageTenderDetails({
             {specification.techStackRecommendation && (
               <div>
                 <strong>המלצה טכנולוגית:</strong>
-                <p style={{ margin: '6px 0 0', color: '#334155' }}>{specification.techStackRecommendation}</p>
+                <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)' }}>{specification.techStackRecommendation}</p>
               </div>
             )}
 
@@ -354,7 +354,7 @@ export default function ManageTenderDetails({
                   {specification.openSourceReferences.map((ref) => (
                     <li key={ref.url}>
                       <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
-                      {ref.description && <span style={{ color: '#64748b' }}> — {ref.description}</span>}
+                      {ref.description && <span style={{ color: 'var(--text-muted)' }}> — {ref.description}</span>}
                     </li>
                   ))}
                 </ul>
@@ -368,7 +368,7 @@ export default function ManageTenderDetails({
                   {specification.readingSources.map((ref) => (
                     <li key={ref.url}>
                       <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
-                      {ref.description && <span style={{ color: '#64748b' }}> — {ref.description}</span>}
+                      {ref.description && <span style={{ color: 'var(--text-muted)' }}> — {ref.description}</span>}
                     </li>
                   ))}
                 </ul>
@@ -378,13 +378,13 @@ export default function ManageTenderDetails({
             {specification.document && (
               <div>
                 <strong>מסמך אפיון:</strong>
-                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px', marginTop: '6px' }}>
+                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '12px', marginTop: '6px' }}>
                   {specification.document}
                 </pre>
               </div>
             )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderTop: '1px solid var(--border-default)', paddingTop: '12px' }}>
               <button
                 type="button"
                 className={specification.isPublished ? 'secondary-button' : 'button-primary'}
@@ -393,7 +393,7 @@ export default function ManageTenderDetails({
               >
                 {specification.isPublished ? 'הסר פרסום (השאר פרטי)' : 'פרסם יחד עם המכרז'}
               </button>
-              <span style={{ fontSize: '0.85rem', color: '#666' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 {specification.isPublished
                   ? 'האפיון גלוי כרגע גם למועמדים הצופים במכרז'
                   : 'האפיון גלוי כרגע רק לך כבעל המכרז'}
@@ -412,7 +412,7 @@ export default function ManageTenderDetails({
             id="tender-title"
             value={draftTender.title}
             onChange={(e) => handleFieldChange('title', e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)' }}
+            style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}
           />
         </div>
 
@@ -424,7 +424,7 @@ export default function ManageTenderDetails({
             rows={4}
             value={draftTender.shortDescription ?? ''}
             onChange={(e) => handleFieldChange('shortDescription', e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)' }}
+            style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}
           />
         </div>
 
@@ -432,7 +432,7 @@ export default function ManageTenderDetails({
         <div className="selection-cards-row" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           
           {/* קוביה א': סוג המוצר */}
-          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: '8px' }}>
+          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
             <h3 style={{ margin: '0 0 4px 0' }}>{t('tenders.productTypeHeading')}</h3>
             <p className="helper-text" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>{t('tenders.productTypeHelperText')}</p>
             <div className="domain-list" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -445,7 +445,7 @@ export default function ManageTenderDetails({
                     className={`domain-chip ${selected ? 'selected' : ''}`}
                     style={{
                       padding: '6px 12px',
-                      borderRadius: '20px',
+                      borderRadius: 'var(--radius-pill)',
                       border: '1px solid',
                       borderColor: selected ? 'var(--link-color)' : 'var(--border-strong)',
                       backgroundColor: selected ? 'var(--color-info-bg)' : 'var(--bg-surface)',
@@ -462,7 +462,7 @@ export default function ManageTenderDetails({
           </div>
 
           {/* קוביה ב': צורת שימוש ב-AI */}
-          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: '8px' }}>
+          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
             <h3 style={{ margin: '0 0 4px 0' }}>{t('tenders.aiApplicationHeading')}</h3>
             <p className="helper-text" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>{t('tenders.aiApplicationHelperText')}</p>
             <div className="domain-list" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -475,7 +475,7 @@ export default function ManageTenderDetails({
                     className={`domain-chip ${selected ? 'selected' : ''}`}
                     style={{
                       padding: '6px 12px',
-                      borderRadius: '20px',
+                      borderRadius: 'var(--radius-pill)',
                       border: '1px solid',
                       borderColor: selected ? 'var(--link-color)' : 'var(--border-strong)',
                       backgroundColor: selected ? 'var(--color-info-bg)' : 'var(--bg-surface)',
@@ -494,7 +494,7 @@ export default function ManageTenderDetails({
 
         {/* שדות אג'נטים דינמיים - מוצגים רק במידת הצורך */}
         {showAgentsSection && (
-          <div className="form-section" style={{ padding: '15px', background: 'var(--bg-elevated)', borderRadius: '8px' }}>
+          <div className="form-section" style={{ padding: '15px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
             <div className="section-title" style={{ fontWeight: 'bold', marginBottom: '12px' }}>{t('tenders.agentExplanationSectionTitle')}</div>
             <div className="agent-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {agents.map((agentText, index) => (
@@ -508,7 +508,7 @@ export default function ManageTenderDetails({
                       value={agentText}
                       onChange={(e) => handleAgentChange(index, e.target.value)}
                       placeholder={t('tenders.agentDescriptionPlaceholder', { index: index + 1 })}
-                      style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid var(--border-strong)' }}
+                      style={{ flex: 1, padding: '8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}
                       rows={2}
                       maxLength={300}
                     />
@@ -543,7 +543,7 @@ export default function ManageTenderDetails({
                 id="tender-timeRequired-value"
                 value={draftTender.timeRequired?.value ?? 0}
                 onChange={(e) => handleFieldChange('timeRequired', { ...draftTender.timeRequired, value: Number(e.target.value) } as TenderTime)}
-                style={{ padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '40%' }}
+                style={{ padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: '40%' }}
                 type="number"
                 min={0}
               />
@@ -551,7 +551,7 @@ export default function ManageTenderDetails({
                 id="tender-timeRequired-unit"
                 value={draftTender.timeRequired?.unit ?? 'ימים'}
                 onChange={(e) => handleFieldChange('timeRequired', { ...draftTender.timeRequired, unit: e.target.value } as TenderTime)}
-                style={{ padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)', width: '60%' }}
+                style={{ padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: '60%' }}
               >
                 {timeUnits.map((u) => (
                   <option key={u} value={u}>{u}</option>
@@ -565,7 +565,7 @@ export default function ManageTenderDetails({
               id="tender-budget"
               value={draftTender.budget ?? 0}
               onChange={(e) => handleFieldChange('budget', Number(e.target.value))}
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)' }}
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}
               type="number"
               min={0}
             />
@@ -581,7 +581,7 @@ export default function ManageTenderDetails({
               rows={3}
               value={draftTender.additionalDetails ?? ''}
               onChange={(e) => handleFieldChange('additionalDetails', e.target.value)}
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-strong)' }}
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)' }}
             />
           </div>
           <div className="footer-side" style={{ flex: 1, marginTop: '30px' }}>
@@ -599,17 +599,17 @@ export default function ManageTenderDetails({
 
       {/* פעולות, שגיאות והודעות הצלחה */}
       <div className="detail-actions" style={{ marginTop: '40px', display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
-        {errorMessage && <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: '4px' }}>{errorMessage}</div>}
-        {successMessage && <div className="success-message" style={{ color: 'var(--color-success)', background: 'var(--color-success-bg)', padding: '8px 12px', borderRadius: '4px' }}>{successMessage}</div>}
+        {errorMessage && <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>{errorMessage}</div>}
+        {successMessage && <div className="success-message" style={{ color: 'var(--color-success)', background: 'var(--color-success-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>{successMessage}</div>}
         
         <button type="button" className="button-primary submit-button" onClick={saveTender} disabled={isLoading} style={{ padding: '10px 20px', cursor: 'pointer' }}>
           {isLoading ? t('tenders.savingBtn') : t('tenders.saveUpdateBtn')}
         </button>
 
         {showCloseConfirmation ? (
-          <div className="close-confirmation" style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--color-warning-bg)', padding: '8px', borderRadius: '6px' }}>
+          <div className="close-confirmation" style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'var(--color-warning-bg)', padding: '8px', borderRadius: 'var(--radius-sm)' }}>
             <span>{t('tenders.closeConfirmQuestion')}</span>
-            <button type="button" className="primary-button" onClick={closeTender} disabled={isLoading} style={{ background: 'var(--color-danger)', color: 'var(--text-inverse)', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+            <button type="button" className="primary-button" onClick={closeTender} disabled={isLoading} style={{ background: 'var(--color-danger)', color: 'var(--text-inverse)', border: 'none', padding: '6px 12px', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>
               {t('tenders.confirmCloseBtn')}
             </button>
             <button type="button" className="secondary-button" onClick={() => setShowCloseConfirmation(false)} disabled={isLoading} style={{ padding: '6px 12px', cursor: 'pointer' }}>

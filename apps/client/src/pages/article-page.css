@@ -17,33 +17,42 @@
   text-decoration: none;
   font-size: 0.9rem;
   margin-bottom: 1.5rem;
-  font-weight: 500;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s var(--ease-out);
 }
 
 .article-back-link:hover {
+  color: var(--link-color-hover);
   text-decoration: underline;
+}
+
+.article-back-link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .article-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .article-category {
   font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--link-color);
+  font-weight: 700;
+  color: var(--brand-primary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .article-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   margin: 0.5rem 0;
   color: var(--text-primary);
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .article-description {
@@ -55,7 +64,7 @@
 .article-meta {
   margin-top: 0.75rem;
   font-size: 0.85rem;
-  color: var(--gray-400);
+  color: var(--text-muted);
 }
 
 /* Markdown content styles */
@@ -89,9 +98,9 @@
 .article-content li { margin-bottom: 0.3rem; }
 
 .article-content code {
-  background: var(--gray-100);
+  background: var(--bg-elevated);
   padding: 0.15em 0.4em;
-  border-radius: 4px;
+  border-radius: 6px; /* tight inline-code chip; smaller than --radius-sm on purpose */
   font-size: 0.9em;
   font-family: monospace;
   direction: ltr;
@@ -99,11 +108,12 @@
 }
 
 .article-content pre {
-  /* Fixed dark code block, same convention as other code samples in the app */
-  background: #1f2937;
-  color: #f9fafb;
+  /* Deliberate one-off: code blocks stay dark in both themes
+     (same ink/terminal colors as the showcase pages). */
+  background: #0f1d22;
+  color: #d6e2e0;
   padding: 1.2rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow-x: auto;
   margin-bottom: 1rem;
   direction: ltr;
@@ -120,7 +130,7 @@
 }
 
 .article-content blockquote {
-  border-right: 4px solid var(--link-color);
+  border-right: 3px solid var(--brand-primary);
   padding-right: 1rem;
   margin: 1rem 0;
   color: var(--text-muted);
@@ -141,7 +151,7 @@
 }
 
 .article-content th {
-  background: var(--bg-page);
+  background: var(--bg-elevated);
   font-weight: 600;
 }
 
@@ -152,7 +162,7 @@
 
 .article-content img {
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .article-content hr {

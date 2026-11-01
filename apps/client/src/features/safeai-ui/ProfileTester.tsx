@@ -72,7 +72,7 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
     <div style={{ 
       backgroundColor: "var(--bg-elevated)",
       padding: "20px", 
-      borderRadius: "8px",
+      borderRadius: "var(--radius-sm)",
       marginBottom: "30px"
     }}>
       <h3 style={{ marginTop: 0, marginBottom: "20px" }}>🧪 {t("profileTester.title")}</h3>
@@ -110,7 +110,7 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
             placeholder={t("profileTester.testTextPlaceholder")}
             rows={4}
             required
-            style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid var(--border-default)" }}
+            style={{ width: "100%", padding: "10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-default)" }}
           />
         </div>
 
@@ -130,7 +130,7 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
           padding: "15px",
           backgroundColor: "var(--color-danger-bg)",
           border: "1px solid var(--color-danger-border)",
-          borderRadius: "4px",
+          borderRadius: "var(--radius-sm)",
           color: "var(--color-danger)"
         }}>
           <strong>❌ {t("statistics.errorLabel")}</strong> {error}
@@ -143,7 +143,7 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
           padding: "20px",
           backgroundColor: result.allowed ? "var(--color-success-bg)" : "var(--color-danger-bg)",
           border: `2px solid ${result.allowed ? "var(--color-success)" : "var(--color-danger)"}`,
-          borderRadius: "8px",
+          borderRadius: "var(--radius-sm)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" }}>
             <span style={{ fontSize: "32px" }}>
@@ -161,8 +161,8 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
 
           <div style={{ 
             padding: "10px", 
-            backgroundColor: "rgba(255,255,255,0.5)", 
-            borderRadius: "4px",
+            backgroundColor: "var(--bg-surface)", 
+            borderRadius: "var(--radius-sm)",
             fontSize: "14px"
           }}>
             <strong>{t("profileTester.reasonLabel")}</strong> {getReasonText(result.reason)}
@@ -171,8 +171,8 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
           <div style={{
             marginTop: "15px",
             padding: "10px",
-            backgroundColor: "rgba(255,255,255,0.3)",
-            borderRadius: "4px",
+            backgroundColor: "var(--bg-surface)",
+            borderRadius: "var(--radius-sm)",
             fontSize: "13px",
             fontFamily: "monospace"
           }}>

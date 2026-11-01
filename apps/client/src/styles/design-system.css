@@ -1,91 +1,142 @@
-/* =========================
-   Design Tokens (OpenAI-like)
-   ========================= */
+/* =========================================================================
+   SafeAI613 design system — global tokens and base elements.
+
+   One visual language for the whole site, matching the showcase pages
+   (gateway + /welcome/*): a clean white canvas, deep ink text, the SafeAI
+   green as the main accent and the Platform blue as the secondary one,
+   soft rounded corners, soft tinted shadows and the Heebo font.
+   Page stylesheets should build on these tokens instead of hard-coding
+   colors, so dark mode and future brand changes work everywhere at once.
+   See docs/UI_STYLE_GUIDE.md.
+   ========================================================================= */
+
 :root {
-  --bg-page: #f9fafb;
+  /* Surfaces */
+  --bg-page: #f7f9f8;
   --bg-surface: #ffffff;
-  --bg-elevated: #f8fafc;
-  --bg-overlay: rgba(15, 23, 42, 0.5);
+  --bg-elevated: #f2f5f4;
+  --bg-overlay: rgba(15, 29, 34, 0.5);
 
-  --border-default: #e5e7eb;
-  --border-muted: #f1f5f9;
-  --border-strong: #cbd5e1;
+  /* Lines */
+  --border-default: #e4e9e7;
+  --border-muted: #eef2f0;
+  --border-strong: #cfd8d5;
 
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  /* Text */
+  --text-primary: #0f1d22;
+  --text-secondary: #3d4d54;
+  --text-muted: #66767c;
   --text-inverse: #ffffff;
 
-  --brand-primary: #f76402; /* כחול רגוע */
-  --brand-primary-hover: #a05805;
+  /* Brand — primary: SafeAI green, secondary: Platform blue, tertiary: Hub copper */
+  --brand-primary: #0b8466;
+  --brand-primary-hover: #096e55;
+  --brand-primary-soft: rgba(16, 163, 127, 0.1);
 
-  --brand-secondary: #1C7AA6;
-  --brand-secondary-hover: #239AD1;
+  --brand-secondary: #2f5d8a;
+  --brand-secondary-hover: #234a70;
+  --brand-secondary-soft: rgba(47, 93, 138, 0.1);
 
-  --link-color: #2563eb;
-  --link-color-hover: #1e40af;
+  --brand-hub: #c2703d;
+  --brand-hub-soft: rgba(194, 112, 61, 0.1);
+
+  --link-color: #2f5d8a;
+  --link-color-hover: #0b8466;
 
   /* Neutral scale — flipped under [data-theme="dark"] so any component
      built from these stays legible without per-component dark rules. */
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
-  --gray-950: #020617;
+  --gray-50: #f7f9f8;
+  --gray-100: #eef2f0;
+  --gray-200: #e4e9e7;
+  --gray-300: #cfd8d5;
+  --gray-400: #9aa8ac;
+  --gray-500: #66767c;
+  --gray-600: #4b5b61;
+  --gray-700: #3d4d54;
+  --gray-800: #23343a;
+  --gray-900: #0f1d22;
+  --gray-950: #071114;
 
-  /* Darkened from #16a34a/#0284c7 - those were ~3.3:1/~4.1:1 with white
-     text, below WCAG AA (4.5:1). These pass (~5:1+) so every solid-fill
-     badge using --color-success/--color-info + --text-inverse across the
-     app is AA-compliant, not just call sites that opt in individually. */
+  /* Status colors — solid fills pass WCAG AA (≥4.5:1) with white text. */
   --color-success: #2e7d32;
-  --color-success-bg: #f0fdf4;
-  --color-success-border: #bbf7d0;
+  --color-success-bg: #effaf4;
+  --color-success-border: #bfe8d0;
 
-  --color-danger: #dc2626;
-  --color-danger-bg: #fef2f2;
-  --color-danger-border: #fecaca;
+  --color-danger: #c62828;
+  --color-danger-bg: #fdf1f1;
+  --color-danger-border: #f5c9c9;
 
   --color-warning: #b45309;
-  --color-warning-bg: #fef3c7;
-  --color-warning-border: #fde68a;
+  --color-warning-bg: #fdf6e7;
+  --color-warning-border: #f3dfae;
 
-  --color-info: #1565c0;
-  --color-info-bg: #f0f9ff;
-  --color-info-border: #bae6fd;
+  --color-info: #1f5f99;
+  --color-info-bg: #eff6fc;
+  --color-info-border: #c6dcf0;
 
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
-  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.18);
+  /* Depth — soft, slightly tinted shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 29, 34, 0.05);
+  --shadow-md: 0 8px 24px -12px rgba(15, 29, 34, 0.18);
+  --shadow-lg: 0 24px 48px -20px rgba(15, 29, 34, 0.28);
 
-  --radius-sm: 0px;
-  --radius-md: 0px;
+  /* Shape */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
 
+  /* Type */
+  --font-family: "Heebo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-sm: 13px;
-  --font-md: 14px;
+  --font-md: 15px;
   --font-lg: 18px;
 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --focus-ring: 0 0 0 3px rgba(16, 163, 127, 0.22);
+
+  font-family: var(--font-family);
+}
+
+/* =========================
+   Base
+   ========================= */
+body {
+  margin: 0;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--brand-primary-soft);
 }
 
 /* =========================
    Typography
    ========================= */
 h1 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   margin-bottom: 8px;
+  color: var(--text-primary);
 }
 
 h2 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+h3 {
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 p {
@@ -99,13 +150,28 @@ p {
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 9px 16px;
   border-radius: var(--radius-sm);
+  font-family: inherit;
   font-size: var(--font-sm);
+  font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
   background: transparent;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease-out);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-primary {
@@ -113,8 +179,10 @@ p {
   color: var(--text-inverse);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -12px rgba(16, 163, 127, 0.6);
 }
 
 .btn-secondary {
@@ -123,8 +191,9 @@ p {
   color: var(--text-primary);
 }
 
-.btn-secondary:hover {
-  background: var(--bg-elevated);
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
 }
 
 .btn-danger {
@@ -133,7 +202,7 @@ p {
   background: var(--bg-surface);
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
   background: var(--color-danger-bg);
 }
 
@@ -143,22 +212,32 @@ p {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
 label {
   font-size: var(--font-sm);
-  color: var(--text-muted);
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 input,
 select,
 textarea {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
   font-size: var(--font-md);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--gray-400);
 }
 
 input:focus,
@@ -166,6 +245,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--brand-primary);
+  box-shadow: var(--focus-ring);
 }
 
 /* =========================
@@ -180,14 +260,14 @@ textarea:focus {
 
 .table th {
   text-align: start;
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .table td {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid var(--border-muted);
 }
 
@@ -202,7 +282,54 @@ textarea:focus {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 18px;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease-out);
+}
+
+/* =========================
+   Page entrance
+   Gateway-level pages (about, contact, auth...) fade up when opened —
+   see SiteLayout. fill-mode "backwards" lets go of the transform once
+   done, so it never traps position:fixed children (modals).
+   ========================= */
+.site-page {
+  animation: site-page-enter 0.5s var(--ease-out) backwards;
+}
+
+@keyframes site-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* =========================
+   404 page
+   ========================= */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 96px 20px;
+  text-align: center;
+}
+
+.not-found-code {
+  font-size: clamp(5rem, 16vw, 8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  direction: ltr;
+}
+
+.not-found-title {
+  margin: 0 0 12px;
+  font-size: 22px;
 }
 
 /* =========================
@@ -231,69 +358,75 @@ textarea:focus {
 }
 
 /* =========================
-   Dark Mode
+   Dark Mode — same palette as the showcase pages' dark mode
    ========================= */
 [data-theme="dark"] {
-  --bg-page: #0b0f14;
-  --bg-surface: #111827;
-  --bg-elevated: #1e293b;
+  --bg-page: #0d1315;
+  --bg-surface: #141c1f;
+  --bg-elevated: #1a2428;
   --bg-overlay: rgba(0, 0, 0, 0.65);
 
-  --border-default: #1f2937;
-  --border-muted: #1e293b;
-  --border-strong: #334155;
+  --border-default: #233034;
+  --border-muted: #1b2629;
+  --border-strong: #34454a;
 
-  --text-primary: #e5e7eb;
-  --text-secondary: #cbd5f5;
-  --text-muted: #94a3b8;
-  --text-inverse: #0f172a;
+  --text-primary: #eef3f1;
+  --text-secondary: #c3cdd0;
+  --text-muted: #8d999d;
+  --text-inverse: #0d1315;
 
-  --brand-primary: #38bdf8;
-  --brand-primary-hover: #0ea5e9;
+  --brand-primary: #2fd6a7;
+  --brand-primary-hover: #5fe2bd;
+  --brand-primary-soft: rgba(47, 214, 167, 0.12);
 
-  --brand-secondary: #4FC3E8;
-  --brand-secondary-hover: #2BA8D6;
+  --brand-secondary: #7fb0e0;
+  --brand-secondary-hover: #a3c7ea;
+  --brand-secondary-soft: rgba(127, 176, 224, 0.14);
 
-  --link-color: #60a5fa;
-  --link-color-hover: #93c5fd;
+  --brand-hub: #e09a6c;
+  --brand-hub-soft: rgba(224, 154, 108, 0.14);
+
+  --link-color: #7fb0e0;
+  --link-color-hover: #2fd6a7;
 
   /* Neutral scale flipped: --gray-50 (lightest in light mode) becomes the
      darkest surface, --gray-950 becomes the lightest — so components that
      reference these tokens invert automatically. */
-  --gray-50: #020617;
-  --gray-100: #0f172a;
-  --gray-200: #1e293b;
-  --gray-300: #334155;
-  --gray-400: #475569;
-  --gray-500: #64748b;
-  --gray-600: #94a3b8;
-  --gray-700: #cbd5e1;
-  --gray-800: #e2e8f0;
-  --gray-900: #f1f5f9;
-  --gray-950: #f8fafc;
+  --gray-50: #0d1315;
+  --gray-100: #141c1f;
+  --gray-200: #1a2428;
+  --gray-300: #233034;
+  --gray-400: #4b5b61;
+  --gray-500: #6d7d82;
+  --gray-600: #8d999d;
+  --gray-700: #c3cdd0;
+  --gray-800: #dde5e3;
+  --gray-900: #eef3f1;
+  --gray-950: #f7f9f8;
 
   --color-success: #4ade80;
-  --color-success-bg: #052e1c;
-  --color-success-border: #166534;
+  --color-success-bg: #0b2a1c;
+  --color-success-border: #1d5a3a;
 
   --color-danger: #f87171;
-  --color-danger-bg: #3f1212;
-  --color-danger-border: #991b1b;
+  --color-danger-bg: #3a1414;
+  --color-danger-border: #7f2020;
 
   --color-warning: #fbbf24;
-  --color-warning-bg: #3f2d07;
-  --color-warning-border: #92660c;
+  --color-warning-bg: #3a2a09;
+  --color-warning-border: #80600f;
 
-  --color-info: #38bdf8;
-  --color-info-bg: #082f3f;
-  --color-info-border: #0369a1;
+  --color-info: #7fb0e0;
+  --color-info-bg: #0f2233;
+  --color-info-border: #24496e;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 24px 48px -20px rgba(0, 0, 0, 0.7);
+
+  --focus-ring: 0 0 0 3px rgba(47, 214, 167, 0.25);
 }
 
-/* התאמות כלליות */
 [data-theme="dark"] body {
   background-color: var(--bg-page);
   color: var(--text-primary);
@@ -321,7 +454,7 @@ textarea:focus {
 [data-theme="dark"] input,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
-  background: var(--gray-50);
+  background: var(--bg-elevated);
   color: var(--text-primary);
   border-color: var(--border-default);
 }
@@ -331,5 +464,14 @@ textarea:focus {
 }
 
 [data-theme="dark"] .table tr:hover td {
-  background: #020617;
+  background: var(--bg-elevated);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-page,
+  .btn,
+  .card {
+    animation: none;
+    transition: none;
+  }
 }

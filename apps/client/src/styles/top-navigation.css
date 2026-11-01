@@ -1,12 +1,13 @@
-/* OpenAI-Inspired Top Navigation */
+/* Top navigation — frosted bar in the showcase style (design-system tokens) */
 
 .top-navigation {
-  background-color: var(--bg-surface);
+  background-color: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-default);
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: var(--shadow-sm);
 }
 
 .top-nav-container {
@@ -67,8 +68,8 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s, color 0.2s;
   background: none;
   border: none;
   cursor: pointer;
@@ -81,8 +82,9 @@
 }
 
 .top-nav-link.active {
-  background-color: var(--bg-elevated);
-  color: var(--text-primary);
+  background-color: var(--brand-primary-soft);
+  color: var(--brand-primary);
+  font-weight: 600;
 }
 
 /* Navigation Buttons */
@@ -90,10 +92,10 @@
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s var(--ease-out), box-shadow 0.2s;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -101,25 +103,28 @@
 }
 
 .top-nav-btn-secondary {
-  background-color: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
 }
 
 .top-nav-btn-secondary:hover {
-  background-color: var(--bg-page);
-  border-color: var(--gray-400);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
 }
 
 .top-nav-btn-primary {
-  background-color: var(--brand-secondary);
+  background-color: var(--brand-primary);
   color: var(--text-inverse);
-  border: 1px solid var(--brand-secondary);
+  border: 1px solid var(--brand-primary);
 }
 
 .top-nav-btn-primary:hover {
-  background-color: var(--brand-secondary-hover);
-  border-color: var(--brand-secondary-hover);}
+  background-color: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -12px rgba(16, 163, 127, 0.6);
+}
 
 /* User Menu */
 .user-menu-container {
@@ -132,24 +137,23 @@
   gap: 8px;
   padding: 6px 12px;
   background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s, background-color 0.2s;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
 .user-menu-trigger:hover {
-  background-color: var(--bg-page);
-  border-color: var(--gray-400);
+  border-color: var(--brand-primary);
 }
 
 .user-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-secondary-hover) 100%);
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
   color: var(--text-inverse);  display: flex;
   align-items: center;
   justify-content: center;
@@ -182,7 +186,7 @@
   min-width: 240px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   padding: 8px;
   z-index: 1001;
@@ -202,8 +206,8 @@
 
 .user-menu-header {
   padding: 12px;
-  border-radius: 6px;
-  background-color: var(--bg-page);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-elevated);
 }
 
 .user-menu-name {
@@ -236,8 +240,8 @@
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 6px;
-  transition: all 0.2s;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s, color 0.2s;
   cursor: pointer;
   background: none;
   border: none;

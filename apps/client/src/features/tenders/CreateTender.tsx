@@ -329,11 +329,11 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                background: 'linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-primary) 100%)',
                 color: 'var(--text-inverse)',
                 border: 'none',
                 padding: '10px 16px',
-                borderRadius: '20px',
+                borderRadius: 'var(--radius-pill)',
                 cursor: 'pointer',
                 fontWeight: 'bold',
                 boxShadow: 'var(--shadow-sm)'
@@ -345,7 +345,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
 
           {/* תיבת הטקסט החכמה שנפתחת בלחיצה */}
           {isSmartOpen && (
-            <div className="smart-create-box" style={{ width: '100%', marginTop: '16px', padding: '16px', border: '1px solid var(--border-default)', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)' }}>
+            <div className="smart-create-box" style={{ width: '100%', marginTop: '16px', padding: '16px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)' }}>
               <label htmlFor="smartText" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>{t('tenders.smartCreateLabel')}</label>
               <textarea
                 id="smartText"
@@ -363,7 +363,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
                 style={{ marginTop: '12px' }}
               >
                 {isSmartLoading
-                  ? <AiThinkingLoader color="#ffffff" />
+                  ? <AiThinkingLoader color="var(--text-inverse)" />
                   : t('tenders.smartCreateGenerateBtn')
                 }
               </button>

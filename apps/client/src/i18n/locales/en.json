@@ -399,7 +399,8 @@
   },
   "notFound": {
     "seoTitle": "Page Not Found",
-    "message": "404 \u2013 Page not found"
+    "message": "404 \u2013 Page not found",
+    "backHome": "Back to home"
   },
   "landing": {
     "seoTitle": "Welcome",

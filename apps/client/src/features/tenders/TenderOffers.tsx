@@ -53,7 +53,7 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
       </header>
 
       {errorMessage && (
-        <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: '4px', marginBottom: '16px' }}>
+        <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', marginBottom: '16px' }}>
           {errorMessage}
         </div>
       )}
@@ -71,7 +71,7 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
                 style={{
                   padding: '12px',
                   border: isHighlighted ? '2px solid var(--color-info)' : '1px solid var(--border-default)',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--radius-sm)',
                   marginBottom: '10px',
                   backgroundColor: isHighlighted ? 'var(--color-info-bg)' : undefined,
                 }}
@@ -82,7 +82,7 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
                 {applicant.proposal && <p><strong>הצעה:</strong> {applicant.proposal}</p>}
                 {applicant.contactMethod && <p><strong>דרכי קשר:</strong> {applicant.contactMethod}</p>}
                 {applicant.professionalProfile && (
-                  <div style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-elevated)', borderRadius: '4px' }}>
+                  <div style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)' }}>
                     <p><strong>פרופיל מקצועי - {applicant.professionalProfile.name}</strong></p>
                     {applicant.professionalProfile.description && <p>{applicant.professionalProfile.description}</p>}
                     {applicant.professionalProfile.experience && (

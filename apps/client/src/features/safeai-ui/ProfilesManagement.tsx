@@ -259,12 +259,12 @@ export default function ProfilesManagement() {
                     </span>
                   </div>
                 )}
-                <div style={{ marginTop: "10px", padding: "10px", backgroundColor: "#f8f9fa", borderRadius: "5px" }}>
+                <div style={{ marginTop: "10px", padding: "10px", backgroundColor: "var(--bg-elevated)", borderRadius: "var(--radius-sm)" }}>
                   <strong style={{ display: "block", marginBottom: "5px" }}>📝 Prompts:</strong>
                   {profile.contentPrompts && profile.contentPrompts.length > 0 && (
                     <div style={{ marginBottom: "5px", fontSize: "13px" }}>
                       <strong>Content:</strong> {profile.contentPrompts.length} prompt(s)
-                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "#666" }}>
+                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "var(--text-muted)" }}>
                         {profile.contentPrompts.map((prompt, idx) => (
                           <div key={idx} style={{ marginBottom: "2px" }}>• {prompt.substring(0, 50)}{prompt.length > 50 ? '...' : ''}</div>
                         ))}
@@ -274,7 +274,7 @@ export default function ProfilesManagement() {
                   {profile.behaviorPrompts && profile.behaviorPrompts.length > 0 && (
                     <div style={{ marginBottom: "5px", fontSize: "13px" }}>
                       <strong>Behavior:</strong> {profile.behaviorPrompts.length} prompt(s)
-                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "#666" }}>
+                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "var(--text-muted)" }}>
                         {profile.behaviorPrompts.map((prompt, idx) => (
                           <div key={idx} style={{ marginBottom: "2px" }}>• {prompt.substring(0, 50)}{prompt.length > 50 ? '...' : ''}</div>
                         ))}
@@ -284,7 +284,7 @@ export default function ProfilesManagement() {
                   {profile.knowledgePrompts && profile.knowledgePrompts.length > 0 && (
                     <div style={{ fontSize: "13px" }}>
                       <strong>Knowledge:</strong> {profile.knowledgePrompts.length} prompt(s)
-                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "#666" }}>
+                      <div style={{ marginTop: "3px", paddingRight: "10px", fontSize: "12px", color: "var(--text-muted)" }}>
                         {profile.knowledgePrompts.map((prompt, idx) => (
                           <div key={idx} style={{ marginBottom: "2px" }}>• {prompt.substring(0, 50)}{prompt.length > 50 ? '...' : ''}</div>
                         ))}
@@ -294,7 +294,7 @@ export default function ProfilesManagement() {
                   {(!profile.contentPrompts || profile.contentPrompts.length === 0) &&
                    (!profile.behaviorPrompts || profile.behaviorPrompts.length === 0) &&
                    (!profile.knowledgePrompts || profile.knowledgePrompts.length === 0) && (
-                    <div style={{ fontSize: "12px", color: "#999" }}>{t("profilesManagement.noPromptsDefined")}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{t("profilesManagement.noPromptsDefined")}</div>
                   )}
                 </div>
               </div>

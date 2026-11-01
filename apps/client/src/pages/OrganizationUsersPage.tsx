@@ -587,8 +587,8 @@ export default function OrganizationUsersPage() {
                 <td>{user.name || "-"}</td>
                 <td>
                   <span style={{
-                    padding: "4px 8px",
-                    borderRadius: "4px",
+                    padding: "4px 10px",
+                    borderRadius: "var(--radius-pill)",
                     backgroundColor: user.role === "org_owner" ? "var(--color-success)" : "var(--color-info)",
                     color: "var(--text-inverse)",
                     fontSize: "12px"

@@ -163,7 +163,7 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
           <div style={{ 
             backgroundColor: "var(--color-info-bg)",
             border: "1px solid var(--color-info-border)",
-            borderRadius: "4px", 
+            borderRadius: "var(--radius-sm)", 
             padding: "15px", 
             marginBottom: "20px" 
           }}>
@@ -199,7 +199,7 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
                   key={key._id} 
                   style={{
                     border: "1px solid var(--border-default)",
-                    borderRadius: "8px",
+                    borderRadius: "var(--radius-sm)",
                     padding: "15px",
                     backgroundColor: key.isActive ? "var(--bg-surface)" : "var(--bg-elevated)",
                   }}

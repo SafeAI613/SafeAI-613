@@ -158,8 +158,8 @@ export default function AboutPage() {
                 x2="100%"
                 y2="100%"
               >
-                <stop offset="0%" stopColor="#1C7AA6" stopOpacity="1" />
-                <stop offset="100%" stopColor="#135471" stopOpacity="1" />
+                <stop offset="0%" stopColor="#2f5d8a" stopOpacity="1" />
+                <stop offset="100%" stopColor="#0b8466" stopOpacity="1" />
               </linearGradient>
 
               <filter
@@ -182,16 +182,16 @@ export default function AboutPage() {
               <path
                 d="M0 400 V100 C0 20, 280 20, 280 100 V400"
                 fill="none"
-                stroke="#999"
+                stroke="var(--gray-400)"
                 stroke-width="5"
               />
 
-              <g stroke="#bbb" stroke-width="2">
+              <g stroke="var(--gray-300)" stroke-width="2">
                 <line x1="40" y1="55" x2="40" y2="400" />
                 <line x1="100" y1="35" x2="100" y2="400" />
                 <line x1="180" y1="35" x2="180" y2="400" />
                 <line x1="240" y1="55" x2="240" y2="400" />
-                <path d="M2 150 H278 M2 280 H278" stroke="#ccc" />
+                <path d="M2 150 H278 M2 280 H278" stroke="var(--border-strong)" />
               </g>
 
               <g
@@ -206,9 +206,9 @@ export default function AboutPage() {
                   width="190"
                   height="30"
                   rx="4"
-                  fill="#666"
+                  fill="var(--text-muted)"
                 />
-                <text x="140" y="155" fill="#ff9999">
+                <text x="140" y="155" fill="var(--color-danger)">
                   api.openai.com
                 </text>
 
@@ -218,9 +218,9 @@ export default function AboutPage() {
                   width="190"
                   height="30"
                   rx="4"
-                  fill="#666"
+                  fill="var(--text-muted)"
                 />
-                <text x="140" y="240" fill="#ff9999">
+                <text x="140" y="240" fill="var(--color-danger)">
                   api.google.com
                 </text>
 
@@ -230,9 +230,9 @@ export default function AboutPage() {
                   width="190"
                   height="30"
                   rx="4"
-                  fill="#666"
+                  fill="var(--text-muted)"
                 />
-                <text x="140" y="325" fill="#ff9999">
+                <text x="140" y="325" fill="var(--color-danger)">
                   api.anthropic.com
                 </text>
               </g>
@@ -242,14 +242,14 @@ export default function AboutPage() {
               <path
                 d="M0 400 V100 C0 20, 280 20, 280 100 V400"
                 fill="none"
-                stroke="#999"
+                stroke="var(--gray-400)"
                 stroke-width="5"
               />
 
               <path
                 d="M280 100 C280 20, 450 60, 450 140 V420 L280 400"
-                fill="#fafafa"
-                stroke="#ccc"
+                fill="var(--bg-elevated)"
+                stroke="var(--border-strong)"
                 stroke-width="2"
               />
               <line
@@ -257,7 +257,7 @@ export default function AboutPage() {
                 y1="200"
                 x2="450"
                 y2="240"
-                stroke="#ddd"
+                stroke="var(--border-default)"
                 stroke-width="2"
               />
               <line
@@ -265,7 +265,7 @@ export default function AboutPage() {
                 y1="300"
                 x2="450"
                 y2="340"
-                stroke="#ddd"
+                stroke="var(--border-default)"
                 stroke-width="2"
               />
 
@@ -278,10 +278,10 @@ export default function AboutPage() {
                 <text
                   x="120"
                   y="112"
-                  font-family="'Segoe UI', Tahoma, sans-serif"
+                  font-family="inherit"
                   font-size="16"
                   font-weight="900"
-                  fill="var(--text-inverse)"
+                  fill="#ffffff"
                   text-anchor="middle"
                 >
                   https://safeai613.com/v1

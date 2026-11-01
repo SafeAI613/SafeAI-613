@@ -1,14 +1,18 @@
+/* Organization wallet / users / invoices pages — solid version of the site
+   design language (design-system tokens only, see docs/UI_STYLE_GUIDE.md). */
+
 .organization-page {
   text-align: start;
   padding: 20px;
-  font-family: Arial, sans-serif;
+  font-family: inherit;
   color: var(--text-primary);
 }
 
 .organization-page h1 {
   margin-bottom: 24px;
-  font-size: 32px;
-  letter-spacing: 0.04em;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .organization-grid {
@@ -21,15 +25,16 @@
 .organization-info-card,
 .wallet-card {
   padding: 20px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .organization-info-card h2 {
   margin: 0 0 12px 0;
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .organization-info-card p {
@@ -47,12 +52,25 @@
 
 .org-edit-button {
   padding: 6px 14px;
-  background-color: transparent;
-  color: var(--link-color);
-  border: 1px solid var(--link-color);
-  border-radius: 10px;
+  background-color: var(--bg-surface);
+  color: var(--brand-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  font-family: inherit;
   font-size: 14px;
+  font-weight: 600;
+  transition: border-color 0.2s var(--ease-out), background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+
+.org-edit-button:hover {
+  border-color: var(--brand-secondary);
+  background-color: var(--brand-secondary-soft);
+}
+
+.org-edit-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .org-edit-form {
@@ -63,8 +81,8 @@
 
 .org-edit-input {
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
   font-size: 14px;
   font-family: inherit;
 }
@@ -84,8 +102,8 @@
   overflow-y: auto;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 10px;
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
   z-index: 20;
 }
 
@@ -96,6 +114,7 @@
   cursor: pointer;
   text-align: start;
   direction: ltr;
+  transition: background-color 0.2s var(--ease-out);
 }
 
 .email-autocomplete-item:hover,
@@ -110,12 +129,16 @@
 
 .wallet-title {
   margin: 0 0 10px 0;
-  color: var(--link-color);
+  color: var(--brand-secondary);
   font-size: 20px;
+  font-weight: 700;
 }
 
 .wallet-balance {
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   margin: 10px 0;
 }
 
@@ -127,7 +150,7 @@
   background-color: var(--color-warning-bg);
   color: var(--color-warning);
   padding: 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-warning-border);
   font-size: 14px;
   margin: 18px 0;
@@ -141,21 +164,40 @@
 
 .topup-input {
   flex: 1;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border-strong);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
   font-size: 14px;
+}
+
+.topup-button,
+.retry-button {
+  padding: 10px 18px;
+  background-color: var(--brand-secondary);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  transition: background-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
 }
 
 .topup-button {
   min-width: 120px;
-  padding: 12px 18px;
-  background-color: var(--link-color);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
+}
+
+.topup-button:hover:not(:disabled),
+.retry-button:hover:not(:disabled) {
+  background-color: var(--brand-secondary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.topup-button:focus-visible,
+.retry-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .topup-button:disabled {
@@ -165,16 +207,26 @@
 
 .organization-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 20px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  font-size: 14px;
 }
 
 .organization-table th,
 .organization-table td {
   padding: 14px 12px;
-  border: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-muted);
   text-align: start;
   vertical-align: middle;
+}
+
+.organization-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .organization-table thead {
@@ -182,15 +234,18 @@
 }
 
 .organization-table th {
-  font-size: 14px;
-  color: var(--gray-600);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom-color: var(--border-default);
 }
 
 .organization-table tbody tr {
   background-color: var(--bg-surface);
+  transition: background-color 0.2s var(--ease-out);
 }
 
-.organization-table tbody tr:nth-child(odd) {
+.organization-table tbody tr:hover {
   background-color: var(--bg-elevated);
 }
 
@@ -201,9 +256,10 @@
 .status-pill {
   display: inline-block;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--text-inverse);
   font-size: 12px;
+  font-weight: 600;
   min-width: 80px;
   text-align: center;
 }
@@ -219,15 +275,6 @@
   margin-bottom: 16px;
 }
 
-.retry-button {
-  padding: 10px 18px;
-  background-color: var(--link-color);
-  color: var(--text-inverse);
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
 .org-profiles-list {
   list-style: none;
   margin: 0 0 16px 0;
@@ -238,7 +285,7 @@
 
 .org-profiles-list-item {
   padding: 8px 0;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-muted);
 }
 
 .org-profiles-list-item label {
@@ -261,55 +308,18 @@
   color: var(--color-success);
   margin-bottom: 16px;
 }
-  
-  .wallet-title {
-    margin: 0 0 10px 0;
-    color: var(--link-color);
+
+@media (prefers-reduced-motion: reduce) {
+  .org-edit-button,
+  .email-autocomplete-item,
+  .topup-button,
+  .retry-button,
+  .organization-table tbody tr {
+    transition: none;
   }
-  
-  .wallet-balance {
-    font-size: 24px;
-    margin: 10px 0;
+
+  .topup-button:hover:not(:disabled),
+  .retry-button:hover:not(:disabled) {
+    transform: none;
   }
-  
-  .wallet-balance-amount {
-    color: var(--color-success);
-  }
-  
-  .simulation-warning {
-    background-color: var(--color-warning-bg);
-    color: var(--color-warning);
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 13px;
-    margin: 15px 0;
-    border: 1px solid var(--color-warning-border);
-  }
-  
-  .topup-form {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .topup-input {
-    flex: 1;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border: 1px solid var(--border-strong);
-    font-size: 14px;
-  }
-  
-  .topup-button {
-    padding: 8px 16px;
-    background-color: var(--link-color);
-    color: var(--text-inverse);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
-  .topup-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
+}

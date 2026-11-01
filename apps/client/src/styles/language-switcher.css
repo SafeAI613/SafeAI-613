@@ -1,3 +1,6 @@
+/* Language switcher (components/LanguageSwitcher.tsx) — design-system
+   tokens only (see docs/UI_STYLE_GUIDE.md). */
+
 .language-switcher {
   position: relative;
   display: inline-block;
@@ -8,15 +11,25 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: transparent;
+  background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--text-primary);
+  font-family: inherit;
+  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
 }
 
 .language-switcher-trigger:hover {
-  background: var(--border-muted);
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
+
+.language-switcher-trigger:focus-visible {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .language-switcher-code {
@@ -26,13 +39,16 @@
 
 .language-switcher-arrow {
   color: var(--text-muted);
-  transition: transform 0.15s ease;
+  transition: transform 0.2s var(--ease-out);
 }
 
-.language-switcher:hover .language-switcher-arrow {
+.language-switcher:hover .language-switcher-arrow,
+.language-switcher:focus-within .language-switcher-arrow {
   transform: rotate(180deg);
 }
 
+/* Flag artwork: 2px keeps the flag's small-corner look at 22x16 — the
+   radius tokens (10px+) would turn it into a pill. */
 .flag-icon {
   border-radius: 2px;
   flex-shrink: 0;
@@ -41,23 +57,26 @@
 
 .language-switcher-menu {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   inset-inline-end: 0; /* opens toward the page in both RTL and LTR, never past the screen edge */
   min-width: 150px;
+  padding: 4px;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   z-index: 100;
 
   visibility: hidden;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out),
+    visibility 0.2s var(--ease-out);
 }
 
-.language-switcher:hover .language-switcher-menu {
+.language-switcher:hover .language-switcher-menu,
+.language-switcher:focus-within .language-switcher-menu {
   visibility: visible;
   opacity: 1;
   transform: translateY(0);
@@ -67,27 +86,44 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 9px 10px;
+  font-family: inherit;
   font-size: var(--font-sm);
   color: var(--text-primary);
   width: 100%;
   background: transparent;
   border: none;
+  border-radius: var(--radius-sm);
   text-align: start;
   cursor: pointer;
+  transition: background-color 0.2s var(--ease-out);
 }
 
 .language-switcher-item:hover {
-  background: var(--border-muted);
+  background: var(--bg-elevated);
+}
+
+.language-switcher-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .language-switcher-item-active {
-  background: var(--border-muted);
+  background: var(--brand-primary-soft);
   font-weight: 600;
   color: var(--text-primary);
   cursor: default;
 }
 
-[data-theme="dark"] .language-switcher-menu {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+.language-switcher-item-active:hover {
+  background: var(--brand-primary-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-switcher-trigger,
+  .language-switcher-arrow,
+  .language-switcher-menu,
+  .language-switcher-item {
+    transition: none;
+  }
 }

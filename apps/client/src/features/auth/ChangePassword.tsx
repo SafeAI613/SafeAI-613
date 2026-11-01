@@ -89,7 +89,7 @@ export default function ChangePassword() {
       <div className="auth-form-wrapper">
         <h2 className="auth-title">עדכון סיסמה נדרש</h2>
 
-        <p style={{ textAlign: "center", color: "#666", marginBottom: "25px" }}>
+        <p style={{ textAlign: "center", color: "var(--text-muted)", marginBottom: "25px" }}>
           הסיסמה שקיבלת היא זמנית — יש להחליף אותה לפני המשך השימוש
         </p>
 
@@ -122,7 +122,7 @@ export default function ChangePassword() {
               <div className="password-requirements">
                 <ul>
                   {passwordErrors.map((err, idx) => (
-                    <li key={idx} style={{ color: "#dc3545", fontSize: "12px" }}>
+                    <li key={idx} style={{ color: "var(--color-danger)", fontSize: "12px" }}>
                       {err}
                     </li>
                   ))}
