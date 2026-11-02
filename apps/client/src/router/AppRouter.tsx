@@ -47,9 +47,8 @@ import PlatformLayout from "../layout/PlatformLayout";
 import HubLayout from "../layout/HubLayout";
 import { ProtectedRoute, PublicRoute } from "./guards";
 import LegacyRedirect from "./LegacyRedirect";
-import { ROUTES, LEGACY_REDIRECTS } from "./paths";
+import { ROUTES, LEGACY_REDIRECTS, ROUTER_BASE } from "./paths";
 
-const ROUTER_BASE = import.meta.env.VITE_BASE_PATH?.replace(/\/$/, "") || "";
 
 export default function AppRouter() {
   return (
@@ -102,7 +101,16 @@ export default function AppRouter() {
           <Route path={ROUTES.hub.article} element={<ArticlePage />} />
           <Route path={ROUTES.hub.courses} element={<CoursesPage />} />
           <Route path={ROUTES.hub.guides} element={<RecommendedGuidesPage />} />
-          <Route path={ROUTES.hub.projects} element={<TenderBoardPage />} />
+          {/* The tender API requires auth (server tenderBoardRouter), so guests
+              go to login and come back here instead of seeing a load error. */}
+          <Route
+            path={ROUTES.hub.projects}
+            element={
+              <ProtectedRoute>
+                <TenderBoardPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path={ROUTES.hub.agents} element={<AgentsIndexPage />}>
             <Route index element={<AgentsMarketplace />} />
             <Route

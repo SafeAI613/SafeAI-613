@@ -12,6 +12,7 @@ import type {
   OrganizationUsageSummary,
   OrganizationUser,
 } from "../api/organizationApi";
+import { appUrl, ROUTES } from "../../../router/paths";
 
 interface OrganizationDetailProps {
   orgId: string;
@@ -32,7 +33,7 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
   const { locale } = useLocale();
 
   const handleDownloadExcel = () => {
-    const loginUrl = `${window.location.origin}/login`;
+    const loginUrl = `${window.location.origin}${appUrl(ROUTES.login)}`;
     const rows = createdMembers.map((m) => ({
       [t("orgUsers.tableHeaders.name")]: m.name,
       [t("orgUsers.tableHeaders.email")]: m.email,

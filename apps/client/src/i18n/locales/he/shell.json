@@ -4,6 +4,9 @@
       "home": "בית",
       "login": "התחברות",
       "tools": "הגדרות תצוגה",
+      "account": "החשבון שלי",
+      "changePassword": "שינוי סיסמה",
+      "logout": "התנתקות",
       "hub": {
         "news": "חדשות AI",
         "forum": "פורום",

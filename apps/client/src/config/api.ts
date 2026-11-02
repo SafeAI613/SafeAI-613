@@ -1,3 +1,5 @@
+import { appUrl, ROUTES } from "../router/paths";
+
 // API Configuration
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -17,6 +19,7 @@ export const API_ENDPOINTS = {
     googleLogin: `${API_BASE_URL}/auth/google`,
     googleCallback: `${API_BASE_URL}/auth/google/callback`,
     me: `${API_BASE_URL}/auth/me`,
+    logout: `${API_BASE_URL}/auth/logout`,
   },
   // Resource endpoints
   profiles: `${API_BASE_URL}/profiles`,
@@ -257,7 +260,7 @@ export async function apiCall<T>(
       localStorage.removeItem("user");
       localStorage.removeItem("userRole");
 
-      window.location.href = '/login';
+      window.location.href = appUrl(ROUTES.login);
     }
 
     const error = new Error(

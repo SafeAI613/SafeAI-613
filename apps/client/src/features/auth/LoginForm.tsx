@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { startActivityTracking } from "../../utils/tokenManager";
-import ProfileSelectionModal from "../../components/ProfileSelectionModal";
 import { AUTH_ERROR_CODE_KEYS } from "../../i18n/authErrorCodes";
 import { useAuth } from "../../context/authStore";
 import { ROUTES, safeNextPath } from "../../router/paths";
@@ -31,8 +30,6 @@ export default function LoginForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setUser } = useAuth();
@@ -85,13 +82,8 @@ export default function LoginForm() {
             // Start activity tracking for token management
             startActivityTracking();
 
-            // Check if user has a profile
-            if (!data.user.profileId) {
-              setLoggedInUser(data.user);
-              setShowProfileModal(true);
-            } else {
-              navigate(postLoginDestination);
-            }
+            // A missing filter profile is handled by ProfileGate inside ProtectedRoute
+            navigate(postLoginDestination);
           }
         })
         .catch((err) => {
@@ -129,12 +121,9 @@ export default function LoginForm() {
         if (response.user.mustChangePassword) {
           // Temporary password (e.g. issued when added to an organization) must be replaced first
           navigate(ROUTES.changePassword);
-        } else if (!response.user.profileId) {
-          // Show profile selection modal
-          setLoggedInUser(response.user);
-          setShowProfileModal(true);
         } else {
-          // Navigate to the requested destination (or the default dashboard)
+          // Navigate to the requested destination (or the default dashboard).
+          // A missing filter profile is handled by ProfileGate inside ProtectedRoute.
           navigate(postLoginDestination);
         }
       }
@@ -160,20 +149,8 @@ export default function LoginForm() {
     window.location.href = `${API_ENDPOINTS.auth.googleLogin}`;
   };
 
-  const handleProfileSelected = () => {
-    // Navigate to the requested destination after profile is selected
-    navigate(postLoginDestination);
-  };
-
   return (
     <>
-      <ProfileSelectionModal
-        isOpen={showProfileModal}
-        onClose={() => {}} // Don't allow closing without selecting
-        userId={loggedInUser?._id || ""}
-        onProfileSelected={handleProfileSelected}
-      />
-      
       <div className="auth-form-container">
       <div className={`auth-form-wrapper${flavor ? ` auth-flavor-${flavor}` : ""}`}>
         <h2 className="auth-title">
