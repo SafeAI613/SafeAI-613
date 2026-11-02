@@ -14,12 +14,13 @@
 
 import logger from "../logger";
 import {
+  BlockKind,
   buildBlockedAnthropicMessage,
   buildBlockedChatCompletion,
   buildBlockedResponsesApi,
   toSSEStream,
 } from "./blockedResponse";
-import { evaluateText } from "./input/evaluate";
+import { evaluateText, EvaluateResult } from "./input/evaluate";
 
 export type ProxyApi = "chat" | "responses" | "anthropic";
 
@@ -29,6 +30,8 @@ interface GuardInputArgs {
   model: string;
   api: ProxyApi;
   stream?: boolean;
+  /** נקרא עם תוצאת הסינון המלאה (לצורכי מעקב — RequestTrace). */
+  onEvaluated?: (result: EvaluateResult) => void;
 }
 
 /**
@@ -39,34 +42,36 @@ interface GuardInputArgs {
 export async function guardInput(
   args: GuardInputArgs,
 ): Promise<object | ReadableStream | null> {
-  const { profile, text, model, api, stream } = args;
+  const { profile, text, model, api, stream, onEvaluated } = args;
 
   const result = await evaluateText({
     profileId: profile?._id?.toString() ?? "",
     text,
   });
+  onEvaluated?.(result);
 
   if (result.allowed) {
     return null;
   }
 
   const reason = result.reason || "Unknown reason";
-  logger.info(
-    JSON.stringify({
-      event: "proxy.blocked",
-      api,
-      model,
-      reason,
-      blockedBy: result.blockedBy,
-    }),
-  );
+  const kind: BlockKind = result.errored ? "unavailable" : "policy";
+  const logLine = JSON.stringify({
+    event: result.errored ? "proxy.filter_error" : "proxy.blocked",
+    api,
+    model,
+    reason,
+    blockedBy: result.blockedBy,
+  });
+  if (result.errored) logger.error(logLine);
+  else logger.info(logLine);
 
   const payload =
     api === "anthropic"
-      ? buildBlockedAnthropicMessage(model, reason)
+      ? buildBlockedAnthropicMessage(model, reason, kind)
       : api === "responses"
-        ? buildBlockedResponsesApi(model, reason)
-        : buildBlockedChatCompletion(model, reason);
+        ? buildBlockedResponsesApi(model, reason, kind)
+        : buildBlockedChatCompletion(model, reason, kind);
 
   return stream ? toSSEStream(payload) : payload;
 }
