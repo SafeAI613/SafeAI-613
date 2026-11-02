@@ -52,7 +52,6 @@ export default function RegisterFormSuccess() {
             className="alert alert-warning"
             style={{
               background: "var(--color-warning-bg)",
-              border: "2px solid var(--color-warning-border)",
               borderRadius: "var(--radius-sm)",
               padding: "20px",
               marginBottom: "25px",
@@ -84,7 +83,6 @@ export default function RegisterFormSuccess() {
                     fontFamily: "monospace",
                     fontSize: "14px",
                     wordBreak: "break-all",
-                    border: "2px solid var(--color-warning-border)",
                     boxShadow: "var(--shadow-md)",
                   }}
                 >

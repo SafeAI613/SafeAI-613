@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ROUTES } from "../../router/paths";
+import { useLocale } from "../../i18n/useLocale";
 
 export default function ApiKeyDisplay() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
 
@@ -38,7 +40,7 @@ export default function ApiKeyDisplay() {
         `Key: ${proxyApiKey}\n\n`,
         `⚠️ IMPORTANT: Keep this key secure and never share it publicly.\n`,
         `This is the only time you will see this key.\n\n`,
-        `Generated: ${new Date().toLocaleString("he-IL")}\n`,
+        `Generated: ${new Date().toLocaleString(locale)}\n`,
       ],
       { type: "text/plain" },
     );
@@ -111,7 +113,6 @@ export default function ApiKeyDisplay() {
           className="alert alert-warning"
           style={{
             background: "var(--color-warning-bg)",
-            border: "2px solid var(--color-warning-border)",
             borderRadius: "var(--radius-sm)",
             padding: "20px",
             marginBottom: "25px",
@@ -122,7 +123,7 @@ export default function ApiKeyDisplay() {
           >
             ⚠️ {t("userApiKeys.importantTitle")}
           </h3>
-          <ul style={{ margin: 0, paddingRight: "20px", color: "var(--color-warning)" }}>
+          <ul style={{ margin: 0, paddingInlineStart: "20px", color: "var(--color-warning)" }}>
             <li>{t("userApiKeys.saveKeySafely")}</li>
             <li>
               <strong>{t("userApiKeys.lastChanceToSee")}</strong>

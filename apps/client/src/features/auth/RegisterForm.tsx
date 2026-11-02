@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { AUTH_ERROR_CODE_KEYS } from "../../i18n/authErrorCodes";
@@ -71,7 +71,7 @@ export default function RegisterForm() {
 
   const validateEmail = (email: string): string | null => {
     if (email.includes("+")) {
-      return 'לא ניתן להשתמש בתו "+" בכתובת המייל';
+      return t("register.emailPlusError");
     }
     return null;
   };
@@ -124,7 +124,7 @@ export default function RegisterForm() {
     }
 
     if (!agreedToPrivacyPolicy) {
-      setError("יש לאשר את מדיניות הפרטיות כדי להירשם");
+      setError(t("register.privacyRequired"));
       setLoading(false);
       return;
     }
@@ -329,10 +329,12 @@ export default function RegisterForm() {
                 }}
               />
               <span>
-                קראתי ואני מסכימ/ה ל{" "}
-                <Link to={ROUTES.privacy} target="_blank" rel="noopener noreferrer">
-                  מדיניות הפרטיות
-                </Link>
+                <Trans
+                  i18nKey="register.privacyConsent"
+                  components={{
+                    policy: <Link to={ROUTES.privacy} target="_blank" rel="noopener noreferrer" />,
+                  }}
+                />
               </span>
             </label>
           </div>

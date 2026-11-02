@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { useAuth } from "../../context/authStore";
 import { ROUTES } from "../../router/paths";
 
 export default function ChangePassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
   const [formData, setFormData] = useState({
@@ -19,16 +21,16 @@ export default function ChangePassword() {
   const validatePassword = (password: string): string[] => {
     const errors: string[] = [];
     if (password.length < 8) {
-      errors.push("הסיסמה חייבת להכיל לפחות 8 תווים");
+      errors.push(t("resetPassword.errorMinLength"));
     }
     if (!/[A-Z]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות אות גדולה אחת");
+      errors.push(t("resetPassword.errorUppercase"));
     }
     if (!/[a-z]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות אות קטנה אחת");
+      errors.push(t("resetPassword.errorLowercase"));
     }
     if (!/[0-9]/.test(password)) {
-      errors.push("הסיסמה חייבת להכיל לפחות ספרה אחת");
+      errors.push(t("resetPassword.errorDigit"));
     }
     return errors;
   };
@@ -47,7 +49,7 @@ export default function ChangePassword() {
     setPasswordErrors([]);
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError("הסיסמאות אינן תואמות");
+      setError(t("resetPassword.errorMatch"));
       setLoading(false);
       return;
     }
@@ -77,7 +79,7 @@ export default function ChangePassword() {
       navigate(user?.profileId ? ROUTES.home : ROUTES.login);
     } catch (err: unknown) {
       const errorMessage =
-        err instanceof Error ? err.message : "עדכון הסיסמה נכשל";
+        err instanceof Error ? err.message : t("changePassword.errorFallback");
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -87,15 +89,15 @@ export default function ChangePassword() {
   return (
     <div className="auth-form-container">
       <div className="auth-form-wrapper">
-        <h2 className="auth-title">עדכון סיסמה נדרש</h2>
+        <h2 className="auth-title">{t("changePassword.title")}</h2>
 
         <p style={{ textAlign: "center", color: "var(--text-muted)", marginBottom: "25px" }}>
-          הסיסמה שקיבלת היא זמנית — יש להחליף אותה לפני המשך השימוש
+          {t("changePassword.subtitle")}
         </p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="currentPassword">סיסמה זמנית *</label>
+            <label htmlFor="currentPassword">{t("changePassword.tempPasswordLabel")}</label>
             <input
               type="password"
               id="currentPassword"
@@ -108,7 +110,7 @@ export default function ChangePassword() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="newPassword">סיסמה חדשה *</label>
+            <label htmlFor="newPassword">{t("resetPassword.newPasswordLabel")}</label>
             <input
               type="password"
               id="newPassword"
@@ -132,7 +134,7 @@ export default function ChangePassword() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">אימות סיסמה *</label>
+            <label htmlFor="confirmPassword">{t("resetPassword.confirmPasswordLabel")}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -151,7 +153,7 @@ export default function ChangePassword() {
           )}
 
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? "מעדכן..." : "עדכן סיסמה"}
+            {loading ? t("changePassword.submitting") : t("changePassword.submit")}
           </button>
         </form>
       </div>

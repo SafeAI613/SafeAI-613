@@ -173,7 +173,7 @@ export default function AboutPage() {
                   dx="0"
                   dy="3"
                   stdDeviation="4"
-                  flood-opacity="0.2"
+                  floodOpacity="0.2"
                 />
               </filter>
             </defs>
@@ -183,10 +183,10 @@ export default function AboutPage() {
                 d="M0 400 V100 C0 20, 280 20, 280 100 V400"
                 fill="none"
                 stroke="var(--gray-400)"
-                stroke-width="5"
+                strokeWidth="5"
               />
 
-              <g stroke="var(--gray-300)" stroke-width="2">
+              <g stroke="var(--gray-300)" strokeWidth="2">
                 <line x1="40" y1="55" x2="40" y2="400" />
                 <line x1="100" y1="35" x2="100" y2="400" />
                 <line x1="180" y1="35" x2="180" y2="400" />
@@ -195,10 +195,10 @@ export default function AboutPage() {
               </g>
 
               <g
-                font-family="Arial"
-                font-size="14"
-                font-weight="bold"
-                text-anchor="middle"
+                fontFamily="Arial"
+                fontSize="14"
+                fontWeight="bold"
+                textAnchor="middle"
               >
                 <rect
                   x="45"
@@ -243,14 +243,14 @@ export default function AboutPage() {
                 d="M0 400 V100 C0 20, 280 20, 280 100 V400"
                 fill="none"
                 stroke="var(--gray-400)"
-                stroke-width="5"
+                strokeWidth="5"
               />
 
               <path
                 d="M280 100 C280 20, 450 60, 450 140 V420 L280 400"
                 fill="var(--bg-elevated)"
                 stroke="var(--border-strong)"
-                stroke-width="2"
+                strokeWidth="2"
               />
               <line
                 x1="280"
@@ -258,7 +258,7 @@ export default function AboutPage() {
                 x2="450"
                 y2="240"
                 stroke="var(--border-default)"
-                stroke-width="2"
+                strokeWidth="2"
               />
               <line
                 x1="280"
@@ -266,7 +266,7 @@ export default function AboutPage() {
                 x2="450"
                 y2="340"
                 stroke="var(--border-default)"
-                stroke-width="2"
+                strokeWidth="2"
               />
 
               <g transform="translate(20, 80)" filter="url(#softShadow)">
@@ -278,11 +278,11 @@ export default function AboutPage() {
                 <text
                   x="120"
                   y="112"
-                  font-family="inherit"
-                  font-size="16"
-                  font-weight="900"
+                  fontFamily="inherit"
+                  fontSize="16"
+                  fontWeight="900"
                   fill="#ffffff"
-                  text-anchor="middle"
+                  textAnchor="middle"
                 >
                   https://safeai613.com/v1
                 </text>
