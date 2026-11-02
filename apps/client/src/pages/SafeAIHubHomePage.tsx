@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/authStore";
+import { useLocale } from "../i18n/useLocale";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { ChatIcon, NewsIcon } from "../features/landing/icons";
 import FeedList, { type FeedItem } from "../features/dashboard/FeedList";
@@ -31,6 +33,8 @@ function truncate(text: string, maxLength: number): string {
 export default function SafeAIHubHomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
 
   const [postItems, setPostItems] = useState<FeedItem[]>([]);
   const [postsFailed, setPostsFailed] = useState(false);
@@ -48,7 +52,7 @@ export default function SafeAIHubHomePage() {
           (data.posts || []).slice(0, 3).map((post) => ({
             id: post._id,
             title: post.title,
-            meta: `${post.author?.name || "משתמש"} · ${new Date(post.createdAt).toLocaleDateString("he-IL")}`,
+            meta: `${post.author?.name || t("shell.feed.defaultAuthor")} · ${new Date(post.createdAt).toLocaleDateString(locale)}`,
             icon: <ChatIcon size={18} />,
             onClick: () => navigate(generatePath(ROUTES.hub.forumPost, { id: post._id })),
           })),
@@ -56,7 +60,7 @@ export default function SafeAIHubHomePage() {
       )
       .catch(() => setPostsFailed(true))
       .finally(() => setPostsLoading(false));
-  }, [navigate, user?.role]);
+  }, [navigate, user?.role, t, locale]);
 
   useEffect(() => {
     apiCall<NewsItem[]>(`${API_ENDPOINTS.news}?limit=3`)
@@ -65,7 +69,7 @@ export default function SafeAIHubHomePage() {
           items.map((item) => ({
             id: item._id,
             title: item.title,
-            meta: new Date(item.createdAt).toLocaleDateString("he-IL"),
+            meta: new Date(item.createdAt).toLocaleDateString(locale),
             description: truncate(item.content, 60),
             icon: <NewsIcon size={14} />,
             onClick: () => navigate(generatePath(ROUTES.hub.newsItem, { id: item._id })),
@@ -74,29 +78,31 @@ export default function SafeAIHubHomePage() {
       )
       .catch(() => setNewsFailed(true))
       .finally(() => setNewsLoading(false));
-  }, [navigate]);
+  }, [navigate, locale]);
 
   return (
     <>
       <span className="dash-eyebrow">SafeAI Hub</span>
-      <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
-      <p className="dash-subtitle">כל המשאבים למתכנתים במקום אחד — פורום, קורסים, מדריכים, פרויקטים וחדשות.</p>
+      <h1 className="dash-title">
+        {user?.name ? t("hubHome.greetingNamed", { name: user.name }) : t("hubHome.greeting")}
+      </h1>
+      <p className="dash-subtitle">{t("hubHome.subtitle")}</p>
 
       <div className="dash-feeds-lead">
         <FeedList
-          title="פוסטים אחרונים בפורום"
+          title={t("hubHome.postsTitle")}
           items={postItems}
           loading={postsLoading}
           failed={postsFailed}
-          emptyLabel="אין עדיין פוסטים בפורום."
+          emptyLabel={t("hubHome.postsEmpty")}
           variant="cards"
         />
         <FeedList
-          title="עדכונים"
+          title={t("hubHome.updatesTitle")}
           items={newsItems}
           loading={newsLoading}
           failed={newsFailed}
-          emptyLabel="אין עדכונים חדשים כרגע."
+          emptyLabel={t("hubHome.updatesEmpty")}
           variant="updates"
         />
       </div>

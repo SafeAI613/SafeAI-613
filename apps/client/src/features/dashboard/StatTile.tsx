@@ -1,4 +1,6 @@
+import { useTranslation } from "react-i18next";
 import Sparkline from "./Sparkline";
+import { useLocale } from "../../i18n/useLocale";
 
 interface StatTileProps {
   label: string;
@@ -17,19 +19,22 @@ interface StatTileProps {
 // they all reveal together, instead of popping in one at a time as each
 // request happens to resolve.
 export default function StatTile({ label, value, loading, failed, trend }: StatTileProps) {
+  const { t } = useTranslation();
+  const { locale } = useLocale();
+
   if (loading) {
     return (
       <div className="dash-stat-tile">
         <div className="dash-stat-skeleton-value" aria-hidden="true" />
         <div className="dash-stat-skeleton-label" aria-hidden="true" />
-        <span className="lv2-sr-only">{`טוען ${label}…`}</span>
+        <span className="lv2-sr-only">{t("shell.statTile.loading", { label })}</span>
       </div>
     );
   }
 
   return (
     <div className="dash-stat-tile">
-      <div className="dash-stat-value">{failed || value === null ? "—" : value.toLocaleString("he-IL")}</div>
+      <div className="dash-stat-value">{failed || value === null ? "—" : value.toLocaleString(locale)}</div>
       <div className="dash-stat-label">{label}</div>
       {!failed && trend && <Sparkline values={trend} />}
     </div>

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import i18n from "../i18n";
 
 const isDisplayMediaSupported = () =>
   typeof navigator !== "undefined" && !!navigator.mediaDevices?.getDisplayMedia;
@@ -44,11 +45,11 @@ const grabFrame = (stream: MediaStream): Promise<File> =>
     // should take milliseconds, never seconds. If it doesn't fire at all,
     // fail loudly instead of hanging silently like before.
     const timeoutId = setTimeout(() => {
-      finish(() => reject(new Error("צילום המסך נכשל (הזמן המוקצב תם)")));
+      finish(() => reject(new Error(i18n.t("shell.errors.screenCaptureTimeout"))));
     }, GRAB_FRAME_TIMEOUT_MS);
 
     video.onerror = () => {
-      finish(() => reject(new Error("שגיאה בטעינת המסך המשותף")));
+      finish(() => reject(new Error(i18n.t("shell.errors.screenCaptureLoad"))));
     };
 
     video.onloadedmetadata = () => {
@@ -58,13 +59,13 @@ const grabFrame = (stream: MediaStream): Promise<File> =>
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          finish(() => reject(new Error("לא ניתן ליצור canvas לצילום המסך")));
+          finish(() => reject(new Error(i18n.t("shell.errors.screenCaptureCanvas"))));
           return;
         }
         ctx.drawImage(video, 0, 0);
         canvas.toBlob((blob) => {
           if (!blob) {
-            finish(() => reject(new Error("נכשלה יצירת קובץ הצילום")));
+            finish(() => reject(new Error(i18n.t("shell.errors.screenCaptureFile"))));
             return;
           }
           finish(() => resolve(new File([blob], `screenshot-${Date.now()}.png`, { type: "image/png" })));

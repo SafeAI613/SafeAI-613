@@ -2,8 +2,9 @@
    (SCRUM-228 / SCRUM-229), inspired by a reference API-platform dashboard:
    a fixed sidebar plus a main column with a get-started checklist, quick
    stat tiles, and a recent-activity feed. Reuses the --lv2-* tokens from
-   landing-page-v2.css. In DOM order the sidebar comes first, which under
-   dir="rtl" places it on the right, matching the rest of the Hebrew UI. */
+   landing-page-v2.css. In DOM order the sidebar comes first, so it sits on
+   the inline-start side: on the right in Hebrew (RTL), on the left in
+   English (LTR). Every side-specific rule below uses logical properties. */
 
 .dash-page {
   display: grid;
@@ -13,6 +14,13 @@
   margin: 0;
   padding: 0;
   align-items: start;
+
+  /* Sign of "forward" on the x axis (-1 in RTL, +1 in LTR) for hover nudges. */
+  --dash-forward: -1;
+}
+
+.dash-page[dir="ltr"] {
+  --dash-forward: 1;
 }
 
 .dash-sidebar {
@@ -22,7 +30,7 @@
   position: sticky;
   top: 0;
   padding: 28px 20px;
-  border-left: 1px solid var(--lv2-line);
+  border-inline-end: 1px solid var(--lv2-line); /* divider between sidebar and content */
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -48,6 +56,8 @@
 
 .dash-sidebar-tools {
   display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 12px 0;
 }
 
@@ -58,7 +68,7 @@
   border: none;
   background: none;
   width: 100%;
-  text-align: right;
+  text-align: start;
   padding: 9px 12px;
   border-radius: var(--radius-sm);
   font-family: inherit;
@@ -134,11 +144,15 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid var(--lv2-line);
-  background: linear-gradient(135deg, var(--lv2-accent-soft), transparent 65%);
+  background: linear-gradient(135deg, var(--lv2-accent-soft), transparent 65%), var(--lv2-surface);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md);
   padding: 8px;
   margin-bottom: 32px;
+}
+
+.dash-page[dir="ltr"] .dash-getstarted-card {
+  background: linear-gradient(225deg, var(--lv2-accent-soft), transparent 65%), var(--lv2-surface);
 }
 
 .dash-getstarted-step {
@@ -148,7 +162,7 @@
   border: none;
   background: none;
   width: 100%;
-  text-align: right;
+  text-align: start;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -157,7 +171,7 @@
 }
 
 .dash-getstarted-step:hover {
-  background: var(--lv2-surface);
+  background: var(--bg-elevated);
 }
 
 .dash-getstarted-marker {
@@ -165,8 +179,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--lv2-surface);
-  border: 2px solid var(--lv2-line);
+  background: var(--bg-elevated);
   color: var(--lv2-muted);
   display: flex;
   align-items: center;
@@ -177,7 +190,6 @@
 
 .dash-getstarted-step-done .dash-getstarted-marker {
   background: var(--lv2-accent);
-  border-color: var(--lv2-accent);
   color: var(--text-inverse);
 }
 
@@ -212,8 +224,8 @@
 }
 
 .dash-stat-tile {
-  border: 1px solid var(--lv2-line);
   background: var(--lv2-surface);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md);
   padding: 18px 20px;
 }
@@ -311,17 +323,14 @@
   flex-direction: column;
   gap: 3px;
   width: 100%;
-  text-align: right;
-  border: 1px solid var(--lv2-line);
+  text-align: start;
+  border: none;
   background: var(--lv2-surface);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-family: inherit;
   cursor: pointer;
-}
-
-.dash-feed-item:hover {
-  border-color: var(--lv2-accent);
 }
 
 .dash-feed-item-title {
@@ -355,17 +364,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border: 1px solid var(--lv2-line);
+  border: none;
   background: var(--lv2-surface);
+  box-shadow: var(--shadow-card);
   border-radius: var(--radius-md);
   padding: 16px;
-  text-align: right;
+  text-align: start;
   cursor: pointer;
   font-family: inherit;
-}
-
-.dash-card:hover {
-  border-color: var(--lv2-accent);
 }
 
 .dash-card-icon {
@@ -401,7 +407,7 @@
   display: flex;
   gap: 10px;
   width: 100%;
-  text-align: right;
+  text-align: start;
   background: none;
   border: none;
   padding: 0;
@@ -461,7 +467,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     min-height: auto;
-    border-left: none;
+    border-inline-end: none;
     border-bottom: 1px solid var(--lv2-line);
     padding: 16px 20px;
   }
@@ -503,14 +509,14 @@
 }
 
 .dash-sidebar-item:hover > svg {
-  transform: translateX(-3px);
+  transform: translateX(calc(3px * var(--dash-forward)));
 }
 
 .dash-stat-tile,
 .dash-getstarted-card,
 .dash-feed-item,
 .dash-card {
-  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
 
 .dash-stat-tile:hover,
@@ -561,5 +567,32 @@
   .dash-feed-item:hover,
   .dash-card:hover {
     transform: none;
+  }
+}
+
+/* ---------- Language switcher in the sidebar ----------
+   The sidebar hugs the screen's inline-start edge, so the menu opens toward
+   the content (anchored to the switcher's inline-start edge) and upward,
+   since the tools row sits at the bottom of the navigation. On narrow
+   screens the sidebar stacks above the content, so the menu drops down
+   (still opening toward the inline-end side, away from the screen edge). */
+.dash-sidebar .language-switcher-sidebar .language-switcher-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  transform: translateY(4px);
+}
+
+.dash-sidebar .language-switcher-sidebar:hover .language-switcher-menu,
+.dash-sidebar .language-switcher-sidebar:focus-within .language-switcher-menu {
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .dash-sidebar .language-switcher-sidebar .language-switcher-menu {
+    top: calc(100% + 6px);
+    bottom: auto;
+    transform: translateY(-4px);
   }
 }

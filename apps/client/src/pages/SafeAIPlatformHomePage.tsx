@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/authStore";
+import { useLocale } from "../i18n/useLocale";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import ChecklistStep from "../features/dashboard/ChecklistStep";
 import StatTile from "../features/dashboard/StatTile";
@@ -48,6 +50,8 @@ function buildLast7DaySeries(daily: DailyUsage[], key: "requests" | "tokens"): n
 export default function SafeAIPlatformHomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
 
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [usageFailed, setUsageFailed] = useState(false);
@@ -103,34 +107,36 @@ export default function SafeAIPlatformHomePage() {
           items.map((item) => ({
             id: item._id,
             title: item.title,
-            meta: new Date(item.createdAt).toLocaleDateString("he-IL"),
+            meta: new Date(item.createdAt).toLocaleDateString(locale),
             onClick: () => navigate(generatePath(ROUTES.hub.newsItem, { id: item._id })),
           })),
         ),
       )
       .catch(() => setNewsFailed(true))
       .finally(() => setNewsLoading(false));
-  }, [navigate]);
+  }, [navigate, locale]);
 
   return (
     <>
       <span className="dash-eyebrow">SafeAI Platform</span>
-      <h1 className="dash-title">שלום{user?.name ? `, ${user.name}` : ""}</h1>
-      <p className="dash-subtitle">כל מה שצריך לניהול השימוש שלך ב-SafeAI API Platform במקום אחד.</p>
+      <h1 className="dash-title">
+        {user?.name ? t("platformHome.greetingNamed", { name: user.name }) : t("platformHome.greeting")}
+      </h1>
+      <p className="dash-subtitle">{t("platformHome.subtitle")}</p>
 
-      <h2 className="dash-section-title">בואו נתחיל</h2>
+      <h2 className="dash-section-title">{t("platformHome.getStarted")}</h2>
       <div className="dash-getstarted-card">
         <ChecklistStep
           step={1}
-          label="צור מפתח API"
-          description="נדרש כדי לבצע קריאות ל-API"
+          label={t("platformHome.createKey")}
+          description={t("platformHome.createKeyDesc")}
           done={!keysLoading && !!activeKeysCount}
           path={`${ROUTES.platform.account}/api-keys`}
         />
         <ChecklistStep
           step={2}
-          label="בצע קריאה ראשונה"
-          description="לפי המדריך בתיעוד"
+          label={t("platformHome.firstCall")}
+          description={t("platformHome.firstCallDesc")}
           done={!usageLoading && !!usage?.totalRequests}
           path={ROUTES.hub.articles}
         />
@@ -138,24 +144,35 @@ export default function SafeAIPlatformHomePage() {
 
       <div className="dash-stats-row">
         <StatTile
-          label="בקשות (7 ימים אחרונים)"
+          label={t("platformHome.requests7d")}
           value={usage?.totalRequests ?? null}
           loading={statsRowLoading}
           failed={usageFailed}
           trend={requestsTrend}
         />
         <StatTile
-          label="טוקנים בשימוש"
+          label={t("platformHome.tokensUsed")}
           value={usage?.totalTokens ?? null}
           loading={statsRowLoading}
           failed={usageFailed}
           trend={tokensTrend}
         />
-        <StatTile label="מפתחות API פעילים" value={activeKeysCount} loading={statsRowLoading} failed={keysFailed} />
+        <StatTile
+          label={t("platformHome.activeKeys")}
+          value={activeKeysCount}
+          loading={statsRowLoading}
+          failed={keysFailed}
+        />
       </div>
 
       <div className="dash-feeds">
-        <FeedList title="עדכונים אחרונים" items={newsItems} loading={newsLoading} failed={newsFailed} emptyLabel="אין עדכונים חדשים כרגע." />
+        <FeedList
+          title={t("platformHome.recentUpdates")}
+          items={newsItems}
+          loading={newsLoading}
+          failed={newsFailed}
+          emptyLabel={t("platformHome.updatesEmpty")}
+        />
       </div>
     </>
   );
