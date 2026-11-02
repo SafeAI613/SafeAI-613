@@ -55,7 +55,7 @@ export async function getAdminStats(req: Request, res: Response) {
       // Evaluation logs (blocked requests)
       EvaluationLog.countDocuments({
         createdAt: { $gte: startDate },
-        llmFinalDecision: "BLOCK",
+        llmFinalDecision: "blocked",
       }),
       
       // Total users
@@ -138,7 +138,7 @@ export async function getAdminDailyStats(req: Request, res: Response) {
       {
         $match: {
           createdAt: { $gte: startDate },
-          llmFinalDecision: "BLOCK",
+          llmFinalDecision: "blocked",
         },
       },
       {

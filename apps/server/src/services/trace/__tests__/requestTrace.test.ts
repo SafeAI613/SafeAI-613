@@ -11,31 +11,15 @@ jest.mock("../../../logger", () => ({
 }));
 
 import { RequestTrace, MAX_CONTENT_CHARS } from "../requestTrace";
-import type { EvaluateResult } from "../../../workflows/input/evaluate";
+import type { FilterResult } from "../../filter/inputFilter";
 
 const user = { _id: "507f1f77bcf86cd799439011", profileId: "507f1f77bcf86cd799439012" };
 const newTrace = (stream = false) =>
   new RequestTrace({ api: "chat", user, body: { model: "foo-model", stream } });
 
-const allowed: EvaluateResult = {
-  allowed: true,
-  reason: "allowed-by-llm",
-  trace: [
-    {
-      node: "llm-decision",
-      status: "allow",
-      durationMs: 1,
-      metadata: { judgeReason: "foo", judgeModel: "bar", latencyMs: 5 },
-    },
-  ],
-};
-const blocked: EvaluateResult = { ...allowed, allowed: false, reason: "blocked-by-llm" };
-const errored: EvaluateResult = {
-  allowed: false,
-  errored: true,
-  reason: "error-in-llm-decision",
-  trace: [{ node: "llm-decision", status: "error", reason: "timeout", durationMs: 1, metadata: {} }],
-};
+const allowed: FilterResult = { verdict: "allowed", reason: "foo", judgeModel: "bar", latencyMs: 5 };
+const blocked: FilterResult = { ...allowed, verdict: "blocked" };
+const errored: FilterResult = { verdict: "error", error: "timeout", judgeModel: "bar", latencyMs: 5 };
 
 function savedRecord() {
   expect(mockCreate).toHaveBeenCalledTimes(1);
@@ -62,7 +46,7 @@ describe("RequestTrace", () => {
       question: "lorem",
       answer: "ipsum",
       providerResponseId: "resp-1",
-      filter: { verdict: "allowed", reason: "allowed-by-llm", judgeReason: "foo", judgeModel: "bar", latencyMs: 5 },
+      filter: { verdict: "allowed", judgeReason: "foo", judgeModel: "bar", latencyMs: 5 },
     });
   });
 

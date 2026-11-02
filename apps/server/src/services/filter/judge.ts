@@ -1,5 +1,5 @@
 /**
- * server/src/services/llmService.ts
+ * server/src/services/filter/judge.ts
  *
  * LLM-as-a-judge: מחליט האם טקסט מותר לפי פרופיל.
  *
@@ -13,9 +13,9 @@
  *    בערך ברירת המחדל ומחזירים 400 על temperature: 0.
  */
 
-import logger from "../logger";
-import { buildFilterPrompt } from "./promptBuilder";
-import { openai } from "../config/openai";
+import logger from "../../logger";
+import { buildFilterPrompt } from "../promptBuilder";
+import { openai } from "../../config/openai";
 
 const DEFAULT_JUDGE_MODEL = "gpt-5.4-nano";
 const JUDGE_TIMEOUT_MS = 15_000;

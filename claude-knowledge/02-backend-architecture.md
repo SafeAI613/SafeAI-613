@@ -50,6 +50,6 @@ route → controller → service → repository → model (Mongoose) → MongoDB
 - `errorHandler.ts` — מטפל שגיאות מרכזי (בסוף ה-stack).
 
 ## נתיב ה-proxy (`/v1`) בקצרה
-`openaiRouter` → `proxyAuth` → `proxyService` → `guardInput` (סינון) → אם מאושר: העברה ל-LiteLLM → `usageTracker` רושם שימוש/עלות. אם נחסם: מוחזרת **תשובת דמה** בפורמט ה-API המתאים (chat / responses / anthropic), כולל תמיכה ב-streaming (SSE). ראה [05-safety-filter-engine.md].
+`openaiRouter` → `proxyAuth` → `proxyService` → `filterInput` (סינון, `services/filter/`) → אם מאושר: העברה ל-LiteLLM → `usageTracker` רושם שימוש/עלות. אם נחסם: מוחזרת **תשובת דמה** בפורמט ה-API המתאים (chat / responses / anthropic), כולל תמיכה ב-streaming (SSE). ראה [05-safety-filter-engine.md].
 
 תמיכה במספר פורמטי API: OpenAI Chat Completions, OpenAI Responses API, ו-Anthropic Messages (דרך `anthropicAdapter.ts`).

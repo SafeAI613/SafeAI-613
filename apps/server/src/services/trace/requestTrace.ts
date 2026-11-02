@@ -26,7 +26,7 @@ import {
   TraceStage,
 } from "../../models/requestLog";
 import { createRequestLog } from "../../repositories/requestLogRepository";
-import type { EvaluateResult } from "../../workflows/input/evaluate";
+import type { FilterResult } from "../filter/inputFilter";
 import { ExtractedAnswer, SSEAnswerCollector } from "./answerExtractor";
 
 /** אורך מקסימלי לשאלה / לתשובה שנשמרות. */
@@ -49,19 +49,15 @@ function toObjectId(value: unknown): mongoose.Types.ObjectId | undefined {
     : undefined;
 }
 
-/** מתרגם את תוצאת ה-input workflow לשדות הסינון שנשמרים. */
-function toFilterRecord(result: EvaluateResult): RequestLogFilter {
-  const last = result.trace?.[result.trace.length - 1];
-  const meta = (last?.metadata ?? {}) as Record<string, unknown>;
-
+/** מתרגם את תוצאת הסינון לשדות שנשמרים. */
+function toFilterRecord(result: FilterResult): RequestLogFilter {
   const record: RequestLogFilter = {
-    verdict: result.errored ? "error" : result.allowed ? "allowed" : "blocked",
-    reason: result.reason,
+    verdict: result.verdict,
+    judgeModel: result.judgeModel,
+    latencyMs: result.latencyMs,
   };
-  if (typeof meta.judgeReason === "string") record.judgeReason = meta.judgeReason;
-  if (typeof meta.judgeModel === "string") record.judgeModel = meta.judgeModel;
-  if (typeof meta.latencyMs === "number") record.latencyMs = meta.latencyMs;
-  if (result.errored && last?.reason) record.error = last.reason;
+  if (result.verdict === "error") record.error = result.error;
+  else record.judgeReason = result.reason;
   return record;
 }
 
@@ -97,7 +93,7 @@ export class RequestTrace {
   }
 
   /** evaluation === null → לא היה טקסט משתמש לבדוק. */
-  recordFilter(text: string, evaluation: EvaluateResult | null): void {
+  recordFilter(text: string, evaluation: FilterResult | null): void {
     if (text && shouldStoreContent()) this.data.question = truncate(text);
     this.data.filter = evaluation ? toFilterRecord(evaluation) : { verdict: "skipped" };
   }
