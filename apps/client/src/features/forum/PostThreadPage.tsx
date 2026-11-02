@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, generatePath, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Trans, useTranslation } from 'react-i18next';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
@@ -20,6 +21,8 @@ import {
 } from './api';
 import { validateFileForUpload } from './uploadValidation';
 import type { Post, Comment } from './types';
+import { formatForumDate } from './formatForumDate';
+import { useLocale } from '../../i18n/useLocale';
 import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
@@ -39,6 +42,8 @@ export const PostThreadPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
+  const { dir, language } = useLocale();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +71,7 @@ export const PostThreadPage: React.FC = () => {
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({
-        placeholder: 'כתוב תגובה...',
+        placeholder: t('forum.thread.editorPlaceholder'),
         emptyEditorClass: 'is-editor-empty',
       }),
     ],
@@ -155,7 +160,7 @@ export const PostThreadPage: React.FC = () => {
   }, [id, location.search]);
 
   const handleDeleteComment = async (commentId: string) => {
-    if (!window.confirm('האם את בטוחה שברצונך למחוק תגובה זו לצמיתות?')) return;
+    if (!window.confirm(t('forum.thread.confirmDelete'))) return;
 
     try {
       const response = await deleteComment(commentId, currentUser?._id);
@@ -164,11 +169,11 @@ export const PostThreadPage: React.FC = () => {
         setComments((prev) => prev.filter((comment) => comment._id !== commentId));
       } else {
         const errData = await response.json();
-        showAlert(errData.message || 'שגיאה במחיקת התגובה', { type: 'error' });
+        showAlert(errData.message || t('forum.thread.deleteFailed'), { type: 'error' });
       }
     } catch (err) {
       console.error('Error deleting comment:', err);
-      showAlert('שגיאה בתקשורת עם השרת', { type: 'error' });
+      showAlert(t('forum.errors.network'), { type: 'error' });
     }
   };
 
@@ -191,18 +196,18 @@ export const PostThreadPage: React.FC = () => {
 
         if (!urlResponse.ok) {
           const errData = await urlResponse.json().catch(() => null);
-          throw new Error(errData?.error || 'נכשלה קבלת קישור מאובטח לתגובה');
+          throw new Error(errData?.error || t('forum.thread.uploadUrlFailed'));
         }
         const { url, fields, fileUrl } = await urlResponse.json();
 
         const awsResponse = await uploadFileViaPresignedPost(url, fields, selectedFile);
 
-        if (!awsResponse.ok) throw new Error('העלאת קובץ התגובה ל-S3 נכשלה');
+        if (!awsResponse.ok) throw new Error(t('forum.thread.s3Failed'));
         finalFileUrl = fileUrl;
 
       } catch (error) {
         console.error('Error uploading comment file to S3:', error);
-        showAlert('נכשלה העלאת הקובץ המצורף לתגובה. אנו נסה שוב.', { type: 'error' });
+        showAlert(t('forum.thread.uploadFailed'), { type: 'error' });
         setCommentLoading(false);
         return;
       }
@@ -226,7 +231,7 @@ export const PostThreadPage: React.FC = () => {
         navigate(ROUTES.hub.forum);
       } else {
         const errData = await response.json();
-        showAlert(`שגיאת שרת: ${errData.message || 'לא ניתן לשמור תגובה'}`, { type: 'error' });
+        showAlert(t('forum.thread.serverError', { message: errData.message || t('forum.thread.saveFailed') }), { type: 'error' });
       }
     } catch (err) {
       console.error('Error submitting comment:', err);
@@ -268,72 +273,12 @@ export const PostThreadPage: React.FC = () => {
     }
   };
 
-  const convertToGematriaPipe = (num: number): string => {
-    if (num === 15) return 'טו"';
-    if (num === 16) return 'טז"';
-    const hundreds = ['', 'ק', 'ר', 'ש', 'ת'];
-    const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
-    const units = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
-    let result = '';
-    const h = Math.floor((num % 1000) / 100);
-    const t = Math.floor((num % 100) / 10);
-    const u = num % 10;
-    if (h > 0) result += hundreds[h] || '';
-    if (t > 0) result += tens[t] || '';
-    if (u > 0) result += units[u] || '';
-    if (result.length === 1) {
-      return `${result}'`;
-    } else if (result.length > 1) {
-      return `${result.slice(0, -1)}"${result.slice(-1)}`;
-    }
-    return result;
-  };
-
-  const formatForumDate = (dateInput: string | Date | number): string => {
-    const now = new Date();
-    const date = new Date(dateInput);
-    if (isNaN(date.getTime())) return '';
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const timeString = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-    if (diffInMinutes < 60 && diffInMinutes >= 0) {
-      return diffInMinutes === 0 ? 'עכשיו' : `לפני ${diffInMinutes} דקות`;
-    } 
-    if (compareDate.getTime() === today.getTime()) return `היום ב-${timeString}`;
-    if (compareDate.getTime() === yesterday.getTime()) return `אתמול ב-${timeString}`;
-
-    const isCurrentYear = date.getFullYear() === now.getFullYear();
-    const monthFormatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' });
-    const monthName = monthFormatter.format(date).replace(/[֑-ׇ]/g, "");
-    const dayLetters = convertToGematriaPipe(date.getDate());
-    let hebrewDate = `${dayLetters} ב${monthName}`;
-
-    if (!isCurrentYear) {
-      const jewishYearFormatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' });
-      const yearParts = jewishYearFormatter.format(date).split(' ');
-      let yearLetters = yearParts[yearParts.length - 1];
-      if (yearLetters.startsWith('ה')) yearLetters = yearLetters.substring(1);
-      hebrewDate += ` ${yearLetters}`;
-    }
-
-    const gregoreanDate = date.toLocaleDateString('he-IL', {
-      day: 'numeric',
-      month: 'numeric',
-      year: isCurrentYear ? undefined : 'numeric'
-    });
-    return `${hebrewDate} / ${gregoreanDate}`;
-  };
-const renderFileAttachment = (fileUrl: string, index: number) => {
+  const renderFileAttachment = (fileUrl: string, index: number) => {
     if (!fileUrl) return null;
     
     // 1. פיענוח תווים מיוחדים בעברית (הופך %D7%A5 וכדומה לאותיות אמיתיות)
     const cleanPath = decodeURIComponent(fileUrl.split('?')[0]);
-    let fileName = cleanPath.split('/').pop() || 'קובץ מצורף';
+    let fileName = cleanPath.split('/').pop() || t('forum.thread.attachment.defaultName');
     const fileExtension = fileName.split('.').pop()?.toLowerCase() || '';
 
     // 2. חילוץ השם המקורי בצורה בטוחה: 
@@ -353,7 +298,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
 
     // 3. הגנה חיונית: אם החיתוך השתבש והשאיר שם ריק או רק את הסיומת, נחזיר את השם המקורי לפני החיתוך
     if (!fileName || fileName.startsWith('.') || fileName === fileExtension) {
-      fileName = cleanPath.split('/').pop() || 'קובץ מצורף';
+      fileName = cleanPath.split('/').pop() || t('forum.thread.attachment.defaultName');
     }
 
     // 4. הגבלת אורך תצוגה אסתטית (למשל: document...docx)
@@ -369,10 +314,10 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
         <div
           key={index}
           onClick={() => window.open(fileUrl, '_blank')}
-          title="לחצי להגדלת התמונה"
+          title={t('forum.thread.attachment.enlarge')}
           className="forum-attachment-image"
         >
-          <img src={fileUrl} alt="תצוגה מקדימה" className="forum-attachment-image-img" />
+          <img src={fileUrl} alt={t('forum.thread.attachment.preview')} className="forum-attachment-image-img" />
         </div>
       );
     }
@@ -411,7 +356,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           >
             {fileName}
           </span>
-          <span className="forum-attachment-filetype">קובץ {fileExtension}</span>
+          <span className="forum-attachment-filetype">{t('forum.thread.attachment.fileType', { ext: fileExtension })}</span>
         </div>
 
         <a
@@ -422,16 +367,14 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           className="forum-attachment-download"
         >
           <i className="fa-solid fa-download"></i>
-          הורדה
+          {t('forum.thread.attachment.download')}
         </a>
       </div>
     );
   };
 
-  if (loading) return <div className="forum-thread-loading">טוען שרשור...</div>;
-
-  if (loading) return <div className="forum-thread-loading">טוען שרשור...</div>;
-  if (!post) return <div className="forum-thread-not-found">הפוסט לא נמצא.</div>;
+  if (loading) return <div className="forum-thread-loading" dir={dir}>{t('forum.thread.loading')}</div>;
+  if (!post) return <div className="forum-thread-not-found" dir={dir}>{t('forum.thread.notFound')}</div>;
 
   const firstImageAttachment = post.attachments?.find((url) =>
     ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
@@ -443,7 +386,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
     .join(', ');
 
   return (
-    <div className="forum-thread-page">
+    <div className="forum-thread-page" dir={dir}>
       <SEO
         title={post.title}
         description={buildMetaDescription(post.content)}
@@ -457,7 +400,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
         onClick={() => navigate(ROUTES.hub.forum)}
         className="forum-back-btn"
       >
-        ← חזרה לפורום
+        {t('forum.thread.back')}
       </button>
 
       <div className="forum-post-card">
@@ -466,7 +409,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
             {post.author?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
           <span className="forum-post-author-name">
-            {post.author?.name || 'משתמש מערכת'}
+            {post.author?.name || t('forum.thread.systemUser')}
           </span>
         </div>
 
@@ -474,10 +417,10 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           <div>
             <div className="forum-post-meta-row">
               <span className="forum-post-meta-text">
-                {formatForumDate(post.createdAt)}
+                {formatForumDate(post.createdAt, t, language)}
               </span>
               <span className="forum-post-meta-text">
-                👁 צפיות: {post.viewsCount}
+                {t('forum.thread.views', { views: post.viewsCount })}
               </span>
             </div>
 
@@ -487,7 +430,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               </span>
               {post.isLocked && (
                 <span className="forum-post-locked-badge">
-                  🔒 נעול
+                  {t('forum.thread.locked')}
                 </span>
               )}
               <h1 className="forum-post-title">{post.title}</h1>
@@ -522,7 +465,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
       </div>
       {currentUser && (     
       <div className="forum-rating-row">
-        <span className="forum-rating-label">דירוג הפוסט:</span>
+        <span className="forum-rating-label">{t('forum.thread.ratingLabel')}</span>
         <div className="forum-stars-row">
           {[1, 2, 3, 4, 5].map((star) => {
             const isFilled = star <= (hoverRating || userRating);
@@ -533,6 +476,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
                 className={`forum-star ${isFilled ? 'forum-star-filled' : ''}`}
+                title={t('forum.thread.starLabel', { star })}
               >
                 ★
               </span>
@@ -540,7 +484,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
           })}
         </div>
         <span className="forum-rating-summary">
-          ({post.averageRating || 0}/5 מתוך {post.ratingCount || 0} מדרגים)
+          {t('forum.thread.ratingSummary', { average: post.averageRating || 0, raters: post.ratingCount || 0 })}
         </span>
       </div>
       )}
@@ -559,24 +503,24 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                     {commenterInitial}
                   </div>
                   <small className="forum-comment-author-name">
-                    {comment.author?.name || 'משתמש'}
+                    {comment.author?.name || t('forum.thread.anonymousUser')}
                   </small>
                 </div>
 
                 <div className="forum-comment-body">
                   <div className="forum-comment-header-row">
                     <div className="forum-comment-date">
-                      {formatForumDate(comment.createdAt)}
+                      {formatForumDate(comment.createdAt, t, language)}
                     </div>
 
                     {isAdmin && (
                       <button
                         onClick={() => handleDeleteComment(comment._id)}
-                        title="מחק תגובה זו כעל מנהל"
+                        title={t('forum.thread.deleteTitle')}
                         className="forum-comment-delete-btn"
                       >
                         <i className="fa-solid fa-trash-can"></i>
-                        מחק
+                        {t('forum.thread.delete')}
                       </button>
                     )}
                   </div>
@@ -603,11 +547,11 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
       {post.isLocked ? (
         <div className="forum-locked-notice">
           <i className="fa-solid fa-lock forum-locked-icon"></i>
-          <span>שרשור זה ננעל לתגובות חדשות על ידי מנהל המערכת.</span>
+          <span>{t('forum.thread.lockedNotice')}</span>
         </div>
       ) : !currentUser ? (
        <div className="forum-unauthorized-notice">
-        <span>יש <Link to={loginPath(location.pathname)} className="forum-login-link">להתחבר</Link> כדי להגיב כאן</span>
+        <span><Trans i18nKey="forum.thread.loginToComment" components={{ link: <Link to={loginPath(location.pathname)} className="forum-login-link" /> }} /></span>
       </div>
       ) : (
         <div className="forum-comment-form-wrap">
@@ -616,7 +560,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               {currentUserInitial}
             </div>
             <small className="forum-comment-form-username">
-              {currentUser?.name || 'את/ה'}
+              {currentUser?.name || t('forum.thread.you')}
             </small>
           </div>
 
@@ -629,6 +573,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <select 
                   onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
                   className="forum-editor-select"
+                  aria-label={t('forum.thread.editor.fontFamily')}
                 >
                   <option value="Arial">Sans Serif (Arial)</option>
                   <option value="Courier New">Fixed Width</option>
@@ -642,11 +587,12 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                     else editor.chain().focus().toggleHeading({ level: Number(val) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
                   }}
                   className="forum-editor-select"
+                  aria-label={t('forum.thread.editor.blockType')}
                 >
-                  <option value="p">טקסט רגיל</option>
-                  <option value="3">כותרת קטנה</option>
-                  <option value="2">כותרת בינונית</option>
-                  <option value="1">כותרת גדולה</option>
+                  <option value="p">{t('forum.thread.editor.paragraph')}</option>
+                  <option value="3">{t('forum.thread.editor.headingSmall')}</option>
+                  <option value="2">{t('forum.thread.editor.headingMedium')}</option>
+                  <option value="1">{t('forum.thread.editor.headingLarge')}</option>
                 </select>
 
                 <div className="forum-editor-divider" />
@@ -654,6 +600,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleBold().run()}
+                  title={t('forum.thread.editor.bold')}
                   className={`forum-editor-btn forum-editor-btn-text forum-editor-btn-bold ${editor.isActive('bold') ? 'forum-editor-btn-active' : ''}`}
                 >
                   B
@@ -661,6 +608,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleItalic().run()}
+                  title={t('forum.thread.editor.italic')}
                   className={`forum-editor-btn forum-editor-btn-text forum-editor-btn-italic ${editor.isActive('italic') ? 'forum-editor-btn-active' : ''}`}
                 >
                   I
@@ -668,6 +616,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleStrike().run()}
+                  title={t('forum.thread.editor.strike')}
                   className={`forum-editor-btn forum-editor-btn-text forum-editor-btn-strike ${editor.isActive('strike') ? 'forum-editor-btn-active' : ''}`}
                 >
                   S
@@ -678,11 +627,12 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <select
                   onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
                   className="forum-editor-select-plain"
+                  aria-label={t('forum.thread.editor.textColor')}
                 >
-                  <option value="#374151">✒️ שחור</option>
-                  <option value="#10b981">ירוק</option>
-                  <option value="#2563eb">כחול</option>
-                  <option value="#ef4444">אדום</option>
+                  <option value="#374151">{t('forum.thread.editor.colorBlack')}</option>
+                  <option value="#10b981">{t('forum.thread.editor.colorGreen')}</option>
+                  <option value="#2563eb">{t('forum.thread.editor.colorBlue')}</option>
+                  <option value="#ef4444">{t('forum.thread.editor.colorRed')}</option>
                 </select>
 
                 <select
@@ -691,11 +641,12 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                     else editor.chain().focus().toggleHighlight({ color: e.target.value }).run();
                   }}
                   className="forum-editor-select-plain"
+                  aria-label={t('forum.thread.editor.highlight')}
                 >
-                  <option value="none">⚪ ללא רקע</option>
-                  <option value="#fef08a">צהוב</option>
-                  <option value="#bbf7d0">ירוק בהיר</option>
-                  <option value="#bfdbfe">כחול בהיר</option>
+                  <option value="none">{t('forum.thread.editor.highlightNone')}</option>
+                  <option value="#fef08a">{t('forum.thread.editor.highlightYellow')}</option>
+                  <option value="#bbf7d0">{t('forum.thread.editor.highlightLightGreen')}</option>
+                  <option value="#bfdbfe">{t('forum.thread.editor.highlightLightBlue')}</option>
                 </select>
 
                 <div className="forum-editor-divider" />
@@ -703,6 +654,8 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                  title={t('forum.thread.editor.alignRight')}
+                  aria-label={t('forum.thread.editor.alignRight')}
                   className={`forum-editor-btn forum-editor-btn-align ${editor.isActive({ textAlign: 'right' }) ? 'forum-editor-btn-active' : ''}`}
                 >
                   ➡️
@@ -710,6 +663,8 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                  title={t('forum.thread.editor.alignCenter')}
+                  aria-label={t('forum.thread.editor.alignCenter')}
                   className={`forum-editor-btn forum-editor-btn-align ${editor.isActive({ textAlign: 'center' }) ? 'forum-editor-btn-active' : ''}`}
                 >
                   ↔️
@@ -717,6 +672,8 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                  title={t('forum.thread.editor.alignLeft')}
+                  aria-label={t('forum.thread.editor.alignLeft')}
                   className={`forum-editor-btn forum-editor-btn-align ${editor.isActive({ textAlign: 'left' }) ? 'forum-editor-btn-active' : ''}`}
                 >
                   ⬅️
@@ -729,14 +686,14 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                   onClick={() => editor.chain().focus().toggleBulletList().run()}
                   className={`forum-editor-btn forum-editor-btn-text ${editor.isActive('bulletList') ? 'forum-editor-btn-active' : ''}`}
                 >
-                  • רשימה
+                  {t('forum.thread.editor.bulletList')}
                 </button>
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleOrderedList().run()}
                   className={`forum-editor-btn forum-editor-btn-text ${editor.isActive('orderedList') ? 'forum-editor-btn-active' : ''}`}
                 >
-                  1. רשימה
+                  {t('forum.thread.editor.orderedList')}
                 </button>
               </div>
             )}
@@ -744,8 +701,8 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
             {selectedFile && (
               <div className="forum-selected-file-banner">
                 <i className="fa-solid fa-circle-check forum-selected-file-icon"></i>
-                <span>הקובץ המצורף <strong>{selectedFile.name}</strong> הועלה ומוכן לשמירה!</span>
-                <button type="button" onClick={() => setSelectedFile(null)} className="forum-remove-file-btn">הסר קובץ</button>
+                <span><Trans i18nKey="forum.thread.fileReady" values={{ name: selectedFile.name }} components={{ strong: <strong /> }} /></span>
+                <button type="button" onClick={() => setSelectedFile(null)} className="forum-remove-file-btn">{t('forum.thread.removeFile')}</button>
               </div>
             )}
 
@@ -753,19 +710,6 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               onClick={() => editor?.commands.focus()}
               className="forum-editor-content-wrap"
             >
-              <style>{`
-                .ProseMirror { outline: none !important; min-height: 140px; white-space: pre-wrap !important; }
-                .ProseMirror p { margin: 0 0 8px 0; }
-                .ProseMirror p.is-editor-empty::before {
-                  content: attr(data-placeholder);
-                  float: right;
-                  color: var(--text-muted);
-                  font-weight: 300;
-                  font-size: 14px;
-                  pointer-events: none;
-                  height: 0;
-                }
-              `}</style>
               <EditorContent editor={editor} />
             </div>
 
@@ -773,15 +717,15 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
               <button
                 type="submit"
                 disabled={commentLoading || isCommentBlocked}
-                title={isCommentBlocked ? "אין לך הרשאה להגיב לפוסטים" : undefined}
+                title={isCommentBlocked ? t('forum.thread.noPermission') : undefined}
                 className="forum-comment-submit-btn"
               >
-                {commentLoading ? "שומר..." : "שמור תגובה"}
+                {commentLoading ? t('forum.thread.saving') : t('forum.thread.submit')}
               </button>
               
               <input type="file" ref={commentFileInputRef} className="forum-file-input-hidden" onChange={(e) => handleCommentFileSelect(e.target.files?.[0] || null)} />
               <button type="button" onClick={() => commentFileInputRef.current?.click()} className="forum-attach-comment-btn">
-                <i className="fa-solid fa-paperclip"></i> צרף קובץ לתגובה
+                <i className="fa-solid fa-paperclip"></i> {t('forum.thread.attach')}
               </button>
             </div>
           </form>
@@ -792,7 +736,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
         <div className="forum-thread-recommendations">
           <h3 className="forum-thread-recommendations-title">
             <i className="fa-solid fa-circle-nodes forum-thread-recommendations-icon"></i>
-            פוסטים נוספים שיכולים לעניין אותך:
+            {t('forum.thread.similarTitle')}
           </h3>
           <div className="forum-thread-recommendations-grid">
             {similarPosts.map((p) => (
@@ -805,7 +749,7 @@ const renderFileAttachment = (fileUrl: string, index: number) => {
                 className="forum-thread-recommendation-card"
               >
                 <h4 className="forum-thread-recommendation-title">{p.title}</h4>
-                <span className="forum-thread-recommendation-link">המשך לשרשור המלא ←</span>
+                <span className="forum-thread-recommendation-link">{t('forum.thread.continueThread')}</span>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, generatePath, useNavigate } from 'react-router-dom';
 import CreatableSelect from 'react-select/creatable';
+import { useTranslation } from 'react-i18next';
 import type { MultiValue } from 'react-select';
 import {
   fetchTags,
@@ -14,6 +15,17 @@ import { validateFileForUpload } from './uploadValidation';
 import '../../styles/forum.css';
 import { ROUTES } from "../../router/paths";
 
+// Minimum post length before the AI writing assistant can be used.
+const MIN_AI_CONTENT_LENGTH = 15;
+
+// The option values are the category names stored on the post (data sent to
+// the server), so they stay as they are; only the visible label is translated.
+const CATEGORY_OPTIONS = [
+  { value: 'פיתוח', labelKey: 'forum.addPost.categories.development' },
+  { value: 'AI', labelKey: 'forum.addPost.categories.ai' },
+  { value: 'כללי', labelKey: 'forum.addPost.categories.general' },
+] as const;
+
 interface AddPostModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,6 +33,7 @@ interface AddPostModalProps {
 }
 
 export const AddPostModal: React.FC<AddPostModalProps> = ({ isOpen, onClose, onPostCreated }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({ title: '', category: 'פיתוח', tags: '', content: '' });
   const [similarPosts, setSimilarPosts] = useState<{ _id: string; title: string }[]>([]);
   const [showSimilar, setShowSimilar] = useState(false); 
@@ -79,10 +92,10 @@ export const AddPostModal: React.FC<AddPostModalProps> = ({ isOpen, onClose, onP
   if (!isOpen) return null;
 
 const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
-    if (formData.content.trim().length < 15) return;
+    if (formData.content.trim().length < MIN_AI_CONTENT_LENGTH) return;
     
     if (mode === 'refine' && formData.content.trim() === lastRefinedContent) {
-      setValidationError('התוכן כבר עבר אופטימיזציה ושיפור ניסוח על ידי ה-AI.');
+      setValidationError(t('forum.addPost.errors.alreadyRefined'));
       return;
     }
 
@@ -96,10 +109,10 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
       const response = await generateAiAssistance(mode, formData.content);
 
       const data = await response.json();
-      console.log("[AI Assist Debug] המידע שחזר מהשרת עבור", mode, ":", data);
+      console.log('[AI Assist Debug] server response for', mode, ':', data);
 
       if (!response.ok) {
-        throw new Error(data.message || 'קריאת ה-AI נכשלה');
+        throw new Error(data.message || t('forum.addPost.errors.aiFailed'));
       }
 
       if (mode === 'refine' && data.refinedContent) {
@@ -116,7 +129,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
 
     } catch (err: unknown) {
       console.error(err);
-      setValidationError(err instanceof Error ? err.message : 'לא ניתן היה לקבל מענה מה-AI כרגע.');
+      setValidationError(err instanceof Error ? err.message : t('forum.addPost.errors.aiUnavailable'));
     } finally {
       setIsAiLoading(false);
     }
@@ -155,7 +168,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
     if (isSubmitting) return;
 
     if (!selectedTags || selectedTags.length === 0) {
-      setValidationError('חובה לבחור או ליצור לפחות תגית אחת עבור הפוסט!');
+      setValidationError(t('forum.addPost.errors.tagRequired'));
       return;
     }
     setValidationError(null);
@@ -173,18 +186,18 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
 
         if (!urlResponse.ok) {
           const errData = await urlResponse.json().catch(() => null);
-          throw new Error(errData?.error || 'נכשלה קבלת קישור מאובטח מהשרת');
+          throw new Error(errData?.error || t('forum.addPost.errors.uploadUrlFailed'));
         }
         const { url, fields, fileUrl } = await urlResponse.json();
 
         const awsResponse = await uploadFileViaPresignedPost(url, fields, selectedFile);
 
-        if (!awsResponse.ok) throw new Error('העלאת הקובץ ל-S3 נכשלה');
+        if (!awsResponse.ok) throw new Error(t('forum.addPost.errors.s3Failed'));
         finalFileUrl = fileUrl;
 
       } catch (error) {
         console.error('Error uploading file to S3:', error);
-        setValidationError('נכשלה העלאת הקובץ המצורף לענן. אנא נסה שוב.');
+        setValidationError(t('forum.addPost.errors.uploadFailed'));
         setIsSubmitting(false);
         return;
       }
@@ -248,38 +261,38 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
     setSelectedFile(file);
   };
 
-  const isContentTooShort = formData.content.trim().length < 15;
+  const isContentTooShort = formData.content.trim().length < MIN_AI_CONTENT_LENGTH;
   const isRefineDisabled = isAiLoading || isContentTooShort || formData.content.trim() === lastRefinedContent;
 
   return (
     <div className="forum-modal-overlay">
       <div className="forum-modal-box">
-        <h2 className="forum-modal-title">הוסף תוכן חדש</h2>
+        <h2 className="forum-modal-title">{t('forum.addPost.title')}</h2>
 
         <form onSubmit={handleSubmit}>
 
           <div className="forum-form-row">
             <div className="forum-category-field">
-              <label className="forum-field-label">קטגוריה/מקדם</label>
+              <label className="forum-field-label">{t('forum.addPost.categoryLabel')}</label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
                 className="forum-category-select"
               >
-                <option value="פיתוח">פיתוח</option>
-                <option value="AI">AI</option>
-                <option value="כללי">כללי</option>
+                {CATEGORY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{t(option.labelKey)}</option>
+                ))}
               </select>
             </div>
 
             <div className="forum-title-field">
-              <label className="forum-field-label">כותרת</label>
+              <label className="forum-field-label">{t('forum.addPost.titleLabel')}</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                 className="forum-title-input"
-                placeholder="רשמי כותרת נושא..."
+                placeholder={t('forum.addPost.titlePlaceholder')}
                 required
               />
 
@@ -287,14 +300,14 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 <div className="forum-similar-posts-dropdown">
                   <div className="forum-similar-posts-header">
                     <small className="forum-similar-posts-label">
-                      💡 אולי כבר יש מענה לפוסט שלך? בדקי פוסטים דומים:
+                      {t('forum.addPost.similarHint')}
                     </small>
                     <button
                       type="button"
                       onClick={() => setShowSimilar(false)}
                       className="forum-similar-posts-close"
                     >
-                      סגור ✖
+                      {t('forum.addPost.closeSimilar')}
                     </button>
                   </div>
                   {similarPosts.map((post: { _id: string; title: string }) => (
@@ -310,11 +323,11 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
           </div>
 
           <div className="forum-content-field">
-            <label className="forum-content-label">תוכן</label>
+            <label className="forum-content-label">{t('forum.addPost.contentLabel')}</label>
             <textarea
               value={formData.content}
               onChange={(e) => setFormData({...formData, content: e.target.value})}
-              placeholder="כתוב כאן את גוף הפוסט..."
+              placeholder={t('forum.addPost.contentPlaceholder')}
               className="forum-content-textarea"
               required
             />
@@ -332,7 +345,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               className="forum-clip-btn"
             >
               <i className="fa-solid fa-paperclip"></i>
-              {selectedFile ? `📎 ${selectedFile.name}` : 'צירוף קבצים'}
+              {selectedFile ? `📎 ${selectedFile.name}` : t('forum.addPost.attachFiles')}
             </button>
           </div>
 
@@ -340,7 +353,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
           <div className="forum-ai-toolbar">
             <div className="forum-ai-toolbar-row">
               <span className="forum-ai-toolbar-label">
-                <span className="forum-ai-emoji">🪄</span> עוזר כתיבה חכם:
+                <span className="forum-ai-emoji">🪄</span> {t('forum.addPost.aiAssistant')}
               </span>
               <button
                 type="button"
@@ -348,7 +361,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 onClick={() => handleAiAssist('refine')}
                 className={`forum-ai-refine-btn ${isRefineDisabled ? 'forum-ai-refine-btn-disabled' : ''}`}
               >
-                {isAiLoading ? 'מעבד...' : 'שפר ניסוח'}
+                {isAiLoading ? t('forum.addPost.processing') : t('forum.addPost.refine')}
               </button>
 
               {backupContent && (
@@ -357,7 +370,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                   onClick={handleUndoRefine}
                   className="forum-ai-undo-btn"
                 >
-                  ↩️ בטל שינוי AI
+                  {t('forum.addPost.undoAi')}
                 </button>
               )}
 
@@ -367,7 +380,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 onClick={() => handleAiAssist('titles')}
                 className={`forum-ai-titles-btn ${isContentTooShort ? 'forum-ai-titles-btn-disabled' : ''}`}
               >
-                {isAiLoading ? 'מעבד...' : 'הצעת כותרת'}
+                {isAiLoading ? t('forum.addPost.processing') : t('forum.addPost.suggestTitle')}
               </button>
               <button
                 type="button"
@@ -375,15 +388,15 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 onClick={() => handleAiAssist('tags')}
                 className={`forum-ai-tags-btn ${isContentTooShort ? 'forum-ai-tags-btn-disabled' : ''}`}
               >
-                {isAiLoading ? 'מעבד...' : 'הצעת תגיות'}
+                {isAiLoading ? t('forum.addPost.processing') : t('forum.addPost.suggestTags')}
               </button>
-              {isContentTooShort && <small className="forum-ai-hint">הקלידי לפחות 15 תווים בתוכן להפעלת ה-AI</small>}
+              {isContentTooShort && <small className="forum-ai-hint">{t('forum.addPost.aiHint', { min: MIN_AI_CONTENT_LENGTH })}</small>}
             </div>
 
             {/* הצגת כותרות לחיצות מוצעות */}
             {aiTitles.length > 0 && (
               <div className="forum-ai-suggestions-block">
-                <small className="forum-ai-suggestions-label">בחרי כותרת מתאימה מההצעות:</small>
+                <small className="forum-ai-suggestions-label">{t('forum.addPost.pickTitle')}</small>
                 <div className="forum-ai-titles-list">
                   {aiTitles.map((title, idx) => (
                     <button
@@ -402,7 +415,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
             {/* הצגת תגיות לחיצות מוצעות */}
             {aiTags.length > 0 && (
               <div className="forum-ai-suggestions-block">
-                <small className="forum-ai-suggestions-label">לחצי על תגיות להוספה מהירה:</small>
+                <small className="forum-ai-suggestions-label">{t('forum.addPost.pickTags')}</small>
                 <div className="forum-ai-tags-list">
                   {aiTags.map((tag, idx) => (
                     <button
@@ -420,7 +433,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
           </div>
 
           <div className="forum-tags-field">
-            <label className="forum-field-label">תגיות נושא </label>
+            <label className="forum-field-label">{t('forum.addPost.tagsLabel')}</label>
             <CreatableSelect
               isMulti
               options={allTags}
@@ -428,10 +441,10 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               onChange={(newValue: MultiValue<{ value: string; label: string }>) => setSelectedTags(newValue ? [...newValue] : [])}
               inputValue={tagInputValue}
               onInputChange={(val) => setTagInputValue(val)}
-              placeholder="נא להכניס לפחות 3 אותיות"
+              placeholder={t('forum.addPost.tagsPlaceholder')}
               formatCreateLabel={(inputValue) => `${inputValue}`}
               menuPlacement="top"
-              noOptionsMessage={() => tagInputValue.length < 3 ? "נא להקליד לפחות 3 אותיות..." : "לא נמצאה תגית מתאימה"}
+              noOptionsMessage={() => tagInputValue.length < 3 ? t('forum.addPost.tagsTypeMore') : t('forum.addPost.tagsNoMatch')}
               filterOption={(option, rawInput) => {
                 if (rawInput.length < 3) return false;
                 return option.label.toLowerCase().includes(rawInput.toLowerCase());
@@ -445,11 +458,10 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                   borderRadius: '6px',
                   minHeight: '40px',
                   height: 'auto',
-                  textAlign: 'right',
+                  textAlign: 'start',
                   boxShadow: 'none',
                   backgroundColor: 'var(--bg-surface)',
-                  paddingLeft: '8px',
-                  paddingRight: '8px',
+                  paddingInline: '8px',
                   boxSizing: 'border-box',
                   '&:hover': { borderColor: 'var(--brand-secondary)' }
                 }),
@@ -466,14 +478,12 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
                 menu: (base) => ({
                   ...base,
                   zIndex: 1050,
-                  border: '1px solid var(--brand-secondary)',
                   boxShadow: 'var(--shadow-md)'
                 }),
                 multiValue: (base) => ({
                   ...base,
                   backgroundColor: 'var(--color-success-bg)',
                   borderRadius: '4px',
-                  border: '1px solid var(--color-success-border)',
                   margin: '2px'
                 }),
                 multiValueLabel: (base) => ({
@@ -498,7 +508,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               disabled={isSubmitting || isAiLoading}
               className={`forum-submit-btn ${isSubmitting ? 'forum-submit-btn-submitting' : ''}`}
             >
-              {isSubmitting ? 'מפרסם פוסט...' : 'הוסף'}
+              {isSubmitting ? t('forum.addPost.submitting') : t('forum.addPost.submit')}
             </button>
             <button
               type="button"
@@ -506,7 +516,7 @@ const handleAiAssist = async (mode: 'refine' | 'titles' | 'tags') => {
               onClick={onClose}
               className={`forum-cancel-btn ${isSubmitting ? 'forum-cancel-btn-disabled' : ''}`}
             >
-              ביטול
+              {t('forum.addPost.cancel')}
             </button>
           </div>
         </form>
