@@ -20,7 +20,7 @@ import {
   buildBlockedResponsesApi,
   toSSEStream,
 } from "./blockedResponse";
-import { evaluateText } from "./input/evaluate";
+import { evaluateText, EvaluateResult } from "./input/evaluate";
 
 export type ProxyApi = "chat" | "responses" | "anthropic";
 
@@ -30,6 +30,8 @@ interface GuardInputArgs {
   model: string;
   api: ProxyApi;
   stream?: boolean;
+  /** נקרא עם תוצאת הסינון המלאה (לצורכי מעקב — RequestTrace). */
+  onEvaluated?: (result: EvaluateResult) => void;
 }
 
 /**
@@ -40,12 +42,13 @@ interface GuardInputArgs {
 export async function guardInput(
   args: GuardInputArgs,
 ): Promise<object | ReadableStream | null> {
-  const { profile, text, model, api, stream } = args;
+  const { profile, text, model, api, stream, onEvaluated } = args;
 
   const result = await evaluateText({
     profileId: profile?._id?.toString() ?? "",
     text,
   });
+  onEvaluated?.(result);
 
   if (result.allowed) {
     return null;

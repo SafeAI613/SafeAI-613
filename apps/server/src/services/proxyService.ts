@@ -15,6 +15,8 @@ import logger from "../logger";
 import { buildSystemPrompt } from "./promptBuilder";
 import { guardInput } from "../workflows/proxyFilter";
 import { extractFilterText, FilterApi } from "./filter/extractFilterText";
+import { RequestTrace } from "./trace/requestTrace";
+import { extractAnswer } from "./trace/answerExtractor";
 /**
  * מזהה provider מתוך model
  */
@@ -96,10 +98,13 @@ async function filterInput(
   body: any,
   profile: any,
   model: string,
+  trace: RequestTrace,
 ): Promise<object | ReadableStream | null> {
+  trace.setStage("filter");
   const text = extractFilterText(api, body);
 
   if (!text) {
+    trace.recordFilter("", null);
     logger.info(
       JSON.stringify({ event: "filter.skipped", api, reason: "no-user-text" }),
     );
@@ -113,12 +118,50 @@ async function filterInput(
     // לתמונות אין עדיין פורמט חסימה ייעודי — מוחזרת תשובה בפורמט chat.
     api: api === "image" ? "chat" : api,
     stream: body.stream,
+    onEvaluated: (result) => trace.recordFilter(text, result),
   });
+}
+
+/**
+ * עוטף פונקציית proxy ברשומת מעקב אחת (RequestLog):
+ * מתעד שגיאות, את התשובה (רגילה או stream), ושומר בסוף.
+ */
+async function withTrace<T>(
+  api: FilterApi,
+  user: any,
+  body: any,
+  run: (trace: RequestTrace) => Promise<T>,
+): Promise<T | ReadableStream<Uint8Array>> {
+  const trace = new RequestTrace({ api, user, body });
+
+  let result: T;
+  try {
+    result = await run(trace);
+  } catch (err) {
+    trace.fail(err);
+    void trace.save();
+    throw err;
+  }
+
+  // תשובת stream אמיתית מהספק — הרשומה תישמר כשה-stream יסתיים.
+  if (result instanceof ReadableStream && !trace.isBlocked) {
+    return trace.tapStream(result as ReadableStream<Uint8Array>);
+  }
+
+  if (!trace.isBlocked) trace.recordAnswer(extractAnswer(api, result));
+  void trace.save();
+  return result;
 }
 
 // ---------- proxies ---------------
 
 export async function proxyChatCompletion(user: any, body: any) {
+  return withTrace("chat", user, body, (trace) =>
+    proxyChatCompletionImpl(user, body, trace),
+  );
+}
+
+async function proxyChatCompletionImpl(user: any, body: any, trace: RequestTrace) {
   const model = body.model;
 
   if (!model) {
@@ -150,8 +193,10 @@ export async function proxyChatCompletion(user: any, body: any) {
     throw new Error("Profile not found");
   }
 
-  const blocked = await filterInput("chat", body, profile, model);
+  const blocked = await filterInput("chat", body, profile, model, trace);
   if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
   // 4. הוספת system prompts
 
   const systemPrompt = await buildSystemPrompt(profile);
@@ -391,6 +436,12 @@ export async function proxyChatCompletion(user: any, body: any) {
 }
 
 export async function proxyResponses(user: any, body: any) {
+  return withTrace("responses", user, body, (trace) =>
+    proxyResponsesImpl(user, body, trace),
+  );
+}
+
+async function proxyResponsesImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model;
 
@@ -417,8 +468,10 @@ export async function proxyResponses(user: any, body: any) {
   const profile = await AIProfile.findById(user.profileId);
   if (!profile) throw new Error("Profile not found");
 
-  const blocked = await filterInput("responses", body, profile, model);
+  const blocked = await filterInput("responses", body, profile, model, trace);
   if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   // System prompt מה-profile
   const systemPrompt = await buildSystemPrompt(profile);
@@ -598,6 +651,12 @@ export async function proxyResponses(user: any, body: any) {
 }
 
 export async function proxyAnthropicMessages(user: any, body: any) {
+  return withTrace("anthropic", user, body, (trace) =>
+    proxyAnthropicMessagesImpl(user, body, trace),
+  );
+}
+
+async function proxyAnthropicMessagesImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model;
 
@@ -629,8 +688,10 @@ export async function proxyAnthropicMessages(user: any, body: any) {
     throw new Error("Profile not found");
   }
 
-  const blocked = await filterInput("anthropic", body, profile, model);
+  const blocked = await filterInput("anthropic", body, profile, model, trace);
   if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   const systemPrompt = await buildSystemPrompt(profile);
 
@@ -730,6 +791,12 @@ export async function proxyAnthropicMessages(user: any, body: any) {
 
 // ========== IMAGE GENERATION ==========
 export async function proxyImageGeneration(user: any, body: any) {
+  return withTrace("image", user, body, (trace) =>
+    proxyImageGenerationImpl(user, body, trace),
+  );
+}
+
+async function proxyImageGenerationImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model || "dall-e-3";
 
@@ -748,8 +815,10 @@ export async function proxyImageGeneration(user: any, body: any) {
   const isFree = isProviderKeyFree(user, providerKeyDoc._id.toString());
   const decryptedLiteLLMKey = decryptSecret(user.litellmKeyEncrypted);
 
-  const blocked = await filterInput("image", body, profile, model);
+  const blocked = await filterInput("image", body, profile, model, trace);
   if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   if (!decryptedLiteLLMKey) throw new Error("LiteLLM key missing");
 

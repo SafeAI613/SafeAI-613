@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { estimateAnthropicTokens } from "../services/anthropicAdapter";
 import { proxyAnthropicMessages} from "../services/proxyService";
 import logger from "../logger";
@@ -7,12 +10,21 @@ export async function anthropicMessagesHandler(req: Request, res: Response) {
   try {
     const data = await proxyAnthropicMessages((req as any).user, req.body);
 
-    if (req.body.stream) {
+    if (req.body.stream && data instanceof ReadableStream) {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
+      res.status(200);
 
-      return res.status(200).send(data);
+      // res.send(ReadableStream) ב-Express 5 שולח "{}" — צריך pipe.
+      // pipeline מטפל ב-backpressure ומבטל את ה-stream אם הלקוח מתנתק.
+      await pipeline(
+        Readable.fromWeb(data as NodeReadableStream<Uint8Array>),
+        res,
+      ).catch((err: Error) =>
+        logger.error("Anthropic stream pipe error:", { error: err.message }),
+      );
+      return;
     }
 
     return res.status(200).json(data);
