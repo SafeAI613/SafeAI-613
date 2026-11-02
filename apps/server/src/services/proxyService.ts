@@ -1,4 +1,4 @@
-import { AIProfile } from "../models";
+import { getFullProfileById } from "../repositories/profileRepository";
 import { decryptSecret } from "../utils/crypto";
 import {
   getProviderKeyByUserAndProvider,
@@ -13,7 +13,8 @@ import {
 } from "../utils/costs";
 import logger from "../logger";
 import { buildSystemPrompt } from "./promptBuilder";
-import { guardInput } from "../workflows/proxyFilter";
+import { evaluateInput, FilterProfile, reasonCode } from "./filter/inputFilter";
+import { buildBlockedResponse } from "./filter/blockedResponse";
 import { extractFilterText, FilterApi } from "./filter/extractFilterText";
 import { RequestTrace } from "./trace/requestTrace";
 import { extractAnswer } from "./trace/answerExtractor";
@@ -96,7 +97,7 @@ function getLiteLLMCost(response: Response, data?: any): number | undefined {
 async function filterInput(
   api: FilterApi,
   body: any,
-  profile: any,
+  profile: FilterProfile,
   model: string,
   trace: RequestTrace,
 ): Promise<object | ReadableStream | null> {
@@ -111,15 +112,40 @@ async function filterInput(
     return null;
   }
 
-  return guardInput({
-    profile,
-    text,
+  const result = await evaluateInput(profile, text);
+  trace.recordFilter(text, result);
+  if (result.verdict === "allowed") return null;
+
+  const reason = reasonCode(result);
+  const logLine = JSON.stringify({
+    event: result.verdict === "error" ? "proxy.filter_error" : "proxy.blocked",
+    api,
     model,
-    // לתמונות אין עדיין פורמט חסימה ייעודי — מוחזרת תשובה בפורמט chat.
-    api: api === "image" ? "chat" : api,
-    stream: body.stream,
-    onEvaluated: (result) => trace.recordFilter(text, result),
+    reason,
   });
+  if (result.verdict === "error") logger.error(logLine);
+  else logger.info(logLine);
+
+  return buildBlockedResponse(
+    // לתמונות אין עדיין פורמט חסימה ייעודי — מוחזרת תשובה בפורמט chat.
+    api === "image" ? "chat" : api,
+    model,
+    reason,
+    result.verdict === "error" ? "unavailable" : "policy",
+    body.stream,
+  );
+}
+
+/**
+ * טוען את הפרופיל המלא של המשתמש — כולל הקטגוריות וה-prompts, שמוגדרים
+ * select:false בסכמה (findById רגיל מחזיר אותם ריקים).
+ */
+async function loadProfile(user: any) {
+  const profile = user?.profileId
+    ? await getFullProfileById(user.profileId.toString())
+    : null;
+  if (!profile) throw new Error("Profile not found");
+  return profile;
 }
 
 /**
@@ -187,11 +213,7 @@ async function proxyChatCompletionImpl(user: any, body: any, trace: RequestTrace
   const isFree = isProviderKeyFree(user, providerKeyDoc._id.toString());
 
   // 3. סינון טקסט (Content Filtering)
-  const profile = await AIProfile.findById(user.profileId);
-
-  if (!profile) {
-    throw new Error("Profile not found");
-  }
+  const profile = await loadProfile(user);
 
   const blocked = await filterInput("chat", body, profile, model, trace);
   if (blocked) return blocked;
@@ -465,8 +487,7 @@ async function proxyResponsesImpl(user: any, body: any, trace: RequestTrace) {
     throw new Error("LiteLLM Proxy Key could not be decrypted or is missing");
 
   // Content filtering - אותו לוגיק כמו בchat completions
-  const profile = await AIProfile.findById(user.profileId);
-  if (!profile) throw new Error("Profile not found");
+  const profile = await loadProfile(user);
 
   const blocked = await filterInput("responses", body, profile, model, trace);
   if (blocked) return blocked;
@@ -683,10 +704,7 @@ async function proxyAnthropicMessagesImpl(user: any, body: any, trace: RequestTr
     throw new Error("LiteLLM Proxy Key could not be decrypted or is missing");
   }
 
-  const profile = await AIProfile.findById(user.profileId);
-  if (!profile) {
-    throw new Error("Profile not found");
-  }
+  const profile = await loadProfile(user);
 
   const blocked = await filterInput("anthropic", body, profile, model, trace);
   if (blocked) return blocked;
@@ -800,7 +818,7 @@ async function proxyImageGenerationImpl(user: any, body: any, trace: RequestTrac
   const startTime = Date.now();
   const model = body.model || "dall-e-3";
 
-  const profile = await AIProfile.findById(user.profileId);
+  const profile = await loadProfile(user);
 
   const provider = getProviderFromModel(model);
 

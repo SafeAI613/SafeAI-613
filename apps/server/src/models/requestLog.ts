@@ -28,8 +28,6 @@ export type TraceStage = "setup" | "filter" | "provider" | "stream";
 
 export interface RequestLogFilter {
   verdict: FilterVerdict;
-  /** קוד הסיבה מה-workflow, למשל "blocked-by-llm" / "error-in-llm-decision". */
-  reason?: string;
   /** ההסבר של ה-judge במילים. */
   judgeReason?: string;
   /** הודעת השגיאה כשה-judge נכשל. */
@@ -69,7 +67,6 @@ const RequestLogSchema = new mongoose.Schema(
     question: String,
     filter: {
       verdict: { type: String, enum: ["allowed", "blocked", "error", "skipped"] },
-      reason: String,
       judgeReason: String,
       error: String,
       judgeModel: String,

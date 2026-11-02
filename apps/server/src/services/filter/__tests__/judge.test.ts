@@ -4,20 +4,20 @@
 
 const mockCreate = jest.fn();
 
-jest.mock("../../config/openai", () => ({
+jest.mock("../../../config/openai", () => ({
   openai: { chat: { completions: { create: (...args: unknown[]) => mockCreate(...args) } } },
 }));
 
-jest.mock("../promptBuilder", () => ({
+jest.mock("../../promptBuilder", () => ({
   buildFilterPrompt: jest.fn().mockResolvedValue("filter prompt"),
 }));
 
-jest.mock("../../logger", () => ({
+jest.mock("../../../logger", () => ({
   __esModule: true,
   default: { info: jest.fn(), error: jest.fn(), debug: jest.fn(), warn: jest.fn() },
 }));
 
-import { judgeText } from "../llmService";
+import { judgeText } from "../judge";
 
 function reply(message: Record<string, unknown>) {
   return { choices: [{ message }] };

@@ -1,5 +1,5 @@
 /**
- * server/src/workflows/blockedResponse.ts
+ * server/src/services/filter/blockedResponse.ts
  *
  * הופך verdict חוסם ל"תשובת דמה" בצורת תשובת LLM אמיתית,
  * במקום לזרוק Error שהופך ל-500/400 ושובר את הלקוח.
@@ -114,4 +114,27 @@ export function toSSEStream(payload: unknown): ReadableStream {
       controller.close();
     },
   });
+}
+/* ============================================================
+ * Entry point
+ * ============================================================ */
+
+export type BlockedApi = "chat" | "responses" | "anthropic";
+
+/** תשובת חסימה בפורמט של ה-API שהלקוח קרא לו (כולל SSE ל-stream). */
+export function buildBlockedResponse(
+  api: BlockedApi,
+  model: string,
+  reason: string,
+  kind: BlockKind,
+  stream?: boolean,
+): object | ReadableStream {
+  const payload =
+    api === "anthropic"
+      ? buildBlockedAnthropicMessage(model, reason, kind)
+      : api === "responses"
+        ? buildBlockedResponsesApi(model, reason, kind)
+        : buildBlockedChatCompletion(model, reason, kind);
+
+  return stream ? toSSEStream(payload) : payload;
 }
