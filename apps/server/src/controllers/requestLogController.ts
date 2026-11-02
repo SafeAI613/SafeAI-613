@@ -7,6 +7,7 @@
  *   query: status? (completed|blocked|filter_error|error), api? (chat|responses|anthropic|image),
  *          userId?, before? (ISO date, ל-pagination), limit? (1-100, ברירת מחדל 50)
  *   200: { items: RequestLog[], nextBefore: string | null }
+ *        (userId מאוכלס כ-{ _id, name, email }, או null אם המשתמש נמחק)
  *   400: { error } — פרמטר לא תקין
  *
  * GET /admin/request-logs/:requestId

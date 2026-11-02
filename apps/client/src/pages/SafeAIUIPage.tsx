@@ -10,6 +10,7 @@ import UserApiKeysPage from "../features/safeai-ui/UserApiKeysPage";
 import BillingPage from "../features/safeai-ui/BillingPage";
 import MyRequestsList from "../features/safeai-ui/MyRequestsList";
 import AdminRequestsList from "../features/safeai-ui/AdminRequestsList";
+import RequestLogsList from "../features/safeai-ui/RequestLogsList";
 import ContactTypesManagement from "../features/safeai-ui/ContactTypesManagement";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { OrganizationsManagement } from "../features/organizations/OrganizationsManagement";
@@ -40,6 +41,7 @@ type Section =
   | "users"
   | "organizations"
   | "all-requests"
+  | "request-logs"
   | "contact-types"
   | "org-statistics"
   | "org-users";
@@ -47,7 +49,7 @@ type Section =
 type Role = "admin" | "user" | "org_owner";
 
 const ROLE_SECTIONS: Record<Role, Section[]> = {
-  admin: ["statistics", "profiles", "users", "organizations", "all-requests", "contact-types"],
+  admin: ["statistics", "profiles", "users", "organizations", "all-requests", "request-logs", "contact-types"],
   user: ["overview", "statistics", "api-keys", "requests", "billing"],
   org_owner: ["org-statistics", "org-users"],
 };
@@ -164,6 +166,8 @@ export default function SafeAIUIPage({ area }: { area: "account" | "admin" }) {
         return <MyRequestsList activeSection={activeSection} />;
       case "all-requests":
         return <AdminRequestsList />;
+      case "request-logs":
+        return <RequestLogsList />;
       case "contact-types":
         return <ContactTypesManagement />;
       case "org-statistics":
@@ -283,6 +287,25 @@ export default function SafeAIUIPage({ area }: { area: "account" | "admin" }) {
                   {newRequestCount > 0 && (
                     <span className="sub-nav-badge">({newRequestCount})</span>
                   )}
+                </button>
+                <button
+                  className={
+                    activeSection === "request-logs"
+                      ? "sub-nav-btn active"
+                      : "sub-nav-btn"
+                  }
+                  onClick={() => goTo("request-logs")}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path
+                      d="M1.5 8h3l1.5-4 3 8 1.5-4h4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {t("safeaiNav.requestLogs")}
                 </button>
                 <button
                   className={

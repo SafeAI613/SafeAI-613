@@ -46,7 +46,7 @@
 |-------|------|-------|
 | `user` | `/platform/account` | `overview`, `statistics`, `api-keys`, `requests`, `billing` |
 | `org_owner` | `/platform/account` | `org-statistics`, `org-users` |
-| `admin` | `/platform/admin` | `statistics`, `profiles`, `users`, `organizations`, `all-requests`, `contact-types` |
+| `admin` | `/platform/admin` | `statistics`, `profiles`, `users`, `organizations`, `all-requests`, `request-logs`, `contact-types` |
 
 טאב לא מוכר, טאב של תפקיד אחר, או האזור הלא נכון לתפקיד → הפניה לטאב ברירת המחדל של התפקיד. קישור לטאב: `` `${ROUTES.platform.account}/requests` ``.
 

@@ -6,6 +6,9 @@
 
 import { RequestLog, RequestLogData, RequestLogStatus, RequestLogApi } from "../models/requestLog";
 
+/** שדות המשתמש שמוצגים במסך הניטור (בלי שדות רגישים). */
+const USER_FIELDS = "name email";
+
 export async function createRequestLog(data: RequestLogData) {
   return RequestLog.create(data);
 }
@@ -29,9 +32,10 @@ export async function findRequestLogs(query: RequestLogQuery) {
   return RequestLog.find(filter)
     .sort({ createdAt: -1 })
     .limit(query.limit)
+    .populate("userId", USER_FIELDS)
     .lean();
 }
 
 export async function findRequestLogByRequestId(requestId: string) {
-  return RequestLog.findOne({ requestId }).lean();
+  return RequestLog.findOne({ requestId }).populate("userId", USER_FIELDS).lean();
 }
