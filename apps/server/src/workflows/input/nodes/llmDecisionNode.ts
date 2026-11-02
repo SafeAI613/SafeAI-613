@@ -2,12 +2,13 @@
  * server/src/workflows/input/nodes/llmDecisionNode.ts
  *
  * ה-node היחיד שפעיל כרגע ב-Input workflow.
- * עוטף את getLLMDecision הקיים — בלי לשנות את הלוגיקה שלו.
+ * עוטף את judgeText. כשל של ה-judge נזרק כ-NodeError, כדי שה-runner
+ * ירשום אותו כ-"error" ב-trace (ולא כ"חסימה" — כמו שהיה קודם).
  */
 
 import logger from "../../../logger";
-import { getLLMDecision } from "../../../services/llmService";
-import { GuardNode } from "../../types";
+import { judgeText } from "../../../services/llmService";
+import { GuardNode, NodeError } from "../../types";
 
 /** בונה את תיאור הפרופיל ל-LLM (הועבר לכאן מתוך evaluateText). */
 function buildProfileDesc(profile: any): string {
@@ -27,16 +28,23 @@ export const llmDecisionNode: GuardNode = {
     const profileDesc = buildProfileDesc(ctx.profile);
     logger.info("profileDesc: " + profileDesc);
 
-    const isSafe = await getLLMDecision(
-      ctx.text,
-      ctx.profile.name,
+    const judge = await judgeText(ctx.text, ctx.profile.name, profileDesc);
+    const metadata = {
       profileDesc,
-    );
+      judgeModel: judge.judgeModel,
+      latencyMs: judge.latencyMs,
+    };
 
+    if (judge.verdict === "error") {
+      throw new NodeError(judge.error, metadata);
+    }
+
+    const allowed = judge.verdict === "allowed";
     return {
-      verdict: isSafe ? "allow" : "block",
-      reason: isSafe ? "allowed-by-llm" : "blocked-by-llm",
-      metadata: { profileDesc },
+      verdict: allowed ? "allow" : "block",
+      reason: allowed ? "allowed-by-llm" : "blocked-by-llm",
+      // ההסבר של ה-judge — נשמר ב-trace/EvaluationLog לצורכי מעקב.
+      metadata: { ...metadata, judgeReason: judge.reason },
     };
   },
 };

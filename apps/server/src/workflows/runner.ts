@@ -13,6 +13,7 @@ import {
   GuardContext,
   GuardNode,
   GuardWorkflowResult,
+  NodeError,
   NodeStatus,
   NodeTrace,
   TransformNode,
@@ -106,7 +107,8 @@ export async function runGuardPipeline(
         };
       }
     } catch (err: any) {
-      // fail-closed: שגיאה ב-node נחשבת חסימה (כמו getLLMDecision שמחזיר false בכשל).
+      // fail-closed: שגיאה ב-node חוסמת את הבקשה, אבל מסומנת errored
+      // כדי שה-trace והמשתמש יבחינו בינה לבין חסימת מדיניות.
       const durationMs = Date.now() - start;
       const entry: NodeTrace = {
         node: node.name,
@@ -114,6 +116,7 @@ export async function runGuardPipeline(
         reason: err?.message ?? "node-error",
         durationMs,
         input: ctx.text,
+        metadata: err instanceof NodeError ? err.metadata : {},
       };
       trace.push(entry);
       logStep(workflowName, entry, {
@@ -125,6 +128,7 @@ export async function runGuardPipeline(
         allowed: false,
         reason: `error-in-${node.name}`,
         blockedBy: node.name,
+        errored: true,
         trace,
       };
     }

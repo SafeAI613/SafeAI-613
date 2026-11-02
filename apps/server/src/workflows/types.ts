@@ -33,6 +33,20 @@ export interface GuardContext {
   profileId: string;
 }
 
+/**
+ * שגיאה שנזרקת מ-node כשהבדיקה עצמה נכשלה (לא חסימה).
+ * ה-metadata נשמר ב-trace כדי שיהיה אפשר לאבחן את הכשל.
+ */
+export class NodeError extends Error {
+  constructor(
+    message: string,
+    public readonly metadata: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = "NodeError";
+  }
+}
+
 export interface GuardNode {
   /** שם ייחודי וקריא — מופיע ב-trace וב-structured logs. */
   name: string;
@@ -80,6 +94,8 @@ export interface GuardWorkflowResult {
   reason: string;
   /** שם ה-node שחסם (אם נחסם). */
   blockedBy?: string;
+  /** true כשהחסימה נובעת משגיאה בבדיקה (fail-closed) ולא מהחלטת מדיניות. */
+  errored?: boolean;
   /** trace מלא של כל ה-nodes שרצו. */
   trace: NodeTrace[];
 }

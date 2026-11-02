@@ -40,6 +40,8 @@ ${dbPrompt.content}
 Profile name: ${profileName}
 Profile description: ${profileDesc}
 
-Respond only with "allowed" or "blocked".
+Respond in JSON with:
+- "verdict": "allowed" or "blocked"
+- "reason": one short English sentence explaining the decision (which category matched).
 `.trim();
 }
