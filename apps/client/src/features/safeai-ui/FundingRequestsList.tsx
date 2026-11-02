@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 
 export type FundingRequestStatus = "pending" | "approved" | "rejected";
 
@@ -28,6 +29,7 @@ function StatusBadge({ status }: { status: FundingRequestStatus }) {
 
 export default function FundingRequestsList({ requests, loading }: Props) {
   const { t } = useTranslation();
+  const { locale } = useLocale();
 
   return (
     <div className="card" style={{ marginTop: "24px" }}>
@@ -52,7 +54,7 @@ export default function FundingRequestsList({ requests, loading }: Props) {
                 <td>
                   <StatusBadge status={req.status} />
                 </td>
-                <td>{new Date(req.createdAt).toLocaleDateString("he-IL")}</td>
+                <td>{new Date(req.createdAt).toLocaleDateString(locale)}</td>
               </tr>
             ))}
           </tbody>

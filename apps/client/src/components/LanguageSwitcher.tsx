@@ -52,7 +52,18 @@ function UsaFlag() {
   );
 }
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  /**
+   * Where the switcher sits, which decides how its menu opens:
+   * - "bar" (default): in a top bar — the menu drops down, aligned to the
+   *   switcher's inline-end edge so it opens back toward the page.
+   * - "sidebar": at the bottom of a side navigation — the menu opens upward
+   *   and toward the main content, so it never runs off the screen edge.
+   */
+  placement?: "bar" | "sidebar";
+}
+
+export function LanguageSwitcher({ placement = "bar" }: LanguageSwitcherProps) {
   const { t, i18n } = useTranslation();
   const LANGUAGES = [
     { code: "he", label: t("langSwitcher.hebrewLabel"), flag: IsraelFlag },
@@ -70,7 +81,7 @@ export function LanguageSwitcher() {
   const CurrentFlag = current.flag;
 
   return (
-    <div className="language-switcher">
+    <div className={`language-switcher language-switcher-${placement}`}>
       <button type="button" className="language-switcher-trigger">
         <CurrentFlag />
         <span className="language-switcher-code">{current.code.toUpperCase()}</span>

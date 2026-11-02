@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, generatePath, useNavigate } from 'react-router-dom';
+import { Trans, useTranslation } from 'react-i18next';
 import { AddPostModal } from './AddPostModal';
 import { fetchPosts as fetchPostsFromApi, fetchSimilarPosts, moderatePost as moderatePostApi } from './api';
 import type { Post } from './types';
+import { formatForumDate } from './formatForumDate';
+import { useLocale } from '../../i18n/useLocale';
 import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
@@ -24,6 +27,8 @@ export const ForumPage: React.FC = () => {
 
   const navigate = useNavigate();
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
+  const { dir, language } = useLocale();
   const userStr = localStorage.getItem('user');
   const currentUser = userStr ? JSON.parse(userStr) : null;
   const isAdmin = currentUser?.role === 'admin';
@@ -34,7 +39,7 @@ export const ForumPage: React.FC = () => {
 
     fetchPostsFromApi(search, page, userRole)
       .then((res) => {
-        if (!res.ok) throw new Error('שרת הפורום החזיר שגיאה');
+        if (!res.ok) throw new Error(t('forum.list.serverError'));
         return res.json();
       })
       .then((data) => {
@@ -145,7 +150,7 @@ export const ForumPage: React.FC = () => {
 
   const handleModeratePost = async (e: React.MouseEvent, postId: string, actionType: 'block' | 'unblock' | 'lock' | 'unlock') => {
     e.stopPropagation(); 
-    if (!currentUser?._id) return showAlert('משתמש לא מחובר', { type: 'error' });
+    if (!currentUser?._id) return showAlert(t('forum.list.notLoggedIn'), { type: 'error' });
 
     try {
       const response = await moderatePostApi(postId, currentUser._id, actionType);
@@ -154,81 +159,20 @@ export const ForumPage: React.FC = () => {
         fetchPosts(searchQuery, currentPage);
       } else {
         const errData = await response.json();
-        showAlert(errData.message || 'שגיאה בביצוע הפעולה', { type: 'error' });
+        showAlert(errData.message || t('forum.list.actionFailed'), { type: 'error' });
       }
     } catch (error) {
       console.error('Error moderating post:', error);
-      showAlert('שגיאה בתקשורת עם השרת', { type: 'error' });
+      showAlert(t('forum.errors.network'), { type: 'error' });
     }
-  };
-
-  const convertToGematriaPipe = (num: number): string => {
-    if (num === 15) return 'טו"';
-    if (num === 16) return 'טז"';
-    const hundreds = ['', 'ק', 'ר', 'ש', 'ת'];
-    const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
-    const units = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
-    let result = '';
-    const h = Math.floor((num % 1000) / 100);
-    const t = Math.floor((num % 100) / 10);
-    const u = num % 10;
-    if (h > 0) result += hundreds[h] || '';
-    if (t > 0) result += tens[t] || '';
-    if (u > 0) result += units[u] || '';
-    if (result.length === 1) {
-      return `${result}'`;
-    } else if (result.length > 1) {
-      return `${result.slice(0, -1)}"${result.slice(-1)}`;
-    }
-    return result;
-  };
-
-  const formatForumDate = (dateInput: string | Date | number): string => {
-    const now = new Date();
-    const date = new Date(dateInput);
-    if (isNaN(date.getTime())) return '';
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const timeString = date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-    if (diffInMinutes < 60 && diffInMinutes >= 0) {
-      return diffInMinutes === 0 ? 'עכשיו' : `לפני ${diffInMinutes} דקות`;
-    } 
-    if (compareDate.getTime() === today.getTime()) return `היום ב-${timeString}`;
-    if (compareDate.getTime() === yesterday.getTime()) return `אתמול ב-${timeString}`;
-
-    const isCurrentYear = date.getFullYear() === now.getFullYear();
-    const monthFormatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { month: 'long' });
-    const monthName = monthFormatter.format(date).replace(/[\u0591-\u05C7]/g, "");
-    const dayLetters = convertToGematriaPipe(date.getDate());
-    let hebrewDate = `${dayLetters} ב${monthName}`;
-
-    if (!isCurrentYear) {
-      const jewishYearFormatter = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { year: 'numeric' });
-      const yearParts = jewishYearFormatter.format(date).split(' ');
-      let yearLetters = yearParts[yearParts.length - 1];
-      if (yearLetters.startsWith('ה')) yearLetters = yearLetters.substring(1);
-      hebrewDate += ` ${yearLetters}`;
-    }
-
-    const gregoreanDate = date.toLocaleDateString('he-IL', {
-      day: 'numeric',
-      month: 'numeric',
-      year: isCurrentYear ? undefined : 'numeric'
-    });
-    return `${hebrewDate} / ${gregoreanDate}`;
   };
 
   return (
-    <div className="forum-page">
+    <div className="forum-page" dir={dir}>
       <SEO
-        title="פורום טכנולוגי מקצועי"
-        description="הצטרפו לקהילת המפתחים והמשתמשים של SafeAI613 בפורום הרשמי. מקום לדיונים מקצועיים, שאלות ותשובות, טיפים, ושיתוף מוצרים איכותיים בעולם ה-AI המסונן."
-        keywords="פורום SafeAI613, קהילת AI חרדית, שאלות ותשובות בינה מלאכותית, פורום מפתחים נטפרי"
+        title={t('forum.seo.title')}
+        description={t('forum.seo.description')}
+        keywords={t('forum.seo.keywords')}
         canonicalUrl="https://safeai613.com/forum"
       />
 
@@ -241,14 +185,14 @@ export const ForumPage: React.FC = () => {
             }
           }}
           disabled={!currentUser}
-          title={!currentUser ? "יש להתחבר כדי להוסיף פוסט" : ""}
+          title={!currentUser ? t('forum.list.loginToAddTitle') : ''}
           className={`forum-add-btn ${!currentUser ? "forum-add-btn-disabled" : ""}`}
         >
-          הוסף פוסט חדש
+          {t('forum.list.addPost')}
         </button>
         {!currentUser && (
         <span className="forum-login-hint">
-        יש <Link to={loginPath(ROUTES.hub.forum)}>להתחבר</Link> כדי להוסיף פוסט חדש
+          <Trans i18nKey="forum.list.loginToAddHint" components={{ link: <Link to={loginPath(ROUTES.hub.forum)} /> }} />
         </span>
         )}
         </div>
@@ -258,7 +202,7 @@ export const ForumPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-            placeholder="חפשו פוסטים, תגיות או נושאים..."
+            placeholder={t('forum.list.searchPlaceholder')}
             className="forum-search-input"
           />
           <i className="fa-solid fa-magnifying-glass forum-search-icon"></i>
@@ -267,7 +211,7 @@ export const ForumPage: React.FC = () => {
 
       <div className="forum-header-row">
         <h2 className="forum-header-title">
-          {searchQuery ? `תוצאות חיפוש עבור: "${searchQuery}"` : 'פוסטים בפורום'}
+          {searchQuery ? t('forum.list.searchResults', { query: searchQuery }) : t('forum.list.title')}
         </h2>
         {searchQuery && (
           <button
@@ -275,19 +219,19 @@ export const ForumPage: React.FC = () => {
             className="forum-clear-filter-btn"
           >
             <i className="fa-solid fa-arrow-rotate-left"></i>
-            חזור לרשימה המלאה
+            {t('forum.list.backToFullList')}
           </button>
         )}
       </div>
 
       {loading ? (
-        <div className="forum-loading">מחפש פוסטים...</div>
+        <div className="forum-loading">{t('forum.list.loading')}</div>
       ) : !Array.isArray(posts) || posts.length === 0 ? (
         <div className="forum-empty-state">
           <i className="fa-solid fa-folder-open forum-empty-icon"></i>
-          <h3 className="forum-empty-title">לא נמצאו פוסטים מתאימים</h3>
+          <h3 className="forum-empty-title">{t('forum.list.emptyTitle')}</h3>
           <button onClick={handleClearFilter} className="forum-show-all-btn">
-            הצג את כל הפוסטים
+            {t('forum.list.showAll')}
           </button>
         </div>
       ) : (
@@ -307,7 +251,7 @@ export const ForumPage: React.FC = () => {
                   <div className={`forum-card-avatar-col ${post.isBlocked ? 'forum-card-avatar-col-blocked' : ''}`}>
                     {post.ratingCount > 0 && (
                       <div className="forum-card-rating-badge">
-                        דירוג: {post.averageRating} ★
+                        {t('forum.list.rating', { rating: post.averageRating })}
                       </div>
                     )}
                     <div className="forum-avatar-circle">
@@ -320,17 +264,17 @@ export const ForumPage: React.FC = () => {
                     <div>
                       <div className="forum-card-meta-row">
                         <span className="forum-card-date">
-                          {formatForumDate(post.createdAt)}
+                          {formatForumDate(post.createdAt, t, language)}
                         </span>
                         <span className="forum-card-stats">
-                           צפיות: {post.viewsCount || 0} | תגובות: {post.commentCount || 0}
+                          {t('forum.list.stats', { views: post.viewsCount || 0, comments: post.commentCount || 0 })}
                         </span>
                       </div>
 
                       <div className="forum-tags-row">
                         <span className="forum-category-badge">{post.category}</span>
-                        {post.isBlocked && <span className="forum-blocked-badge">🛑 חסום</span>}
-                        {post.isLocked && <span className="forum-locked-badge">🔒 נעול</span>}
+                        {post.isBlocked && <span className="forum-blocked-badge">{t('forum.list.blocked')}</span>}
+                        {post.isLocked && <span className="forum-locked-badge">{t('forum.list.locked')}</span>}
 
                         <h3 className="forum-card-title">{post.title}</h3>
                         {post.tags && Array.isArray(post.tags) && post.tags.map((tag: string | { _id: string; name: string }) => {
@@ -358,7 +302,7 @@ export const ForumPage: React.FC = () => {
                             onClick={(e) => toggleExpandPost(e, post._id)}
                             className="forum-read-more"
                           >
-                            {isExpanded ? 'הצג פחות ^' : 'הצג עוד...'}
+                            {isExpanded ? t('forum.list.showLess') : t('forum.list.showMore')}
                           </span>
                         )}
                       </div>
@@ -377,7 +321,7 @@ export const ForumPage: React.FC = () => {
                           })()}
                         </div>
                         <span className="forum-last-comment-link">
-                          לתגובה האחרונה ←
+                          {t('forum.list.toLastComment')}
                         </span>
                       </div>
                     )}
@@ -390,13 +334,13 @@ export const ForumPage: React.FC = () => {
                               onClick={(e) => handleModeratePost(e, post._id, post.isBlocked ? 'unblock' : 'block')}
                               className={`forum-block-btn ${post.isBlocked ? 'forum-block-btn-active' : ''}`}
                             >
-                              {post.isBlocked ? '🔓 ביטל חסימה' : '🛑 חסום פוסט'}
+                              {post.isBlocked ? t('forum.list.unblock') : t('forum.list.block')}
                             </button>
                             <button
                               onClick={(e) => handleModeratePost(e, post._id, post.isLocked ? 'unlock' : 'lock')}
                               className="forum-lock-btn"
                             >
-                              {post.isLocked ? '🔓 שחרר נעילה' : '🔒 נעל לתגובות'}
+                              {post.isLocked ? t('forum.list.unlock') : t('forum.list.lock')}
                             </button>
                           </>
                         )}
@@ -405,7 +349,7 @@ export const ForumPage: React.FC = () => {
                         onClick={(e) => { e.stopPropagation(); navigate(generatePath(ROUTES.hub.forumPost, { id: post._id })); }}
                         className="forum-comments-btn"
                       >
-                        לכל התגובות
+                        {t('forum.list.allComments')}
                       </button>
                     </div>
 
@@ -422,7 +366,7 @@ export const ForumPage: React.FC = () => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 className="forum-page-nav-btn"
               >
-                הקודם ←
+                {t('forum.list.previous')}
               </button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
@@ -440,7 +384,7 @@ export const ForumPage: React.FC = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 className="forum-page-nav-btn"
               >
-                → הבא
+                {t('forum.list.next')}
               </button>
             </div>
           )}
@@ -450,7 +394,7 @@ export const ForumPage: React.FC = () => {
             <div className="forum-recommendations">
               <h3 className="forum-recommendations-title">
                 <i className="fa-solid fa-wand-magic-sparkles forum-recommendations-icon"></i>
-               אולי יעניין אותך גם...
+                {t('forum.list.recommendationsTitle')}
               </h3>
               <div className="forum-recommendations-list">
                 {recommendedPosts.map((p) => (
@@ -465,7 +409,7 @@ export const ForumPage: React.FC = () => {
                     <span className="forum-recommendation-title">
                       {p.title}
                     </span>
-                    <span className="forum-recommendation-link">קרא עוד ←</span>
+                    <span className="forum-recommendation-link">{t('forum.list.readMore')}</span>
                   </div>
                 ))}
               </div>

@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Applicant, Tender } from './types'
+import { formatTenderTime } from './timeUnits'
+import { useLocale } from '../../i18n/useLocale'
 
 interface Props {
   tender: Tender
@@ -10,42 +12,20 @@ interface Props {
   onViewMyApplication: (applicant: Applicant) => void
 }
 
-const singularUnit = (unit: string): string => {
-  switch (unit) {
-    case 'שעות':
-      return 'שעה'
-    case 'ימים':
-      return 'יום'
-    case 'שבועות':
-      return 'שבוע'
-    case 'חודשים':
-      return 'חודש'
-    case 'שנים':
-      return 'שנה'
-    default:
-      return unit
-  }
-}
-
-const formatTimeRequired = (time?: Tender['timeRequired']): string => {
-  if (!time) return '—'
-  const unit = time.value === 1 ? singularUnit(time.unit) : time.unit
-  return time.value === 1 ? `${unit}` : `${time.value} ${unit}`
-}
-
 const formatBudget = (budget?: number): string => {
   return budget === undefined || budget === null ? '—' : budget.toString()
 }
 
-const formatAppliedAt = (appliedAt?: string): string => {
+const formatAppliedAt = (locale: string, appliedAt?: string): string => {
   if (!appliedAt) return '—'
   const date = new Date(appliedAt)
   if (Number.isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString('he-IL')
+  return date.toLocaleDateString(locale)
 }
 
 export default function TenderDetails({ tender, onClose, onApply, currentUserId, onViewMyApplication }: Props) {
   const { t } = useTranslation()
+  const { locale } = useLocale()
   const myApplication = useMemo(
     () => tender.applicants?.find((a) => currentUserId && a.userId === currentUserId),
     [tender, currentUserId],
@@ -78,7 +58,7 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
   return (
     <div role="dialog" aria-modal="true" className="modal-overlay" onClick={onClose} style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px', borderRadius: 'var(--radius-lg)' }}>
-        <header className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '20px' }}>
+        <header className="modal-header" style={{ borderBottom: '1px solid var(--border-muted)', paddingBottom: '16px', marginBottom: '20px' }}>
           <div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{tender.title}</h2>
           </div>
@@ -93,7 +73,7 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
           
           {/* תיאור קצר והסבר */}
           {tender.shortDescription && (
-            <div style={{ background: 'var(--secondary-bg)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
               <strong>{t('tenders.detailsProjectExplanationLabel')}</strong>
               <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)', lineHeight: '1.6' }}>{tender.shortDescription}</p>
             </div>
@@ -101,19 +81,19 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
 
           {/* גריד נתונים יבש */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-            <div style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>{t('tenders.budgetLabel')}</span>
               <strong>{formatBudget(tender.budget)}</strong>
             </div>
-            <div style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>{t('tenders.timeRequiredLabel')}</span>
-              <strong>{formatTimeRequired(tender.timeRequired)}</strong>
+              <strong>{formatTenderTime(t, tender.timeRequired)}</strong>
             </div>
-            <div style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>{t('tenders.registeredForProjectLabel')}</span>
               <strong>{t('tenders.applicantsCountSuffix', { count: applicantsCount })}</strong>
             </div>
-            <div style={{ border: '1px solid var(--border-color)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
+            <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: 'var(--radius-md)', textAlign: 'center' }}>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>{t('tenders.proposalRangeLabel')}</span>
               <strong>{proposalRange ? proposalRange : t('tenders.noProposalsText')}</strong>
             </div>
@@ -125,7 +105,7 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
               {tender.productType && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{t('tenders.productTypeLabel')}</span>
-                  <span className="domain-pill" style={{ backgroundColor: 'var(--gray-100)', color: 'var(--text-secondary)', borderColor: 'var(--border-strong)' }}>{t(`tenders.productTypeOptions.${tender.productType}`, { defaultValue: tender.productType })}</span>
+                  <span className="domain-pill" style={{ backgroundColor: 'var(--gray-100)', color: 'var(--text-secondary)' }}>{t(`tenders.productTypeOptions.${tender.productType}`, { defaultValue: tender.productType })}</span>
                 </div>
               )}
               {tender.aiApplicationType && (
@@ -160,19 +140,19 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
           {/* אפיון ראשוני והמלצת פיתוח - מוצג למועמדים רק אם בעל המכרז בחר לפרסם אותו (SCRUM-291) */}
           {tender.specification?.status === 'ready' && tender.specification.isPublished && (
             <div style={{ borderTop: '1px solid var(--border-muted)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <strong>אפיון ראשוני והמלצת פיתוח:</strong>
+              <strong>{t('tenders.spec.title')}</strong>
 
               {tender.specification.techStackRecommendation && (
                 <div>
-                  <span style={{ color: 'var(--text-muted)' }}>המלצה טכנולוגית: </span>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('tenders.spec.techStack')} </span>
                   <span style={{ color: 'var(--text-secondary)' }}>{tender.specification.techStackRecommendation}</span>
                 </div>
               )}
 
               {!!tender.specification.openSourceReferences?.length && (
                 <div>
-                  <span style={{ color: 'var(--text-muted)' }}>פרויקטים דומים בקוד פתוח:</span>
-                  <ul style={{ margin: '6px 0 0', paddingRight: '20px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('tenders.spec.openSource')}</span>
+                  <ul style={{ margin: '6px 0 0', paddingInlineStart: '20px' }}>
                     {tender.specification.openSourceReferences.map((ref) => (
                       <li key={ref.url}>
                         <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
@@ -184,8 +164,8 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
 
               {!!tender.specification.readingSources?.length && (
                 <div>
-                  <span style={{ color: 'var(--text-muted)' }}>מקורות קריאה מומלצים:</span>
-                  <ul style={{ margin: '6px 0 0', paddingRight: '20px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('tenders.spec.readingSources')}</span>
+                  <ul style={{ margin: '6px 0 0', paddingInlineStart: '20px' }}>
                     {tender.specification.readingSources.map((ref) => (
                       <li key={ref.url}>
                         <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
@@ -196,7 +176,7 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
               )}
 
               {tender.specification.document && (
-                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: 'var(--secondary-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
                   {tender.specification.document}
                 </pre>
               )}
@@ -204,11 +184,11 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
           )}
 
           {/* כפתורי פעולה תחתונה */}
-          <div className="modal-actions mt-18" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: '10px' }}>
+          <div className="modal-actions mt-18" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '12px', borderTop: '1px solid var(--border-muted)', paddingTop: '16px', marginTop: '10px' }}>
             {myApplication ? (
               <>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  הגשת הצעה בתאריך {formatAppliedAt(myApplication.appliedAt)}
+                  {t('tenders.details.appliedOnDate', { date: formatAppliedAt(locale, myApplication.appliedAt) })}
                 </span>
                 <button
                   type="button"
@@ -218,7 +198,7 @@ export default function TenderDetails({ tender, onClose, onApply, currentUserId,
                     onViewMyApplication(myApplication)
                   }}
                 >
-                  לצפייה בהצעה שהגשתי
+                  {t('tenders.details.viewMyApplicationBtn')}
                 </button>
               </>
             ) : (

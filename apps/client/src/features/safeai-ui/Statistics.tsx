@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import { API_ENDPOINTS } from "../../config/api";
 
 interface StatisticsProps {
@@ -45,6 +46,7 @@ interface AdminStats {
 
 export default function Statistics({ user }: StatisticsProps) {
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const [usageData, setUsageData] = useState<UsageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
@@ -216,7 +218,7 @@ export default function Statistics({ user }: StatisticsProps) {
         <div className="dashboard-grid">
           <div className="stat-card">
             <h3>{t("userDashboard.totalRequestsLabel")}</h3>
-            <p className="stat-value">{adminStats.totalRequests.toLocaleString()}</p>
+            <p className="stat-value">{adminStats.totalRequests.toLocaleString(locale)}</p>
             <p className="stat-change">
               {timeRange === "week"
                 ? t("statistics.last7Days")
@@ -231,12 +233,12 @@ export default function Statistics({ user }: StatisticsProps) {
             <>
               <div className="stat-card">
                 <h3>{t("statistics.totalUsersLabel")}</h3>
-                <p className="stat-value">{adminStats.totalUsers.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.totalUsers.toLocaleString(locale)}</p>
               </div>
 
               <div className="stat-card">
                 <h3>{t("userDashboard.totalTokensLabel")}</h3>
-                <p className="stat-value">{adminStats.totalTokens.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.totalTokens.toLocaleString(locale)}</p>
               </div>
 
               <div className="stat-card">
@@ -263,7 +265,7 @@ export default function Statistics({ user }: StatisticsProps) {
             <>
               <div className="stat-card">
                 <h3>{t("statistics.successfulRequestsLabel")}</h3>
-                <p className="stat-value">{adminStats.successfulRequests.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.successfulRequests.toLocaleString(locale)}</p>
                 <p className="stat-change positive">
                   {t("statistics.successPercent", {
                     percent:
@@ -276,7 +278,7 @@ export default function Statistics({ user }: StatisticsProps) {
 
               <div className="stat-card">
                 <h3>{t("userDashboard.blockedRequestsLabel")}</h3>
-                <p className="stat-value">{adminStats.blockedRequests.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.blockedRequests.toLocaleString(locale)}</p>
                 <p className="stat-change negative">
                   {t("userDashboard.blockedPercent", {
                     percent:
@@ -300,7 +302,7 @@ export default function Statistics({ user }: StatisticsProps) {
 
               <div className="stat-card">
                 <h3>{t("userDashboard.totalTokensLabel")}</h3>
-                <p className="stat-value">{adminStats.totalTokens.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.totalTokens.toLocaleString(locale)}</p>
               </div>
 
               <div className="stat-card">
@@ -320,7 +322,7 @@ export default function Statistics({ user }: StatisticsProps) {
             <>
               <div className="stat-card">
                 <h3>{t("statistics.successfulRequestsLabel")}</h3>
-                <p className="stat-value">{adminStats.successfulRequests.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.successfulRequests.toLocaleString(locale)}</p>
                 <p className="stat-change positive">
                   {t("statistics.successPercent", {
                     percent:
@@ -333,7 +335,7 @@ export default function Statistics({ user }: StatisticsProps) {
 
               <div className="stat-card">
                 <h3>{t("userDashboard.totalTokensLabel")}</h3>
-                <p className="stat-value">{adminStats.totalTokens.toLocaleString()}</p>
+                <p className="stat-value">{adminStats.totalTokens.toLocaleString(locale)}</p>
               </div>
 
               <div className="stat-card">
@@ -380,7 +382,7 @@ export default function Statistics({ user }: StatisticsProps) {
                         : "0";
                     return (
                       <tr key={day.date}>
-                        <td>{new Date(day.date).toLocaleDateString()}</td>
+                        <td>{new Date(day.date).toLocaleDateString(locale)}</td>
                         {isOrgOwner && <td>{day.user || "—"}</td>}
                         <td>{day.requests}</td>
                         {isAdmin && (
@@ -417,7 +419,7 @@ export default function Statistics({ user }: StatisticsProps) {
           <div style={{ marginTop: "16px" }}>
             <div className="alert alert-info">
               <strong>📊 {t("statistics.systemAnalysisLabel")}</strong>
-              <ul style={{ marginTop: "8px", marginBottom: "0", paddingRight: "20px" }}>
+              <ul style={{ marginTop: "8px", marginBottom: "0", paddingInlineStart: "20px" }}>
                 <li>{t("statistics.dailyAverageInsight", { avg: avgRequestsPerDay.toFixed(0) })}</li>
                 <li>{t("statistics.blockRateInsight", { rate: blockRate })}</li>
                 <li>

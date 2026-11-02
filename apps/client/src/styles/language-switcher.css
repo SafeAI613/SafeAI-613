@@ -49,7 +49,7 @@
 
 /* Flag artwork: 2px keeps the flag's small-corner look at 22x16 — the
    radius tokens (10px+) would turn it into a pill. */
-.flag-icon {
+.language-switcher .flag-icon {
   border-radius: 2px;
   flex-shrink: 0;
   display: block;
@@ -62,7 +62,6 @@
   min-width: 150px;
   padding: 4px;
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   overflow: hidden;

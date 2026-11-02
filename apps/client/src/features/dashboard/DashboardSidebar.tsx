@@ -2,7 +2,9 @@ import { Link, NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
 import { HomeIcon } from "../landing/icons";
 import { ROUTES } from "../../router/paths";
+import { useTranslation } from "react-i18next";
 import ThemeToggle from "../../components/ThemeToggle";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 export interface SidebarItem {
   key: string;
@@ -33,6 +35,7 @@ const itemClassName = ({ isActive }: { isActive: boolean }) =>
 // cross-link at the bottom moves between the two platforms — per team
 // decision (SCRUM-227) they serve the same audience, so both stay reachable.
 export default function DashboardSidebar({ homeLabel, homePath, items, crossLink, footer }: DashboardSidebarProps) {
+  const { t } = useTranslation();
   return (
     <nav className="dash-sidebar" aria-label={homeLabel}>
       <Link to={ROUTES.home} className="dash-sidebar-brand">
@@ -41,7 +44,7 @@ export default function DashboardSidebar({ homeLabel, homePath, items, crossLink
 
       <NavLink to={homePath} end className={itemClassName}>
         <HomeIcon size={18} />
-        <span>בית</span>
+        <span>{t("shell.sidebar.home")}</span>
       </NavLink>
       {items.map((item) => (
         <NavLink key={item.key} to={item.path} className={itemClassName}>
@@ -56,8 +59,9 @@ export default function DashboardSidebar({ homeLabel, homePath, items, crossLink
         <span>{crossLink.label}</span>
       </Link>
       {footer}
-      <div className="dash-sidebar-tools">
+      <div className="dash-sidebar-tools" role="group" aria-label={t("shell.sidebar.tools")}>
         <ThemeToggle />
+        <LanguageSwitcher placement="sidebar" />
       </div>
     </nav>
   );

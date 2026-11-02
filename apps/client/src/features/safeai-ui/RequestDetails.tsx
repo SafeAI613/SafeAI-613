@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import { apiCall } from "../../config/api";
 import { useAlert } from "../../context/alertStore";
 import "../../styles/safeai-ui.css";
@@ -12,6 +14,8 @@ interface RequestData {
 
 export default function RequestDetails() {
     const { id } = useParams<{ id: string }>();
+    const { t } = useTranslation();
+    const { locale } = useLocale();
     const [request, setRequest] = useState<RequestData | null>(null);
     const navigate = useNavigate();
     const { showAlert } = useAlert();
@@ -26,11 +30,11 @@ export default function RequestDetails() {
                 const fetchedData = data as unknown as RequestData;
                 setRequest(fetchedData);
             })
-            .catch((err) => console.error("שגיאה בטעינת הפנייה:", err));
+            .catch((err) => console.error("Failed to load request:", err));
     }, [id]);
 
 
-    if (!request) return <div>טוען פרטי פנייה...</div>;
+    if (!request) return <div>{t("requests.loadingDetails")}</div>;
 
     const confirmCloseRequest = async () => {
         setIsClosing(true);
@@ -41,8 +45,8 @@ export default function RequestDetails() {
             setRequest({ ...request, status: 'closed' });
             navigate(-1); // נווט חזרה לרשימת הפניות לאחר סגירה
         } catch (error) {
-            console.error("שגיאה בסגירת הפנייה:", error);
-            showAlert("שגיאה בסגירת הפנייה. נסי שוב מאוחר יותר.", { type: "error" });
+            console.error("Failed to close request:", error);
+            showAlert(t("requests.closeFailedAlert"), { type: "error" });
         } finally {
             setIsClosing(false);
             setShowCloseConfirm(false);
@@ -61,26 +65,26 @@ export default function RequestDetails() {
             setRequest((data as unknown as { request: RequestData }).request);
             setReplyText("");
         } catch (err) {
-            console.error("שגיאה בשליחת התגובה:", err);
+            console.error("Failed to send reply:", err);
         } finally {
             setIsSubmitting(false);
         }
     };
 
         return (
-        <div className="request-details-container">
+        <div className="safeai-ui-page request-details-container">
             <button className="back-btn" onClick={() => navigate(-1)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 6L9 12L15 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                חזרה לרשימת הפניות
+                {t("requests.backToList")}
             </button>
-            <h2>פרטי הפנייה</h2>
+            <h2>{t("requests.detailsTitle")}</h2>
             <div className="request-card">
                 <h3>{String(request.title || "")}</h3>
-                <p><strong>סוג:</strong> {String(request.requestType || "")}</p>
-                <p><strong>תוכן:</strong> {String(request.description || "")}</p>
-                <p><strong>תאריך שליחה:</strong> {request.createdAt ? new Date(request.createdAt as string | number | Date).toLocaleDateString("he-IL") : ""}</p>
+                <p><strong>{t("requests.typeLabel")}</strong> {String(request.requestType || "")}</p>
+                <p><strong>{t("requests.contentLabel")}</strong> {String(request.description || "")}</p>
+                <p><strong>{t("requests.sentDateLabel")}</strong> {request.createdAt ? new Date(request.createdAt as string | number | Date).toLocaleDateString(locale) : ""}</p>
                 {(request.attachments || []).length > 0 && (
                     <div className="request-attachment-list">
                         {(request.attachments || []).map((att, index) => {
@@ -90,7 +94,7 @@ export default function RequestDetails() {
                                     {att.type === "video" ? (
                                         <video src={att.url} controls />
                                     ) : (
-                                        <img src={att.url} alt="צירוף לפנייה" />
+                                        <img src={att.url} alt={t("requests.attachmentAlt")} />
                                     )}
                                 </div>
                             );
@@ -98,18 +102,18 @@ export default function RequestDetails() {
                     </div>
                 )}
                 {String(request.status) === "closed" ? (
-                    <button className="close-btn close-btn-disabled" disabled title="לא ניתן לסגור פנייה שכבר נסגרה">
+                    <button className="close-btn close-btn-disabled" disabled title={t("requests.alreadyClosedTitle")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 13L9 17L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        הפנייה סגורה
+                        {t("requests.requestClosedLabel")}
                     </button>
                 ) : (
                     <button className="close-btn" onClick={() => setShowCloseConfirm(true)}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        סגור פנייה
+                        {t("requests.closeRequestBtn")}
                     </button>
                 )}
 
@@ -118,8 +122,8 @@ export default function RequestDetails() {
                         const reply = replyItem as Record<string, unknown>;
                         return (
                             <div key={index} className={`reply-bubble ${String(reply.senderRole || "")}`}>
-                                <p><strong>{reply.senderRole === 'admin' ? 'אדמין' : 'אני'}:</strong> {String(reply.text || "")}</p>
-                                <small>{reply.createdAt ? new Date(reply.createdAt as string | number | Date).toLocaleString("he-IL") : ""}</small>
+                                <p><strong>{reply.senderRole === 'admin' ? t("requests.adminSenderLabel") : t("requests.meSenderLabel")}:</strong> {String(reply.text || "")}</p>
+                                <small>{reply.createdAt ? new Date(reply.createdAt as string | number | Date).toLocaleString(locale) : ""}</small>
                             </div>
                         );
                     })}
@@ -129,10 +133,10 @@ export default function RequestDetails() {
                     <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="כתוב תגובה..."
+                        placeholder={t("requests.replyPlaceholder")}
                     />
                     <button onClick={handleAddReply} disabled={isSubmitting}>
-                        {isSubmitting ? "שולח..." : "שלח תגובה"}
+                        {isSubmitting ? t("requests.sendingReply") : t("requests.sendReplyBtn")}
                     </button>
                 </div>
             </div>
@@ -145,14 +149,14 @@ export default function RequestDetails() {
                                 <path d="M12 9V13M12 17H12.01M10.29 3.86L1.82 18A2 2 0 0 0 3.55 21H20.45A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
                         </div>
-                        <h2 className="confirm-modal-title">סגירת פנייה</h2>
-                        <p className="confirm-modal-text">האם את/ה בטוח/ה שברצונך לסגור את הפנייה? לא ניתן לשלוח תגובות נוספות לאחר הסגירה.</p>
+                        <h2 className="confirm-modal-title">{t("requests.closeConfirmTitle")}</h2>
+                        <p className="confirm-modal-text">{t("requests.closeConfirmText")}</p>
                         <div className="modal-footer confirm-modal-footer">
                             <button className="btn btn-secondary" onClick={() => setShowCloseConfirm(false)} disabled={isClosing}>
-                                ביטול
+                                {t("common.cancel")}
                             </button>
                             <button className="btn btn-danger" onClick={confirmCloseRequest} disabled={isClosing}>
-                                {isClosing ? "סוגר..." : "כן, סגור פנייה"}
+                                {isClosing ? t("requests.closingBtn") : t("requests.confirmCloseBtn")}
                             </button>
                         </div>
                     </div>

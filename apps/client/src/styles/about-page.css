@@ -8,15 +8,14 @@
   padding: 48px 24px 64px;
 }
 
-.about-container {
+.about-page .about-container {
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 48px 56px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
-.about-container h1 {
+.about-page .about-container h1 {
   text-align: center;
   color: var(--text-primary);
   margin: 0 0 40px;
@@ -26,20 +25,20 @@
   line-height: 1.2;
 }
 
-.about-section {
+.about-page .about-section {
   margin-bottom: 40px;
   padding-bottom: 36px;
   border-bottom: 1px solid var(--border-muted);
 }
 
-.about-section:last-of-type {
+.about-page .about-section:last-of-type {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
 /* Section heading with a short brand accent bar */
-.about-section h2 {
+.about-page .about-section h2 {
   position: relative;
   color: var(--text-primary);
   font-size: 22px;
@@ -49,7 +48,7 @@
   padding-top: 14px;
 }
 
-.about-section h2::before {
+.about-page .about-section h2::before {
   content: "";
   position: absolute;
   top: 0;
@@ -60,7 +59,7 @@
   background: var(--brand-primary);
 }
 
-.about-section h3 {
+.about-page .about-section h3 {
   color: var(--text-primary);
   font-size: 18px;
   font-weight: 700;
@@ -68,7 +67,7 @@
   margin-bottom: 10px;
 }
 
-.about-section p {
+.about-page .about-section p {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -76,13 +75,13 @@
   text-align: start;
 }
 
-.about-section ul {
+.about-page .about-section ul {
   list-style: none;
   padding-inline-start: 0;
   margin: 16px 0;
 }
 
-.about-section ul li {
+.about-page .about-section ul li {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -92,7 +91,7 @@
   text-align: start;
 }
 
-.about-section ul li::before {
+.about-page .about-section ul li::before {
   content: "";
   position: absolute;
   inset-inline-start: 4px;
@@ -105,21 +104,20 @@
 
 /* The provider illustration is a fixed-size inline SVG — keep it inside
    the reading column on narrow screens. */
-.about-section svg {
+.about-page .about-section svg {
   max-width: 100%;
   height: auto;
 }
 
-.about-cta {
+.about-page .about-cta {
   background: var(--brand-primary-soft);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 36px 32px;
   text-align: center;
   margin-top: 40px;
 }
 
-.about-cta h2 {
+.about-page .about-cta h2 {
   color: var(--text-primary);
   font-size: 24px;
   font-weight: 800;
@@ -127,7 +125,7 @@
   margin: 0 0 12px;
 }
 
-.about-cta h3 {
+.about-page .about-cta h3 {
   color: var(--text-primary);
   font-size: 20px;
   font-weight: 700;
@@ -135,7 +133,7 @@
   margin-bottom: 12px;
 }
 
-.about-cta p {
+.about-page .about-cta p {
   font-size: 16px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -143,7 +141,7 @@
   text-align: center;
 }
 
-.about-cta .btn {
+.about-page .about-cta .btn {
   display: inline-flex;
   padding: 12px 28px;
   border-radius: var(--radius-sm);
@@ -155,37 +153,37 @@
   margin: 0;
 }
 
-.about-cta .btn:focus-visible {
+.about-page .about-cta .btn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.about-cta .btn-primary {
+.about-page .about-cta .btn-primary {
   background: var(--brand-primary);
   color: var(--text-inverse);
   border: 1px solid var(--brand-primary);
 }
 
-.about-cta .btn-primary:hover {
+.about-page .about-cta .btn-primary:hover {
   background: var(--brand-primary-hover);
   border-color: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-.about-cta .btn-secondary {
+.about-page .about-cta .btn-secondary {
   background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
 }
 
-.about-cta .btn-secondary:hover {
+.about-page .about-cta .btn-secondary:hover {
   border-color: var(--brand-primary);
   color: var(--brand-primary-hover);
   transform: translateY(-1px);
 }
 
-.cta-buttons {
+.about-page .cta-buttons {
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -199,56 +197,56 @@
     padding: 24px 16px 48px;
   }
 
-  .about-container {
+  .about-page .about-container {
     padding: 28px 22px;
     border-radius: var(--radius-md);
   }
 
-  .about-container h1 {
+  .about-page .about-container h1 {
     font-size: 28px;
     margin-bottom: 28px;
   }
 
-  .about-section h2 {
+  .about-page .about-section h2 {
     font-size: 20px;
   }
 
-  .about-section h3 {
+  .about-page .about-section h3 {
     font-size: 17px;
   }
 
-  .about-section p,
-  .about-section ul li {
+  .about-page .about-section p,
+  .about-page .about-section ul li {
     font-size: 15px;
   }
 
-  .about-cta {
+  .about-page .about-cta {
     padding: 24px 20px;
   }
 
-  .about-cta h2 {
+  .about-page .about-cta h2 {
     font-size: 22px;
   }
 
-  .about-cta h3 {
+  .about-page .about-cta h3 {
     font-size: 18px;
   }
 
-  .cta-buttons {
+  .about-page .cta-buttons {
     flex-direction: column;
   }
 
-  .about-cta .btn {
+  .about-page .about-cta .btn {
     width: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-cta .btn {
+  .about-page .about-cta .btn {
     transition: none;
   }
 
-  .about-cta .btn:hover {
+  .about-page .about-cta .btn:hover {
     transform: none;
   }
 }

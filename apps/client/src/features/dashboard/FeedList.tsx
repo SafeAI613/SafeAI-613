@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface FeedItem {
   id: string;
@@ -19,13 +20,14 @@ interface FeedListProps {
 }
 
 export default function FeedList({ title, items, loading, failed, emptyLabel, variant = "list" }: FeedListProps) {
+  const { t } = useTranslation();
   return (
     <div className="dash-feed">
       <h2 className="dash-feed-title">{title}</h2>
       {loading ? (
-        <p className="dash-feed-status">טוען…</p>
+        <p className="dash-feed-status">{t("shell.feed.loading")}</p>
       ) : failed ? (
-        <p className="dash-feed-status">לא ניתן לטעון כרגע.</p>
+        <p className="dash-feed-status">{t("shell.feed.failed")}</p>
       ) : items.length === 0 ? (
         <p className="dash-feed-status">{emptyLabel}</p>
       ) : variant === "cards" ? (

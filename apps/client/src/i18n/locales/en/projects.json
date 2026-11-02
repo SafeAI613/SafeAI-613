@@ -1,0 +1,210 @@
+{
+  "tenders": {
+    "budgetWithCurrency": "{{amount}} ILS",
+    "timeValue": "{{value}} {{unit}}",
+    "timeUnits": {
+      "hours": "Hours",
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months",
+      "years": "Years"
+    },
+    "timeOne": {
+      "hours": "1 hour",
+      "days": "1 day",
+      "weeks": "1 week",
+      "months": "1 month",
+      "years": "1 year"
+    },
+    "timeMany": {
+      "hours": "{{value}} hours",
+      "days": "{{value}} days",
+      "weeks": "{{value}} weeks",
+      "months": "{{value}} months",
+      "years": "{{value}} years"
+    },
+    "board": {
+      "closeSmartSearch": "Close smart search",
+      "appliedFilter": "Tenders I submitted an offer to",
+      "clearAppliedFilter": "Clear search",
+      "alreadyApplied": "You have already applied to this tender",
+      "registrationCancelled": "The registration was cancelled"
+    },
+    "card": {
+      "appliedOn": "Offer submitted on {{date}}",
+      "offersBtn": "Offers",
+      "newOffersAria": "{{count}} new offers"
+    },
+    "details": {
+      "appliedOnDate": "You submitted an offer on {{date}}",
+      "viewMyApplicationBtn": "View my offer"
+    },
+    "myApplication": {
+      "title": "My Offer",
+      "submittedOn": "Submission date",
+      "proposalInShekels": "Offer (ILS)"
+    },
+    "manage": {
+      "newOffersTotal": "You have {{count}} new offers",
+      "newOffersForTender": "{{count}} new offers for the tender:"
+    },
+    "offers": {
+      "markViewedError": "The offers could not be marked as viewed",
+      "title": "Offers for tender: {{title}}",
+      "professionalProfile": "Professional profile - {{name}}",
+      "experience": "Experience:",
+      "resume": "Resume:",
+      "openFile": "Open file",
+      "portfolio": "Portfolio:"
+    },
+    "apply": {
+      "useMyProfile": "Use my professional profile ({{name}})",
+      "fillManually": "Fill in details manually",
+      "chooseResumeOptional": "Choose a resume file (optional)",
+      "noProfileMessage": "You do not have a professional profile yet. Creating one will let you apply faster next time.",
+      "createProfileBtn": "Create a professional profile",
+      "resumeLabel": "Resume (PDF, up to 5MB)",
+      "portfolioLinkLabel": "Portfolio link",
+      "submitting": "Submitting...",
+      "errors": {
+        "nameRequired": "Please enter a name",
+        "nameTooLong": "Name can contain up to {{max}} characters",
+        "emailRequired": "Please enter an email",
+        "emailInvalid": "Please enter a valid email address",
+        "emailTooLong": "Email can contain up to {{max}} characters",
+        "detailsRequired": "Please enter details",
+        "detailsTooLong": "Details can contain up to {{max}} characters",
+        "proposalPositive": "The offer must be a positive number",
+        "contactMethodTooLong": "Contact method can contain up to {{max}} characters",
+        "portfolioLinkTooLong": "The link can contain up to {{max}} characters",
+        "portfolioLinkInvalid": "Please enter a valid link (starting with http:// or https://)",
+        "resumePdfOnly": "Only PDF files can be attached",
+        "resumeTooLarge": "The file size must be 5MB or less",
+        "resumeUploadFailed": "Uploading the resume failed, please try again"
+      }
+    },
+    "create": {
+      "topicMismatchError": "The text you entered does not describe a tender request. Please describe the project or service you want to publish.",
+      "phoneInvalid": "Please enter a valid phone number",
+      "durationValuePlaceholder": "Number"
+    },
+    "spec": {
+      "panelTitle": "Initial Specification and Development Recommendation",
+      "panelDescription": "Automatically generate a technology recommendation, similar open-source projects, reading sources and an initial specification document",
+      "title": "Initial specification and development recommendation:",
+      "regenerateBtn": "Regenerate specification",
+      "generateBtn": "Create initial specification and recommendation",
+      "generating": "The agent is generating the specification. This may take a few minutes...",
+      "cancelling": "Cancelling...",
+      "failed": "Generating the specification failed.",
+      "techStack": "Technology recommendation:",
+      "openSource": "Similar open-source projects:",
+      "readingSources": "Recommended reading:",
+      "document": "Specification document:",
+      "unpublishBtn": "Unpublish (keep private)",
+      "publishBtn": "Publish with the tender",
+      "visiblePublic": "The specification is currently visible to applicants viewing the tender",
+      "visiblePrivate": "The specification is currently visible only to you as the tender owner",
+      "requestError": "Error requesting the specification",
+      "cancelError": "Error cancelling the specification",
+      "publishError": "Error updating the publish status"
+    }
+  },
+  "agents": {
+    "title": "🤖 Agents Marketplace",
+    "subtitle": "Discover, download and contribute agents to the community",
+    "byCreator": "By {{name}}",
+    "tabs": {
+      "gallery": "🏠 Gallery",
+      "submit": "➕ Add an Agent",
+      "stats": "📊 Statistics",
+      "desktop": "⬇️ Desktop App"
+    },
+    "fields": {
+      "financialManagement": "Financial Management",
+      "legal": "Legal",
+      "medical": "Medical",
+      "education": "Education",
+      "businessAutomation": "Business Automation",
+      "softwareDevelopment": "Software Development"
+    },
+    "marketplace": {
+      "loadError": "Failed to load agents. Please try again.",
+      "searchPlaceholder": "Search agents by name or description...",
+      "allFields": "All fields",
+      "allFrameworks": "All frameworks",
+      "sort": {
+        "downloads": "🔥 Most popular",
+        "rating": "⭐ Top rated",
+        "newest": "🆕 Newest"
+      },
+      "resultsCount": "{{count}} agents found",
+      "loading": "Loading agents...",
+      "empty": "No agents match your search",
+      "moreDetails": "More details ›",
+      "prev": "‹ Previous",
+      "next": "Next ›",
+      "page": "Page {{page}}"
+    },
+    "detail": {
+      "notFound": "Agent not found.",
+      "loading": "Loading...",
+      "unknownError": "Unknown error",
+      "backToGallery": "‹ Back to gallery",
+      "by": "By",
+      "ratingsCount": "{{count}} ratings",
+      "downloadNow": "Download now",
+      "description": "Description",
+      "targetAudience": "Target audience",
+      "professionalFields": "Professional fields",
+      "tasks": "Tasks",
+      "exampleQuestions": "Example questions",
+      "techSpecs": "Technical specifications",
+      "supportedModels": "Supported models",
+      "requiredPermissions": "Required permissions",
+      "links": "Links",
+      "releaseDate": "Release date: {{date}}",
+      "downloadsCount": "{{formatted}} downloads",
+      "versionLabel": "Version {{version}}"
+    },
+    "stats": {
+      "loadError": "Failed to load statistics",
+      "loading": "Loading statistics...",
+      "title": "Marketplace Statistics",
+      "totalAgents": "Total agents",
+      "totalDownloads": "Total downloads",
+      "mostPopular": "Most popular",
+      "newest": "Newest",
+      "topRated": "Top rated",
+      "popularFrameworks": "Popular frameworks",
+      "unknown": "Unknown",
+      "noData": "No data yet"
+    },
+    "submit": {
+      "manifestError": "Failed to load the manifest",
+      "iconError": "Failed to generate the icon",
+      "submitError": "Failed to submit the agent",
+      "successTitle": "The agent was submitted successfully!",
+      "redirecting": "Redirecting you to the gallery...",
+      "title": "Add a New Agent",
+      "subtitle": "The repository must contain a <code>manifest.json</code> file at the root of the <code>main</code> branch",
+      "repoLabel": "GitHub repository link (public)",
+      "loading": "Loading...",
+      "loadManifest": "Load manifest",
+      "manifestLoaded": "Manifest loaded successfully",
+      "fieldName": "Name",
+      "fieldCreator": "Creator",
+      "fieldVersion": "Version",
+      "fieldDescription": "Description",
+      "fieldTargetAudience": "Target audience",
+      "downloadLink": "Download link:",
+      "linkValid": "The link is valid",
+      "iconLabel": "Agent icon",
+      "regenerateIcon": "Generate a new icon",
+      "generatingIcon": "Generating icon...",
+      "generateIcon": "Generate icon automatically",
+      "submitting": "Submitting...",
+      "submitForApproval": "Submit for approval"
+    }
+  }
+}

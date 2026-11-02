@@ -11,7 +11,8 @@
   color: var(--text-muted);
 }
 
-.article-back-link {
+.article-page .article-back-link,
+.article-page-error .article-back-link {
   display: inline-block;
   color: var(--link-color);
   text-decoration: none;
@@ -22,23 +23,25 @@
   transition: color 0.2s var(--ease-out);
 }
 
-.article-back-link:hover {
+.article-page .article-back-link:hover,
+.article-page-error .article-back-link:hover {
   color: var(--link-color-hover);
   text-decoration: underline;
 }
 
-.article-back-link:focus-visible {
+.article-page .article-back-link:focus-visible,
+.article-page-error .article-back-link:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.article-header {
+.article-page .article-header {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-default);
 }
 
-.article-category {
+.article-page .article-category {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--brand-primary);
@@ -46,7 +49,7 @@
   letter-spacing: 0.05em;
 }
 
-.article-title {
+.article-page .article-title {
   font-size: 32px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -55,49 +58,49 @@
   line-height: 1.25;
 }
 
-.article-description {
+.article-page .article-description {
   color: var(--text-muted);
   font-size: 1.05rem;
   line-height: 1.6;
 }
 
-.article-meta {
+.article-page .article-meta {
   margin-top: 0.75rem;
   font-size: 0.85rem;
   color: var(--text-muted);
 }
 
 /* Markdown content styles */
-.article-content {
+.article-page .article-content {
   line-height: 1.8;
   font-size: 1rem;
   color: var(--text-secondary);
 }
 
-.article-content h1,
-.article-content h2,
-.article-content h3,
-.article-content h4 {
+.article-page .article-content h1,
+.article-page .article-content h2,
+.article-page .article-content h3,
+.article-page .article-content h4 {
   font-weight: 700;
   margin: 1.8rem 0 0.8rem;
   color: var(--text-primary);
 }
 
-.article-content h1 { font-size: 1.7rem; }
-.article-content h2 { font-size: 1.35rem; border-bottom: 1px solid var(--border-default); padding-bottom: 0.4rem; }
-.article-content h3 { font-size: 1.15rem; }
+.article-page .article-content h1 { font-size: 1.7rem; }
+.article-page .article-content h2 { font-size: 1.35rem; border-bottom: 1px solid var(--border-default); padding-bottom: 0.4rem; }
+.article-page .article-content h3 { font-size: 1.15rem; }
 
-.article-content p { margin-bottom: 1rem; }
+.article-page .article-content p { margin-bottom: 1rem; }
 
-.article-content ul,
-.article-content ol {
-  padding-right: 1.5rem;
+.article-page .article-content ul,
+.article-page .article-content ol {
+  padding-inline-start: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.article-content li { margin-bottom: 0.3rem; }
+.article-page .article-content li { margin-bottom: 0.3rem; }
 
-.article-content code {
+.article-page .article-content code {
   background: var(--bg-elevated);
   padding: 0.15em 0.4em;
   border-radius: 6px; /* tight inline-code chip; smaller than --radius-sm on purpose */
@@ -107,7 +110,7 @@
   unicode-bidi: embed;
 }
 
-.article-content pre {
+.article-page .article-content pre {
   /* Deliberate one-off: code blocks stay dark in both themes
      (same ink/terminal colors as the showcase pages). */
   background: #0f1d22;
@@ -117,10 +120,10 @@
   overflow-x: auto;
   margin-bottom: 1rem;
   direction: ltr;
-  text-align: left;
+  text-align: start;
 }
 
-.article-content pre code {
+.article-page .article-content pre code {
   background: none;
   padding: 0;
   color: inherit;
@@ -129,43 +132,43 @@
   unicode-bidi: embed;
 }
 
-.article-content blockquote {
-  border-right: 3px solid var(--brand-primary);
-  padding-right: 1rem;
+.article-page .article-content blockquote {
+  border-inline-start: 3px solid var(--brand-primary);
+  padding-inline-start: 1rem;
   margin: 1rem 0;
   color: var(--text-muted);
   font-style: italic;
 }
 
-.article-content table {
+.article-page .article-content table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 }
 
-.article-content th,
-.article-content td {
+.article-page .article-content th,
+.article-page .article-content td {
   border: 1px solid var(--border-default);
   padding: 0.6rem 0.8rem;
-  text-align: right;
+  text-align: start;
 }
 
-.article-content th {
+.article-page .article-content th {
   background: var(--bg-elevated);
   font-weight: 600;
 }
 
-.article-content a {
+.article-page .article-content a {
   color: var(--link-color);
   text-decoration: underline;
 }
 
-.article-content img {
+.article-page .article-content img {
   max-width: 100%;
   border-radius: var(--radius-md);
 }
 
-.article-content hr {
+.article-page .article-content hr {
   border: none;
   border-top: 1px solid var(--border-default);
   margin: 2rem 0;

@@ -1,38 +1,17 @@
 import { useTranslation } from 'react-i18next'
 import type { TenderTime } from './types'
-
-const singularUnit = (unit: string): string => {
-  switch (unit) {
-    case 'שעות':
-      return 'שעה'
-    case 'ימים':
-      return 'יום'
-    case 'שבועות':
-      return 'שבוע'
-    case 'חודשים':
-      return 'חודש'
-    case 'שנים':
-      return 'שנה'
-    default:
-      return unit
-  }
-}
-
-const formatTimeRequired = (time?: TenderTime): string => {
-  if (!time) return '—'
-  const unit = time.value === 1 ? singularUnit(time.unit) : time.unit
-  return time.value === 1 ? `${unit}` : `${time.value} ${unit}`
-}
+import { formatTenderTime } from './timeUnits'
+import { useLocale } from '../../i18n/useLocale'
 
 const formatBudget = (budget?: number): string => {
   return budget === undefined || budget === null ? '—' : budget.toString()
 }
 
-const formatAppliedAt = (appliedAt?: string): string => {
+const formatAppliedAt = (locale: string, appliedAt?: string): string => {
   if (!appliedAt) return ''
   const date = new Date(appliedAt)
   if (Number.isNaN(date.getTime())) return ''
-  return date.toLocaleDateString('he-IL')
+  return date.toLocaleDateString(locale)
 }
 
 interface TenderCardProps {
@@ -67,7 +46,8 @@ export default function Card({
   onViewOffers,
 }: TenderCardProps) {
   const { t } = useTranslation()
-  const appliedAtLabel = formatAppliedAt(appliedAt)
+  const { locale } = useLocale()
+  const appliedAtLabel = formatAppliedAt(locale, appliedAt)
 
   return (
     <article
@@ -76,7 +56,7 @@ export default function Card({
       style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
     >
       {appliedAtLabel && (
-        <span className="tender-card__applied-badge">הגשתי הצעה ב-{appliedAtLabel}</span>
+        <span className="tender-card__applied-badge">{t('tenders.card.appliedOn', { date: appliedAtLabel })}</span>
       )}
 
       <div className="tender-card__header">
@@ -89,7 +69,7 @@ export default function Card({
       {shortDescription && (
         <div 
           className="tender-card__summary-wrapper" 
-          style={{ maxHeight: '120px', overflowY: 'auto', marginBottom: '12px', paddingLeft: '4px' }}
+          style={{ maxHeight: '120px', overflowY: 'auto', marginBottom: '12px', paddingInlineEnd: '4px' }}
         >
           <p className="tender-card__summary" style={{ margin: 0 }}>{shortDescription}</p>
         </div>
@@ -98,11 +78,11 @@ export default function Card({
       <div className="tender-card__meta">
         <div>
           <span>{t('tenders.budgetLabel')}</span>
-          <strong>{formatBudget(budget)} ש"ח </strong>
+          <strong>{t('tenders.budgetWithCurrency', { amount: formatBudget(budget) })}</strong>
         </div>
         <div>
           <span>{t('tenders.timeRequiredLabel')}</span>
-          <strong>{formatTimeRequired(timeRequired)}</strong>
+          <strong>{formatTenderTime(t, timeRequired)}</strong>
         </div>
         <div>
           <span>{t('tenders.applicantsCountLabel')}</span>
@@ -117,7 +97,7 @@ export default function Card({
       {(productType || aiApplicationType) && (
         <div className="tender-card__tags" style={{ marginTop: 'auto', paddingTop: '10px' }}>
           {productType && (
-            <span className="domain-pill" style={{ backgroundColor: 'var(--gray-100)', color: 'var(--text-secondary)', borderColor: 'var(--border-strong)' }}>
+            <span className="domain-pill" style={{ backgroundColor: 'var(--gray-100)', color: 'var(--text-secondary)' }}>
               {t(`tenders.productTypeOptions.${productType}`, { defaultValue: productType })}
             </span>
           )}
@@ -140,10 +120,10 @@ export default function Card({
             onClick={onViewOffers}
             style={{ position: 'relative' }}
           >
-            הצעות
+            {t('tenders.card.offersBtn')}
             {newOffersCount > 0 && (
               <span
-                aria-label={`${newOffersCount} הצעות חדשות`}
+                aria-label={t('tenders.card.newOffersAria', { count: newOffersCount })}
                 style={{
                   position: 'absolute',
                   top: '-8px',

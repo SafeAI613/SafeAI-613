@@ -8,16 +8,14 @@
   padding: 48px 24px 64px;
 }
 
-.privacy-container {
+.privacy-page .privacy-container {
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 48px 56px;
-  box-shadow: var(--shadow-sm);
-  direction: rtl;
+  box-shadow: var(--shadow-card);
 }
 
-.privacy-container h1 {
+.privacy-page .privacy-container h1 {
   text-align: center;
   color: var(--text-primary);
   margin: 0 0 10px;
@@ -28,7 +26,7 @@
 }
 
 /* "Last updated" as a soft chip under the title */
-.privacy-updated {
+.privacy-page .privacy-updated {
   display: table;
   margin: 0 auto 40px;
   padding: 4px 14px;
@@ -39,20 +37,20 @@
   text-align: center;
 }
 
-.privacy-section {
+.privacy-page .privacy-section {
   margin-bottom: 36px;
   padding-bottom: 32px;
   border-bottom: 1px solid var(--border-muted);
 }
 
-.privacy-section:last-of-type {
+.privacy-page .privacy-section:last-of-type {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
 
 /* Section heading with a short brand accent bar */
-.privacy-section h2 {
+.privacy-page .privacy-section h2 {
   position: relative;
   color: var(--text-primary);
   font-size: 21px;
@@ -62,7 +60,7 @@
   padding-top: 14px;
 }
 
-.privacy-section h2::before {
+.privacy-page .privacy-section h2::before {
   content: "";
   position: absolute;
   top: 0;
@@ -73,7 +71,7 @@
   background: var(--brand-primary);
 }
 
-.privacy-section h3 {
+.privacy-page .privacy-section h3 {
   color: var(--text-primary);
   font-size: 17px;
   font-weight: 700;
@@ -81,7 +79,7 @@
   margin-bottom: 8px;
 }
 
-.privacy-section p {
+.privacy-page .privacy-section p {
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -89,13 +87,13 @@
   text-align: start;
 }
 
-.privacy-section ul {
+.privacy-page .privacy-section ul {
   list-style: none;
   padding-inline-start: 0;
   margin: 16px 0;
 }
 
-.privacy-section ul li {
+.privacy-page .privacy-section ul li {
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.8;
@@ -105,7 +103,7 @@
   text-align: start;
 }
 
-.privacy-section ul li::before {
+.privacy-page .privacy-section ul li::before {
   content: "";
   position: absolute;
   inset-inline-start: 4px;
@@ -116,30 +114,29 @@
   background: var(--brand-primary);
 }
 
-.privacy-section a {
+.privacy-page .privacy-section a {
   color: var(--link-color);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.privacy-section a:hover {
+.privacy-page .privacy-section a:hover {
   color: var(--link-color-hover);
 }
 
 /* Tables: separate borders so the outer corners can be rounded */
-.privacy-section table {
+.privacy-page .privacy-section table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   margin: 16px 0;
   font-size: 14px;
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
-.privacy-section th,
-.privacy-section td {
+.privacy-page .privacy-section th,
+.privacy-page .privacy-section td {
   border-bottom: 1px solid var(--border-muted);
   border-inline-start: 1px solid var(--border-muted);
   padding: 10px 14px;
@@ -148,39 +145,38 @@
   line-height: 1.6;
 }
 
-.privacy-section tr > :first-child {
+.privacy-page .privacy-section tr > :first-child {
   border-inline-start: none;
 }
 
-.privacy-section tr:last-child > td {
+.privacy-page .privacy-section tr:last-child > td {
   border-bottom: none;
 }
 
-.privacy-section th {
+.privacy-page .privacy-section th {
   background: var(--bg-elevated);
   color: var(--text-primary);
   font-weight: 700;
   border-bottom-color: var(--border-default);
 }
 
-.privacy-contact-box {
+.privacy-page .privacy-contact-box {
   background: var(--brand-primary-soft);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 24px;
   text-align: center;
 }
 
-.privacy-contact-box p {
+.privacy-page .privacy-contact-box p {
   text-align: center;
   margin-bottom: 8px;
 }
 
-.privacy-contact-box p:last-child {
+.privacy-page .privacy-contact-box p:last-child {
   margin-bottom: 0;
 }
 
-.privacy-contact-box a {
+.privacy-page .privacy-contact-box a {
   color: var(--brand-primary);
   font-weight: 700;
   text-decoration: none;
@@ -188,12 +184,12 @@
   transition: color 0.2s var(--ease-out);
 }
 
-.privacy-contact-box a:hover {
+.privacy-page .privacy-contact-box a:hover {
   color: var(--brand-primary-hover);
   text-decoration: underline;
 }
 
-.privacy-contact-box a:focus-visible {
+.privacy-page .privacy-contact-box a:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
@@ -203,35 +199,35 @@
     padding: 24px 16px 48px;
   }
 
-  .privacy-container {
+  .privacy-page .privacy-container {
     padding: 28px 22px;
     border-radius: var(--radius-md);
   }
 
-  .privacy-container h1 {
+  .privacy-page .privacy-container h1 {
     font-size: 28px;
   }
 
-  .privacy-section h2 {
+  .privacy-page .privacy-section h2 {
     font-size: 19px;
   }
 
-  .privacy-section h3 {
+  .privacy-page .privacy-section h3 {
     font-size: 16px;
   }
 
-  .privacy-section p,
-  .privacy-section ul li {
+  .privacy-page .privacy-section p,
+  .privacy-page .privacy-section ul li {
     font-size: 14px;
   }
 
-  .privacy-section table {
+  .privacy-page .privacy-section table {
     font-size: 12px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .privacy-contact-box a {
+  .privacy-page .privacy-contact-box a {
     transition: none;
   }
 }

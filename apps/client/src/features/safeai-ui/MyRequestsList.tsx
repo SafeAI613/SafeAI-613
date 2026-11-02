@@ -1,6 +1,7 @@
 import '../../styles/safeai-ui.css';
 import { generatePath, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 
 import { useState, useEffect } from "react";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
@@ -29,6 +30,7 @@ export default function MyRequestsList({ activeSection }: MyRequestsListProps) {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { locale } = useLocale();
 
   const fetchRequests = async () => {
     try {
@@ -90,7 +92,7 @@ export default function MyRequestsList({ activeSection }: MyRequestsListProps) {
                   <td>
                     <span className="request-type-badge">{req.requestType || req.status || t("requests.unknownValue")}</span>
                   </td>
-                  <td>{new Date(req.createdAt).toLocaleDateString("he-IL")}</td>
+                  <td>{new Date(req.createdAt).toLocaleDateString(locale)}</td>
                 </tr>
               ))}
             </tbody>

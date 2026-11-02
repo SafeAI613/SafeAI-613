@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-const RTL_LANGUAGES = ["he"];
+import { directionFor } from "./useLocale";
 
 export function useLanguageDirection() {
   const { i18n } = useTranslation();
 
   useEffect(() => {
-    const direction = RTL_LANGUAGES.includes(i18n.language) ? "rtl" : "ltr";
-    document.documentElement.setAttribute("dir", direction);
+    document.documentElement.setAttribute("dir", directionFor(i18n.language));
     document.documentElement.setAttribute("lang", i18n.language);
   }, [i18n.language]);
 }

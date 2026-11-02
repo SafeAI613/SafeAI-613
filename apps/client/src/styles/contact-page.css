@@ -13,15 +13,14 @@
   padding: 48px 24px 64px;
 }
 
-.contact-container {
+.contact-page .contact-container {
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   padding: 44px 48px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
-.contact-container h1 {
+.contact-page .contact-container h1 {
   text-align: center;
   color: var(--text-primary);
   margin: 0 0 8px;
@@ -31,7 +30,7 @@
   line-height: 1.2;
 }
 
-.contact-subtitle {
+.contact-page .contact-subtitle {
   text-align: center;
   color: var(--text-muted);
   margin-bottom: 32px;
@@ -39,9 +38,8 @@
 }
 
 /* Design Partner Banner */
-.design-partner-banner {
+.contact-page .design-partner-banner {
   background: var(--brand-primary-soft);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 24px;
   margin-bottom: 32px;
@@ -50,13 +48,13 @@
   align-items: flex-start;
 }
 
-.design-partner-icon {
+.contact-page .design-partner-icon {
   font-size: 40px;
   flex-shrink: 0;
   line-height: 1;
 }
 
-.design-partner-content h3 {
+.contact-page .design-partner-content h3 {
   font-size: 19px;
   color: var(--text-primary);
   margin: 0 0 10px 0;
@@ -64,42 +62,41 @@
   letter-spacing: -0.01em;
 }
 
-.design-partner-content p {
+.contact-page .design-partner-content p {
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.8;
   margin: 0 0 12px 0;
 }
 
-.design-partner-content p:last-child {
+.contact-page .design-partner-content p:last-child {
   margin-bottom: 0;
 }
 
-.design-partner-highlight {
+.contact-page .design-partner-highlight {
   background: var(--bg-surface);
   padding: 12px 16px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-default);
   border-inline-start: 3px solid var(--brand-primary);
   font-weight: 600;
   color: var(--text-primary) !important;
 }
 
 /* Guides Link Section */
-.guides-link-section {
+.contact-page .guides-link-section {
   margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid var(--border-default);
 }
 
-.guides-link-section p {
+.contact-page .guides-link-section p {
   font-size: 15px;
   color: var(--text-secondary);
   margin-bottom: 12px;
   font-weight: 600;
 }
 
-.guides-link-button {
+.contact-page .guides-link-button {
   display: inline-block;
   background: var(--brand-primary);
   color: var(--text-inverse);
@@ -115,32 +112,32 @@
   margin-bottom: 8px;
 }
 
-.guides-link-button:hover {
+.contact-page .guides-link-button:hover {
   background: var(--brand-primary-hover);
   border-color: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-.guides-link-button:focus-visible {
+.contact-page .guides-link-button:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.guides-link-button.secondary {
+.contact-page .guides-link-button.secondary {
   background: var(--bg-surface);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
 }
 
-.guides-link-button.secondary:hover {
+.contact-page .guides-link-button.secondary:hover {
   background: var(--bg-surface);
   border-color: var(--brand-primary);
   color: var(--brand-primary-hover);
   box-shadow: none;
 }
 
-.contact-form {
+.contact-page .contact-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -196,13 +193,11 @@
 .contact-page .message.success {
   background-color: var(--color-success-bg);
   color: var(--color-success);
-  border: 1px solid var(--color-success-border);
 }
 
 .contact-page .message.error {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
-  border: 1px solid var(--color-danger-border);
 }
 
 /* Buttons: base look comes from design-system.css (.btn, .btn-primary,
@@ -223,26 +218,26 @@
   filter: brightness(0.92);
 }
 
-.screen-capture-buttons {
+.contact-page .screen-capture-buttons {
   display: flex;
   gap: 12px;
 }
 
-.capture-hint {
+.contact-page .capture-hint {
   display: block;
   margin-top: 6px;
   color: var(--text-muted);
   font-size: 12px;
 }
 
-.attachment-preview-list {
+.contact-page .attachment-preview-list {
   margin-top: 12px;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
 }
 
-.attachment-preview {
+.contact-page .attachment-preview {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -250,13 +245,13 @@
   max-width: 280px;
 }
 
-.attachment-thumb-wrap {
+.contact-page .attachment-thumb-wrap {
   position: relative;
   width: 100%;
 }
 
-.attachment-preview img,
-.attachment-preview video {
+.contact-page .attachment-preview img,
+.contact-page .attachment-preview video {
   max-width: 100%;
   max-height: 260px;
   border-radius: var(--radius-sm);
@@ -264,7 +259,7 @@
   display: block;
 }
 
-.attachment-spinner-overlay {
+.contact-page .attachment-spinner-overlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -274,7 +269,7 @@
   border-radius: var(--radius-sm);
 }
 
-.attachment-spinner {
+.contact-page .attachment-spinner {
   width: 28px;
   height: 28px;
   border: 3px solid var(--brand-primary-soft);
@@ -289,7 +284,7 @@
   }
 }
 
-.attachment-error {
+.contact-page .attachment-error {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -297,12 +292,12 @@
   font-size: 13px;
 }
 
-.login-required {
+.contact-page .login-required {
   text-align: center;
   padding: 24px 0 8px;
 }
 
-.login-required p {
+.contact-page .login-required p {
   font-size: 16px;
   color: var(--text-muted);
   margin-bottom: 20px;
@@ -314,39 +309,39 @@
     padding: 24px 16px 48px;
   }
 
-  .contact-container {
+  .contact-page .contact-container {
     padding: 28px 22px;
     border-radius: var(--radius-md);
   }
 
-  .contact-container h1 {
+  .contact-page .contact-container h1 {
     font-size: 28px;
   }
 
-  .design-partner-banner {
+  .contact-page .design-partner-banner {
     flex-direction: column;
     gap: 14px;
   }
 
-  .design-partner-icon {
+  .contact-page .design-partner-icon {
     font-size: 32px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .guides-link-button,
+  .contact-page .guides-link-button,
   .contact-page .form-group input,
   .contact-page .form-group select,
   .contact-page .form-group textarea {
     transition: none;
   }
 
-  .guides-link-button:hover {
+  .contact-page .guides-link-button:hover {
     transform: none;
   }
 
   /* Keep the upload spinner as a static ring instead of spinning */
-  .attachment-spinner {
+  .contact-page .attachment-spinner {
     animation: none;
   }
 }

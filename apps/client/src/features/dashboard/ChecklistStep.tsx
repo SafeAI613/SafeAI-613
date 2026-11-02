@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { CheckIcon } from "../landing/icons";
 
 interface ChecklistStepProps {
@@ -11,6 +12,7 @@ interface ChecklistStepProps {
 
 export default function ChecklistStep({ step, label, description, done, path }: ChecklistStepProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <button
@@ -25,7 +27,7 @@ export default function ChecklistStep({ step, label, description, done, path }: 
           {label}
           {/* The checkmark and strikethrough are visual-only cues — a screen
               reader needs the completion state spelled out. */}
-          <span className="lv2-sr-only">{done ? " — הושלם" : " — טרם הושלם"}</span>
+          <span className="lv2-sr-only">{done ? t("shell.checklist.done") : t("shell.checklist.notDone")}</span>
         </span>
         <span className="dash-getstarted-desc">{description}</span>
       </span>

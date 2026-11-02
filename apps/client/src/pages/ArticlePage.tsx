@@ -2,10 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { SEO } from "../components/SEO";
 import "./article-page.css";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
 interface Article {
   _id: string;
@@ -19,6 +21,8 @@ interface Article {
 }
 
 export default function ArticlePage() {
+  const { t } = useTranslation();
+  const { dir, locale } = useLocale();
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,13 +40,13 @@ export default function ArticlePage() {
         setArticle(data.article);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
-          setError("המאמר לא נמצא");
+          setError(t("articlePage.notFound"));
         }
       } finally {
         setLoading(false);
       }
     },
-    [slug]
+    [slug, t]
   );
 
   useEffect(() => {
@@ -51,17 +55,17 @@ export default function ArticlePage() {
     return () => controller.abort();
   }, [load]);
 
-  if (loading) return <div className="article-page-loading">טוען מאמר...</div>;
+  if (loading) return <div className="article-page-loading" dir={dir}>{t("articlePage.loading")}</div>;
   if (error || !article)
     return (
-      <div className="article-page-error" dir="rtl">
-        <p>{error || "מאמר לא נמצא"}</p>
-        <Link to={ROUTES.hub.articles} className="article-back-link">← חזרה ל-Docs</Link>
+      <div className="article-page-error" dir={dir}>
+        <p>{error || t("articlePage.notFound")}</p>
+        <Link to={ROUTES.hub.articles} className="article-back-link">{t("articlePage.backToDocs")}</Link>
       </div>
     );
 
   return (
-    <div className="article-page" dir="rtl">
+    <div className="article-page" dir={dir}>
       <SEO
         title={article.title}
         description={article.description || article.title}
@@ -69,7 +73,7 @@ export default function ArticlePage() {
         canonicalUrl={`https://safeai613.com/docs/${article.slug}`}
       />
       <div className="article-container">
-        <Link to={ROUTES.hub.articles} className="article-back-link">← חזרה ל-Docs</Link>
+        <Link to={ROUTES.hub.articles} className="article-back-link">{t("articlePage.backToDocs")}</Link>
 
         <div className="article-header">
           <span className="article-category">{article.category}</span>
@@ -78,7 +82,7 @@ export default function ArticlePage() {
             <p className="article-description">{article.description}</p>
           )}
           <div className="article-meta">
-            <span>{new Date(article.createdAt).toLocaleDateString("he-IL")}</span>
+            <span>{new Date(article.createdAt).toLocaleDateString(locale)}</span>
           </div>
         </div>
 

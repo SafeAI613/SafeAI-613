@@ -797,7 +797,7 @@
     "cannotRestoreKey": "לא תוכל לשחזר את המפתח אחרי סגירת חלון זה",
     "oldKeyNoLongerWorks": "המפתח הישן כבר לא עובד",
     "downloadAsFileButton": "הורד כקובץ",
-    "closeCannotSeeAgainButton": "סגור ← (לא אוכל לראות את המפתח שוב)"
+    "closeCannotSeeAgainButton": "סגור (לא אוכל לראות את המפתח שוב)"
   },
   "providerKeysManagement": {
     "errorLoadingKeys": "שגיאה בטעינת מפתחות",

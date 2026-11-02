@@ -1,13 +1,11 @@
 import { useState, type FormEvent, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { useScreenCapture } from "../hooks/useScreenCapture";
 import "../styles/contact-page.css";
 import { SEO } from "../components/SEO";
 import { ROUTES, loginPath } from "../router/paths";
-
-const CONTACT_SEO_DESCRIPTION =
-  "צריכים עזרה או תמיכה טכנית? מעוניינים להצטרף לצוות הפיתוח או לנהל קהילה? כתבו לנו ונשמח לעמוד לרשותכם בהקדם.";
 
 const MAX_ATTACHMENTS = 5;
 
@@ -27,7 +25,7 @@ const UPLOAD_STEP_TIMEOUT_MS = 15000;
 const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
   new Promise<T>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
-      reject(new Error(`${label} - הזמן המוקצב תם`));
+      reject(new Error(`${label} - timed out`));
     }, ms);
     promise.then(
       (value) => {
@@ -53,12 +51,14 @@ interface CapturedAttachment {
 }
 
 export default function ContactPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
-  const [requestType, setRequestType] = useState("כללי"); // ערך ברירת מחדל
+  const [messageType, setMessageType] = useState<"success" | "error">("success");
+  const [requestType, setRequestType] = useState("כללי"); // default value sent to the server (data, not UI text) - ערך ברירת מחדל
   const [contactTypes, setContactTypes] = useState<{ label: string; value: string }[]>([]);
 
   const [attachments, setAttachments] = useState<CapturedAttachment[]>([]);
@@ -69,11 +69,18 @@ export default function ContactPage() {
     setAttachments((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   };
 
+  // Validation and upload problems are always shown in the error style;
+  // only a successful submit uses the success style.
+  const showError = (text: string) => {
+    setMessageType("error");
+    setMessage(text);
+  };
+
   const readFileAsDataUri = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error ?? new Error("נכשלה קריאת הקובץ"));
+      reader.onerror = () => reject(reader.error ?? new Error("Failed to read the file"));
       reader.readAsDataURL(file);
     });
 
@@ -86,13 +93,13 @@ export default function ContactPage() {
       console.error(
         `[attachment-upload ${id}] file too large for MongoDB fallback (${file.size} bytes > ${MAX_FALLBACK_FILE_SIZE}).`,
       );
-      setMessage("S3 לא זמין והקובץ גדול מדי לגיבוי. יש להגדיר S3 כדי להעלות קבצים גדולים.");
+      showError(t("contactPage.errorFallbackTooLarge"));
       updateAttachment(id, { uploadStatus: "error" });
       return;
     }
     try {
       console.log(`[attachment-upload ${id}] reading file as data URI for MongoDB fallback...`);
-      const dataUri = await withTimeout(readFileAsDataUri(file), UPLOAD_STEP_TIMEOUT_MS, "קריאת הקובץ");
+      const dataUri = await withTimeout(readFileAsDataUri(file), UPLOAD_STEP_TIMEOUT_MS, "Reading the file");
 
       console.log(`[attachment-upload ${id}] registering fallback attachment in MongoDB...`);
       await withTimeout(
@@ -101,14 +108,14 @@ export default function ContactPage() {
           body: JSON.stringify({ data: dataUri, type }),
         }),
         UPLOAD_STEP_TIMEOUT_MS,
-        "שמירת קובץ הגיבוי",
+        "Saving the fallback file",
       );
 
       console.log(`[attachment-upload ${id}] done via MongoDB fallback.`);
       updateAttachment(id, { uploadStatus: "uploaded", uploadedUrl: dataUri });
     } catch (fallbackErr) {
       console.error(`[attachment-upload ${id}] MongoDB fallback also failed:`, fallbackErr);
-      setMessage("ההעלאה נכשלה גם ל-S3 וגם לגיבוי. נסה שוב.");
+      showError(t("contactPage.errorFallbackFailed"));
       updateAttachment(id, { uploadStatus: "error" });
     }
   };
@@ -139,7 +146,7 @@ export default function ContactPage() {
           body: JSON.stringify({ fileName: file.name, fileType: file.type }),
         }),
         UPLOAD_STEP_TIMEOUT_MS,
-        "בקשת קישור מאובטח",
+        "Requesting a presigned URL",
       );
 
       console.log(`[attachment-upload ${id}] uploading to S3...`);
@@ -150,9 +157,9 @@ export default function ContactPage() {
           body: file,
         }),
         UPLOAD_STEP_TIMEOUT_MS,
-        "העלאה ל-S3",
+        "Uploading to S3",
       );
-      if (!s3Response.ok) throw new Error("העלאת קובץ מצורף נכשלה");
+      if (!s3Response.ok) throw new Error("Attachment upload to S3 failed");
 
       console.log(`[attachment-upload ${id}] S3 upload ok, registering as pending...`);
       await withTimeout(
@@ -161,7 +168,7 @@ export default function ContactPage() {
           body: JSON.stringify({ url: fileUrl, type }),
         }),
         UPLOAD_STEP_TIMEOUT_MS,
-        "רישום הקובץ בשרת",
+        "Registering the file on the server",
       );
 
       console.log(`[attachment-upload ${id}] done via S3.`);
@@ -214,7 +221,7 @@ export default function ContactPage() {
   const { isSupported: isCaptureSupported, isRecording, captureScreenshot, startRecording, stopRecording } =
     useScreenCapture((file) => {
       if (file) addCapturedAttachment(file, "video");
-      else setMessage("ההקלטה יצאה ריקה. נסה שוב, ועדיף לוודא שהטאב הזה נשאר פתוח וגלוי תוך כדי ההקלטה.");
+      else showError(t("contactPage.errorEmptyRecording"));
     });
 
   const handleScreenshotClick = async () => {
@@ -223,7 +230,7 @@ export default function ContactPage() {
       if (file) addCapturedAttachment(file, "image");
     } catch (err) {
       console.error("Error capturing screenshot:", err);
-      setMessage("שגיאה בצילום המסך. נסה שוב.");
+      showError(t("contactPage.errorScreenshot"));
     }
   };
 
@@ -236,7 +243,7 @@ export default function ContactPage() {
       await startRecording();
     } catch (err) {
       console.error("Error starting screen recording:", err);
-      setMessage("שגיאה בהתחלת הקלטת המסך. נסה שוב.");
+      showError(t("contactPage.errorRecordingStart"));
     }
   };
 
@@ -262,21 +269,21 @@ useEffect(() => {
     e.preventDefault();
 
      if (!isLoggedIn) {
-       setMessage("עליך להתחבר כדי לשלוח הודעה");
+       showError(t("contact.requiresLogin"));
        return;
      }
 
     if (!title.trim() || !description.trim()) {
-      setMessage("נא למלא את כל השדות");
+      showError(t("contact.allFieldsRequired"));
       return;
     }
 
     if (hasUploadingAttachment) {
-      setMessage("יש קבצים שעדיין מועלים - יש להמתין לסיום ההעלאה לפני השליחה.");
+      showError(t("contactPage.errorStillUploading"));
       return;
     }
     if (attachments.some((a) => a.uploadStatus === "error")) {
-      setMessage("יש קובץ שנכשל בהעלאה - הסירי אותו או נסי שוב לפני השליחה.");
+      showError(t("contactPage.errorFailedUpload"));
       return;
     }
 
@@ -305,7 +312,8 @@ useEffect(() => {
         }
       );
 
-      setMessage(response.message || "ההודעה נשלחה בהצלחה!");
+      setMessageType("success");
+      setMessage(response.message || t("contact.successMessage"));
       setTitle("");
       setDescription("");
       clearAttachments();
@@ -316,8 +324,8 @@ useEffect(() => {
       }, 2000);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "אירעה שגיאה בשליחת ההודעה. נסה שוב.";
-      setMessage(errorMessage);
+        error instanceof Error ? error.message : t("contact.errorSending");
+      showError(errorMessage);
       console.error("Error sending message:", error);
     } finally {
       setIsSubmitting(false);
@@ -328,19 +336,19 @@ useEffect(() => {
     return (
       <div className="contact-page">
         <SEO
-          title="צור קשר ותמיכה"
-          description={CONTACT_SEO_DESCRIPTION}
+          title={t("contactPage.seoTitle")}
+          description={t("contactPage.seoDescription")}
           canonicalUrl="https://safeai613.com/contact"
         />
         <div className="contact-container">
-          <h1>צור קשר</h1>
+          <h1>{t("contact.title")}</h1>
           <div className="login-required">
-            <p>עליך להתחבר כדי לשלוח הודעה</p>
+            <p>{t("contact.requiresLogin")}</p>
             <button
               className="btn btn-primary"
               onClick={() => navigate(loginPath(ROUTES.contact))}
             >
-              התחבר
+              {t("contact.loginButton")}
             </button>
           </div>
         </div>
@@ -351,34 +359,37 @@ useEffect(() => {
   return (
     <div className="contact-page">
       <SEO
-        title="צור קשר ותמיכה"
-        description={CONTACT_SEO_DESCRIPTION}
+        title={t("contactPage.seoTitle")}
+        description={t("contactPage.seoDescription")}
         canonicalUrl="https://safeai613.com/contact"
       />
       <div className="contact-container">
-        <h1>צור קשר</h1>
-        <p className="contact-subtitle">שלח לנו הודעה ונחזור אליך בהקדם</p>
+        <h1>{t("contact.title")}</h1>
+        <p className="contact-subtitle">{t("contact.subtitle")}</p>
 
         {/* Design Partner Message */}
         <div className="design-partner-banner">
           <div className="design-partner-icon">🤝</div>
           <div className="design-partner-content">
-            <h3>אתם  שותפי העיצוב  שלנו!</h3>
+            <h3>{t("contact.partnerBannerTitle")}</h3>
             <p>
-              המערכת נמצאת בשלב הרצה ניסיונית (Beta) ומתעדכנת כל שבוע.<br/> 
-              המשוב שלכם חיוני לנו ומאפשר לנו לעצב מערכת מקצועית וטובה יותר.<br/>
-              כל הערה, רעיון או בעיה שתשתפו איתנו - <br />יתקבלו בברכה ויעזרו לנו לשפר את החוויה עבורכם ועבור כל המשתמשים.
+              {t("contactPage.partnerLine1")}
+              <br />
+              {t("contactPage.partnerLine2")}
+              <br />
+              {t("contactPage.partnerLine3")} <br />
+              {t("contactPage.partnerLine4")}
             </p>
             <p className="design-partner-highlight">
-              💡 תודה שאתם חלק מהמסע שלנו לבניית פתרון AI בטוח ומתקדם!
+              💡 {t("contact.partnerHighlight")}
             </p>
             <div className="guides-link-section">
-              <p>זקוקים לעזרה? בקרו במרכז המדריכים שלנו:</p>
+              <p>{t("contact.guidesSection")}</p>
               <Link
                 to={ROUTES.hub.articles}
                 className="guides-link-button"
               >
-                📚 מדריכי שימוש
+                📚 {t("contact.guidesDocs")}
               </Link>
               <a
                 href="https://drive.google.com/drive/folders/1-x8qSkCQRWxfIGyNzjszUW_u3eiggY8b?usp=drive_link"
@@ -386,7 +397,7 @@ useEffect(() => {
                 rel="noopener noreferrer"
                 className="guides-link-button secondary"
               >
-                📂 תיקיית המדריכים בדרייב
+                📂 {t("contact.guidesDrive")}
               </a>
             </div>
           </div>
@@ -394,20 +405,20 @@ useEffect(() => {
 
         <form onSubmit={handleSubmit} className="contact-form">
           <div className="form-group">
-            <label htmlFor="title">כותרת</label>
+            <label htmlFor="title">{t("contact.labelTitle")}</label>
             <input
               type="text"
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="נושא ההודעה"
+              placeholder={t("contact.titlePlaceholder")}
               disabled={isSubmitting}
               required
               maxLength={100}
             />
           </div>
           <div className="form-group">
-        <label htmlFor="requestType">סוג הפנייה</label>
+        <label htmlFor="requestType">{t("contactPage.requestTypeLabel")}</label>
         <select
   id="requestType"
   value={requestType}
@@ -415,20 +426,20 @@ useEffect(() => {
   disabled={isSubmitting}
   required
 >
-  <option value="" hidden>בחר סוג פנייה</option>
-  {contactTypes.map((t) => (
-    <option key={t.value} value={t.value}>{t.label}</option>
+  <option value="" hidden>{t("contact.requestTypePlaceholder")}</option>
+  {contactTypes.map((type) => (
+    <option key={type.value} value={type.value}>{type.label}</option>
   ))}
 </select>
         </div>
 
               <div className="form-group">
-            <label htmlFor="description">תיאור</label>
+            <label htmlFor="description">{t("contact.labelDescription")}</label>
             <textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="פרט את הודעתך כאן..."
+              placeholder={t("contact.descriptionPlaceholder")}
               rows={8}
               disabled={isSubmitting}
               required
@@ -438,7 +449,7 @@ useEffect(() => {
 
           {isCaptureSupported && (
             <div className="form-group">
-              <label>{`צירופים (אופציונלי, עד ${MAX_ATTACHMENTS} קבצים)`}</label>
+              <label>{t("contactPage.attachmentsLabel", { max: MAX_ATTACHMENTS })}</label>
               <div className="screen-capture-buttons">
                 <button
                   type="button"
@@ -446,7 +457,7 @@ useEffect(() => {
                   onClick={handleScreenshotClick}
                   disabled={isSubmitting || isRecording || attachmentLimitReached}
                 >
-                  צילום מסך
+                  {t("contactPage.screenshotButton")}
                 </button>
                 <button
                   type="button"
@@ -454,13 +465,13 @@ useEffect(() => {
                   onClick={handleRecordingClick}
                   disabled={isSubmitting || (attachmentLimitReached && !isRecording)}
                 >
-                  {isRecording ? "עצור הקלטה" : "הקלטת מסך"}
+                  {isRecording ? t("contactPage.stopRecordingButton") : t("contactPage.startRecordingButton")}
                 </button>
               </div>
               <small className="capture-hint">
                 {attachmentLimitReached
-                  ? `הגעת למספר המרבי של ${MAX_ATTACHMENTS} צירופים. אפשר להסיר אחד כדי לצרף עוד.`
-                  : 'כדי שגם השמע יוקלט, יש לסמן את תיבת "שיתוף אודיו" בחלונית הבחירה של הדפדפן'}
+                  ? t("contactPage.attachmentLimitHint", { max: MAX_ATTACHMENTS })
+                  : t("contactPage.audioHint")}
               </small>
 
               {attachments.length > 0 && (
@@ -469,26 +480,26 @@ useEffect(() => {
                     <div key={att.id} className="attachment-preview">
                       <div className="attachment-thumb-wrap">
                         {att.type === "image" ? (
-                          <img src={att.previewUrl} alt="תצוגה מקדימה של צילום המסך" />
+                          <img src={att.previewUrl} alt={t("contactPage.screenshotPreviewAlt")} />
                         ) : (
                           <video src={att.previewUrl} controls />
                         )}
                         {att.uploadStatus === "uploading" && (
-                          <div className="attachment-spinner-overlay" aria-label="מעלה קובץ...">
+                          <div className="attachment-spinner-overlay" aria-label={t("contactPage.uploadingFileAria")}>
                             <span className="attachment-spinner" />
                           </div>
                         )}
                       </div>
                       {att.uploadStatus === "error" && (
                         <div className="attachment-error">
-                          <span>העלאה נכשלה</span>
+                          <span>{t("contactPage.uploadFailed")}</span>
                           <button
                             type="button"
                             className="btn btn-secondary"
                             onClick={() => uploadAttachment(att.id, att.file, att.type)}
                             disabled={isSubmitting}
                           >
-                            נסה שוב
+                            {t("contactPage.retryButton")}
                           </button>
                         </div>
                       )}
@@ -498,7 +509,7 @@ useEffect(() => {
                         onClick={() => handleRemoveAttachment(att.id)}
                         disabled={isSubmitting}
                       >
-                        הסר צירוף
+                        {t("contactPage.removeAttachmentButton")}
                       </button>
                     </div>
                   ))}
@@ -508,7 +519,7 @@ useEffect(() => {
           )}
 
           {message && (
-            <div className={`message ${message.includes("שגיאה") || message.includes("נכשל") ? "error" : "success"}`}>
+            <div className={`message ${messageType}`}>
               {message}
             </div>
           )}
@@ -518,7 +529,11 @@ useEffect(() => {
             className="btn btn-primary"
             disabled={isSubmitting || hasUploadingAttachment}
           >
-            {isSubmitting ? "שולח..." : hasUploadingAttachment ? "מעלה קבצים..." : "שלח הודעה"}
+            {isSubmitting
+              ? t("contact.buttonSubmitting")
+              : hasUploadingAttachment
+                ? t("contactPage.uploadingFilesButton")
+                : t("contact.buttonSubmit")}
           </button>
         </form>
       </div>

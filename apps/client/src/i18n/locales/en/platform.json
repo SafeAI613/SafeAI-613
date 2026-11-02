@@ -1,0 +1,70 @@
+{
+  "requests": {
+    "backToList": "Back to requests",
+    "detailsTitle": "Request Details",
+    "attachmentAlt": "Request attachment",
+    "alreadyClosedTitle": "This request is already closed",
+    "requestClosedLabel": "Request closed",
+    "sendingReply": "Sending...",
+    "sendReplyBtn": "Send Reply",
+    "closeConfirmTitle": "Close Request",
+    "closeConfirmText": "Are you sure you want to close this request? No further replies can be sent after it is closed.",
+    "closingBtn": "Closing...",
+    "confirmCloseBtn": "Yes, close request"
+  },
+  "profilesManagement": {
+    "promptCount_one": "{{count}} prompt",
+    "promptCount_other": "{{count}} prompts",
+    "promptCount": "{{count}} prompts",
+    "createdByLabel": "Created by:",
+    "emailLabel": "Email:"
+  },
+  "userDashboard": {
+    "chartTokensLabel": "Tokens",
+    "freeYes": "Yes",
+    "freeNo": "No"
+  },
+  "usersManagement": {
+    "nameColonLabel": "Name:",
+    "canCreatePostsCheckbox": "Allowed to publish forum posts",
+    "canCommentCheckbox": "Allowed to comment in the forum"
+  },
+  "organizations": {
+    "payme": {
+      "missingDetails": "Transaction details are missing",
+      "statusCheckFailed": "Failed to check the payment status",
+      "checkingStatus": "Checking payment status...",
+      "pleaseWait": "Please wait",
+      "successTitle": "Top-up successful!",
+      "updatedBalanceLabel": "Updated wallet balance:",
+      "backToOrgButton": "Back to organization management",
+      "failedTitle": "Top-up failed",
+      "notCompleted": "The payment was not completed or was cancelled.",
+      "retryButton": "Try again"
+    }
+  },
+  "pendingOrganizations": {
+    "approveConfirm": "Approve the organization \"{{name}}\"?",
+    "rejectConfirm": "Reject the organization \"{{name}}\"? This action cannot be undone."
+  },
+  "orgUsers": {
+    "paymentRequestFailed": "Failed to create the payment request",
+    "profilesTitle": "Authorized AI Profiles",
+    "profilesDescription": "Choose which approved AI profiles are available to the organization's users.",
+    "profilesLoading": "Loading profiles...",
+    "profilesEmpty": "There are currently no approved profiles in the system.",
+    "profilesCreatedByLabel": "Created by:",
+    "profilesFetchErrorFallback": "Failed to load the profiles",
+    "profilesSaveFailedFallback": "Failed to save the profiles",
+    "profilesSaveSuccess": "The authorized profiles were saved successfully",
+    "profilesSavingButton": "Saving...",
+    "profilesSaveButton": "Save Profiles"
+  },
+  "inquiries": {
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "subjectPlaceholder": "Subject",
+    "messagePlaceholder": "Message",
+    "attachmentAlt": "Attachment {{index}}"
+  }
+}

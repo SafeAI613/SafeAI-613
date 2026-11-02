@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import "../styles/alert-popup.css";
 
 export type AlertType = "info" | "success" | "error";
@@ -39,6 +40,7 @@ function AlertIcon({ type }: { type: AlertType }) {
 }
 
 export default function AlertPopup({ message, type, onClose }: AlertPopupProps) {
+  const { t } = useTranslation();
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
@@ -61,7 +63,7 @@ export default function AlertPopup({ message, type, onClose }: AlertPopupProps) 
         <p className="alert-popup-message">{message}</p>
         <div className="alert-popup-actions">
           <button className="alert-popup-ok" onClick={onClose} autoFocus>
-            אישור
+            {t("shell.alertPopup.ok")}
           </button>
         </div>
       </div>

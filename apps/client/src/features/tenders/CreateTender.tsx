@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import AiThinkingLoader from './AiThinkingLoader.tsx'
-import type { TenderContactMethod } from './types'
+import type { TenderContactMethod, TenderTimeUnit } from './types'
+import { TIME_UNITS, timeUnitLabel } from './timeUnits'
+import { useLocale } from '../../i18n/useLocale'
 
 
 interface TenderFormData {
@@ -12,7 +14,7 @@ interface TenderFormData {
   productType: string
   aiApplicationType: string
   isActive: boolean
-  duration: { value: number; unit: 'שעות' | 'ימים' | 'שבועות' | 'חודשים' | 'שנים' }
+  duration: { value: number; unit: TenderTimeUnit }
   budget: number
   additionalDetails: string
   wantsEmails: boolean
@@ -36,7 +38,7 @@ interface SmartCreateResponse {
     budget?: number | string
     timeRequired?: {
       value: number
-      unit: 'שעות' | 'ימים' | 'שבועות' | 'חודשים' | 'שנים'
+      unit: TenderTimeUnit
     }
     additionalDetails?: string
     agentsRequired?: string[]
@@ -48,7 +50,8 @@ interface CreateTenderProps {
 }
 
 export default function CreateTender({ onSuccess }: CreateTenderProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const { dir } = useLocale()
   const [formData, setFormData] = useState<TenderFormData>({
     tenderName: '',
     explanation: '',
@@ -79,8 +82,6 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
   const [smartText, setSmartText] = useState<string>('')
   const [isSmartLoading, setIsSmartLoading] = useState<boolean>(false)
 
-  // אפשרויות יחידות זמן
-  const timeUnits = ['שעות', 'ימים', 'שבועות', 'חודשים', 'שנים'] as const
 
   useEffect(() => {
     const fetchFilterOptions = async () => {
@@ -224,7 +225,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
       console.error('Failed to create smart tender', error)
       const code = (error as { code?: string } | undefined)?.code
       if (code === 'TENDER_TOPIC_MISMATCH') {
-        setErrorMessage('הטקסט שהזנת אינו מתאר בקשה ליצירת מכרז. אנא תאר את הפרויקט או השירות שברצונך לפרסם.')
+        setErrorMessage(t('tenders.create.topicMismatchError'))
       } else {
         setErrorMessage(t('tenders.smartCreateErrorMsg'))
       }
@@ -238,12 +239,12 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
 
     const trimmedPhone = formData.contactPhone.trim()
     if (trimmedPhone && !PHONE_REGEX.test(trimmedPhone)) {
-      nextErrors.contactPhone = 'יש להזין מספר טלפון תקין'
+      nextErrors.contactPhone = t('tenders.create.phoneInvalid')
     }
 
     const trimmedEmail = formData.contactEmail.trim()
     if (trimmedEmail && !CONTACT_EMAIL_REGEX.test(trimmedEmail)) {
-      nextErrors.contactEmail = 'יש להזין כתובת אימייל תקינה'
+      nextErrors.contactEmail = t('tenders.apply.errors.emailInvalid')
     }
 
     setContactErrors(nextErrors)
@@ -314,7 +315,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
   const showAgentsSection = formData.aiApplicationType === 'אייגנט' || formData.aiApplicationType === 'מולטי אייגנט'
 
   return (
-    <div className="page-shell" dir={i18n.dir()}>
+    <div className="page-shell" dir={dir}>
       <form className="tender-form" onSubmit={handleSubmit}>
         <header className="form-header">
           <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '16px' }}>
@@ -345,7 +346,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
 
           {/* תיבת הטקסט החכמה שנפתחת בלחיצה */}
           {isSmartOpen && (
-            <div className="smart-create-box" style={{ width: '100%', marginTop: '16px', padding: '16px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)' }}>
+            <div className="smart-create-box" style={{ width: '100%', marginTop: '16px', padding: '16px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)' }}>
               <label htmlFor="smartText" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>{t('tenders.smartCreateLabel')}</label>
               <textarea
                 id="smartText"
@@ -566,7 +567,7 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
                 value={formData.duration.value}
                 onChange={(e) => setFormData((c) => ({ ...c, duration: { ...c.duration, value: Number(e.target.value) } }))}
                 className="input"
-                placeholder="מספר"
+                placeholder={t('tenders.create.durationValuePlaceholder')}
                 type="number"
                 min={0}
               />
@@ -574,10 +575,10 @@ export default function CreateTender({ onSuccess }: CreateTenderProps) {
                 id="duration-unit"
                 name="duration-unit"
                 value={formData.duration.unit}
-                onChange={(e) => setFormData((c) => ({ ...c, duration: { ...c.duration, unit: e.target.value as (typeof timeUnits)[number] } }))}
+                onChange={(e) => setFormData((c) => ({ ...c, duration: { ...c.duration, unit: e.target.value as TenderTimeUnit } }))}
               >
-                {timeUnits.map((u) => (
-                  <option key={u} value={u}>{u}</option>
+                {TIME_UNITS.map((u) => (
+                  <option key={u} value={u}>{timeUnitLabel(t, u)}</option>
                 ))}
               </select>
             </div>

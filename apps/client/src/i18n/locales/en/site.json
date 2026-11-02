@@ -1,0 +1,178 @@
+{
+  "login": {
+    "hubTitle": "Sign in to Hub",
+    "platformTitle": "Sign in to Platform"
+  },
+  "register": {
+    "emailPlusError": "The \"+\" character cannot be used in the email address",
+    "privacyRequired": "You must accept the privacy policy to register",
+    "privacyConsent": "I have read and agree to the <policy>privacy policy</policy>"
+  },
+  "apiKeyDisplay": {
+    "continueToDashboardBtn": "Continue to Dashboard →"
+  },
+  "changePassword": {
+    "title": "Password Update Required",
+    "subtitle": "The password you received is temporary — please replace it before continuing",
+    "tempPasswordLabel": "Temporary password *",
+    "errorFallback": "Failed to update the password",
+    "submitting": "Updating...",
+    "submit": "Update Password"
+  },
+  "contactPage": {
+    "seoTitle": "Contact and Support",
+    "seoDescription": "Need help or technical support? Interested in joining the development team or managing a community? Write to us and we will be glad to assist you as soon as possible.",
+    "partnerLine1": "The system is in a trial run (Beta) and is updated every week.",
+    "partnerLine2": "Your feedback is essential to us and helps us build a more professional and better system.",
+    "partnerLine3": "Every comment, idea or issue you share with us -",
+    "partnerLine4": "will be gratefully received and will help us improve the experience for you and for all users.",
+    "requestTypeLabel": "Request type",
+    "attachmentsLabel": "Attachments (optional, up to {{max}} files)",
+    "screenshotButton": "Screenshot",
+    "startRecordingButton": "Record screen",
+    "stopRecordingButton": "Stop recording",
+    "attachmentLimitHint": "You have reached the maximum of {{max}} attachments. Remove one to attach another.",
+    "audioHint": "To record audio as well, check the \"Share audio\" box in the browser's selection window",
+    "screenshotPreviewAlt": "Screenshot preview",
+    "uploadingFileAria": "Uploading file...",
+    "uploadFailed": "Upload failed",
+    "retryButton": "Try again",
+    "removeAttachmentButton": "Remove attachment",
+    "uploadingFilesButton": "Uploading files...",
+    "errorFallbackTooLarge": "S3 is unavailable and the file is too large for the backup storage. S3 must be configured to upload large files.",
+    "errorFallbackFailed": "The upload failed for both S3 and the backup storage. Please try again.",
+    "errorEmptyRecording": "The recording came out empty. Please try again, preferably keeping this tab open and visible while recording.",
+    "errorScreenshot": "An error occurred while taking the screenshot. Please try again.",
+    "errorRecordingStart": "An error occurred while starting the screen recording. Please try again.",
+    "errorStillUploading": "Some files are still uploading - please wait for the upload to finish before sending.",
+    "errorFailedUpload": "A file failed to upload - remove it or try again before sending."
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: August 24, 2026",
+    "s1": {
+      "heading": "1. Introduction and Scope",
+      "p1": "This privacy policy (the \"Policy\") applies to the SafeAI613 website and services (the \"Website\", the \"Service\", \"we\"), operated by SafeAI613 (Company/Business No. XX, registered address: XX) (the \"Company\"). The Policy explains what personal data we collect from you as a user of the Website, how we use it, with whom we may share it, and how you can exercise your rights regarding it.",
+      "p2": "The Policy was written in accordance with the Israeli Protection of Privacy Law, 5741-1981, as amended (including Amendment 13), and the regulations enacted under it, and taking into account the requirements of the European Union General Data Protection Regulation (GDPR) - since the Service may also be used by users located outside Israel.",
+      "p3": "Use of the Website and the Service constitutes consent to the terms of this Policy. If you do not agree to the terms of the Policy, please refrain from using the Website and the Service."
+    },
+    "s2": {
+      "heading": "2. What Information We Collect",
+      "intro": "We collect the following types of information, depending on how you use the Service:",
+      "registrationHeading": "2.1 Information provided during registration and sign-in",
+      "registrationList": [
+        "Full name and email address",
+        "Password (stored by us in encrypted form only, never in plain text)",
+        "When signing in with a Google account - email address only (we request from Google basic access permission to the profile and email address only, and not to any other data)",
+        "Organization affiliation (if relevant) and role in the system"
+      ],
+      "contentHeading": "2.2 Content you create in the Service",
+      "contentList": [
+        "Posts, comments and attached files that you upload to the forum",
+        "Inquiries and free-text content that you send through the contact form, including your email address",
+        "Details you provide when submitting a proposal on the projects board (name, email, proposal details and contact method) - even if you are not a registered user of the system"
+      ],
+      "technicalHeading": "2.3 Technical information and usage data",
+      "technicalList": [
+        "Usage data of the AI services (for example, volume of use and type of requests) for billing, quotas and operation of the Service",
+        "System records (logs) generated automatically for operation, security and troubleshooting"
+      ],
+      "noAnalytics": "We <strong>do not</strong> currently collect information through third-party analytics or advertising tracking tools (such as Google Analytics or similar tools) - none are used on the Website as of the date this Policy was last updated."
+    },
+    "s3": {
+      "heading": "3. How We Use the Information",
+      "intro": "We use the collected information for the following purposes only:",
+      "list": [
+        "Providing the Service, verifying identity and managing the user account",
+        "Processing content that you send (for example, a forum post) using artificial intelligence tools in order to detect and filter offensive or prohibited content before it is published",
+        "Responding to support and contact inquiries",
+        "Contacting proposal submitters and publishers on the projects board in order to coordinate between the parties",
+        "Managing billing, usage quotas and budget with external artificial intelligence providers",
+        "Securing the system, preventing misuse and troubleshooting",
+        "Complying with the legal obligations that apply to us"
+      ],
+      "p": "We do not use your personal information for the marketing purposes of third parties, and we do not sell personal information to anyone."
+    },
+    "s4": {
+      "heading": "4. Sharing Information with Third Parties and Transferring Information Abroad",
+      "intro": "To operate the Service, we rely on external providers acting as data processors on our behalf. Some of them are located outside Israel, and therefore use of the Service involves transferring information outside the borders of the country:",
+      "colProvider": "Provider",
+      "colPurpose": "Purpose of use",
+      "colData": "Type of information transferred",
+      "rows": [
+        {
+          "provider": "Artificial intelligence providers (such as OpenAI, Anthropic, Google, Groq), through an internal routing layer",
+          "purpose": "Processing user requests in the AI tools, and filtering offensive content in the forum",
+          "data": "The content of the inquiries/posts sent for processing"
+        },
+        {
+          "provider": "Amazon Web Services (S3)",
+          "purpose": "Storing files attached to forum posts and comments",
+          "data": "Files uploaded by the user"
+        },
+        {
+          "provider": "Email service provider (SMTP)",
+          "purpose": "Sending operational emails - account verification, password reset, support inquiries, tender updates",
+          "data": "Email address, message content"
+        },
+        {
+          "provider": "Google (OAuth)",
+          "purpose": "Signing in to the Service with a Google account",
+          "data": "Email address"
+        }
+      ],
+      "p": "We take reasonable measures to ensure that such transfers of information are carried out while maintaining an adequate level of protection, including by relying on contractual protection mechanisms and on the privacy protection commitments of the relevant providers. We do not share personal information with third parties for purposes unrelated to providing the Service, except as required by law or by an order of a competent authority."
+    },
+    "s5": {
+      "heading": "5. Cookies and Local Browser Storage",
+      "p1": "The Website <strong>does not use cookies</strong> as of the date this Policy was last updated. To keep you signed in, we use local browser storage (Local Storage), which holds the sign-in tokens (Access/Refresh Token) and basic user details. This information is stored on your device only and is deleted when you sign out of the Service or clear your browser data.",
+      "p2": "If cookies are used in the future (for example, for analytics), this Policy will be updated accordingly and an appropriate consent notice will be shown to you before they are used."
+    },
+    "s6": {
+      "heading": "6. Information Security",
+      "intro": "We take reasonable security measures to protect your personal information, including:",
+      "list": [
+        "Encryption of passwords and sensitive keys in the database",
+        "Use of time-limited sign-in tokens (JWT)",
+        "Separation of access permissions between different roles in the system"
+      ],
+      "p": "However, we cannot guarantee absolute protection against every breach or unauthorized access, and we cannot guarantee that the transfer of information over the internet will be completely secure. In the event of an information security incident that requires reporting by law, we will act in accordance with the provisions of the applicable law, including reporting to the competent authority and to the relevant users as required."
+    },
+    "s7": {
+      "heading": "7. Information Retention Period",
+      "intro": "We retain personal information only for as long as necessary to fulfill the purposes set out in this Policy, as detailed below:",
+      "list": [
+        "Operational system records and usage data - deleted automatically after 60 days",
+        "Projects board submission details - deleted automatically 60 days after they were recorded",
+        "Content evaluation and filtering records (running the artificial intelligence tools on submitted content) and enforcement records regarding offensive content - retained with no predetermined time limit, in order to maintain the ability to perform quality control, security, and prevention of future repeat violations. Access to these records is limited to authorized staff only",
+        "Account details (name, email, content you published) - retained for as long as the account is active, and deleted or voided at the end of the required period following a deletion request, as detailed in Section 8 below"
+      ]
+    },
+    "s8": {
+      "heading": "8. Your Rights",
+      "intro": "In accordance with the Israeli Protection of Privacy Law, and in accordance with the GDPR to the extent it applies to you, you have the following rights regarding your personal information:",
+      "list": [
+        "The right to review the personal information about you that we hold",
+        "The right to request correction of inaccurate or outdated information",
+        "The right to request deletion of your information, subject to any legal obligation to retain certain information for an additional period",
+        "The right to object to the processing of your information in certain cases",
+        "The right to request a copy of the information you provided to us in an accessible format (data portability), where relevant"
+      ],
+      "p1": "To exercise any of the above rights, you may contact us at the address listed in the \"Contact\" section below. We will make an effort to respond to your request within a reasonable time and in accordance with the applicable law.",
+      "p2": "In addition to contacting us, you have the right to file a complaint with the competent authority: in Israel - the Privacy Protection Authority; and if you are located in the European Union - the relevant local data protection authority in your country of residence."
+    },
+    "s9": {
+      "heading": "9. Minors",
+      "p1": "The Service is intended for independent use from the age of 16 and up. A user under the age of 16 may use the Service only with the approval and supervision of a parent or legal guardian, who will be responsible for ensuring that use of the Service is appropriate for the minor.",
+      "p2": "A parent or guardian who believes that a minor in their care has provided personal information without appropriate consent is invited to contact us at the address listed in the \"Contact\" section for review and appropriate action."
+    },
+    "s10": {
+      "heading": "10. Changes to This Policy",
+      "p": "We may update this Policy from time to time, in accordance with changes to the Service or to legal requirements. The date shown at the top of this document reflects the date of the most recent update. Continued use of the Service after an update is published constitutes consent to the terms of the updated Policy."
+    },
+    "s11": {
+      "heading": "11. Privacy Contact",
+      "p": "For any question, request or complaint regarding privacy and the processing of personal information, you may contact us at:"
+    }
+  }
+}

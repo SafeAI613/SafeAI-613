@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLocale } from '../../i18n/useLocale'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import { normalizeProfile } from './normalize'
 import type { ProfessionalProfile, RawProfessionalProfile, ResumeFile } from './types'
@@ -20,11 +22,14 @@ const INPUT_LIMITS = {
 } as const
 
 const URL_REGEX = /^https?:\/\/.+/i
-const RESUME_MAX_SIZE_BYTES = 5 * 1024 * 1024
+const RESUME_MAX_SIZE_MB = 5
+const RESUME_MAX_SIZE_BYTES = RESUME_MAX_SIZE_MB * 1024 * 1024
 const RESUME_ALLOWED_TYPE = 'application/pdf'
 const MAX_RESUME_FILES = 6
 
 export default function ProfessionalProfileModal({ profile, onClose, onSaved }: Props) {
+  const { t } = useTranslation()
+  const { dir } = useLocale()
   const [name, setName] = useState(profile?.name ?? '')
   const [description, setDescription] = useState(profile?.description ?? '')
   const [experience, setExperience] = useState(profile?.experience ?? '')
@@ -44,25 +49,25 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
 
     const trimmedName = name.trim()
     if (!trimmedName) {
-      nextErrors.name = 'יש להזין שם'
+      nextErrors.name = t('professionalProfile.modal.errors.nameRequired')
     } else if (trimmedName.length > INPUT_LIMITS.name) {
-      nextErrors.name = `שם יכול להכיל עד ${INPUT_LIMITS.name} תווים`
+      nextErrors.name = t('professionalProfile.modal.errors.nameTooLong', { max: INPUT_LIMITS.name })
     }
 
     if (description.trim().length > INPUT_LIMITS.description) {
-      nextErrors.description = `תיאור יכול להכיל עד ${INPUT_LIMITS.description} תווים`
+      nextErrors.description = t('professionalProfile.modal.errors.descriptionTooLong', { max: INPUT_LIMITS.description })
     }
 
     if (experience.trim().length > INPUT_LIMITS.experience) {
-      nextErrors.experience = `ניסיון יכול להכיל עד ${INPUT_LIMITS.experience} תווים`
+      nextErrors.experience = t('professionalProfile.modal.errors.experienceTooLong', { max: INPUT_LIMITS.experience })
     }
 
     const trimmedPortfolioLink = portfolioLink.trim()
     if (trimmedPortfolioLink) {
       if (trimmedPortfolioLink.length > INPUT_LIMITS.portfolioLink) {
-        nextErrors.portfolioLink = `הקישור יכול להכיל עד ${INPUT_LIMITS.portfolioLink} תווים`
+        nextErrors.portfolioLink = t('professionalProfile.modal.errors.portfolioTooLong', { max: INPUT_LIMITS.portfolioLink })
       } else if (!URL_REGEX.test(trimmedPortfolioLink)) {
-        nextErrors.portfolioLink = 'יש להזין קישור תקין (החל ב-http:// או https://)'
+        nextErrors.portfolioLink = t('professionalProfile.modal.errors.portfolioInvalid')
       }
     }
 
@@ -91,7 +96,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
     })
 
     if (!awsResponse.ok) {
-      throw new Error('העלאת הקובץ ל-S3 נכשלה')
+      throw new Error(t('professionalProfile.modal.errors.s3Failed'))
     }
 
     const response = await apiCall<{ success: boolean; profile: RawProfessionalProfile }>(
@@ -147,14 +152,14 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
           setPendingFiles([])
         } catch (uploadError) {
           console.error('Failed to upload pending resume files', uploadError)
-          setErrors((prev) => ({ ...prev, resumeFile: 'חלק מקבצי קורות החיים לא הועלו, נסה שוב' }))
+          setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.pendingUploadFailed') }))
         } finally {
           setIsUploadingResume(false)
         }
       }
     } catch (error) {
       console.error('Failed to save professional profile', error)
-      setErrors((prev) => ({ ...prev, name: 'שמירת הפרופיל נכשלה, נסה שוב' }))
+      setErrors((prev) => ({ ...prev, name: t('professionalProfile.modal.errors.saveFailed') }))
     } finally {
       setIsSaving(false)
     }
@@ -165,15 +170,15 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
 
     const currentCount = resumeFiles.length + pendingFiles.length
     if (currentCount >= MAX_RESUME_FILES) {
-      setErrors((prev) => ({ ...prev, resumeFile: `ניתן לצרף עד ${MAX_RESUME_FILES} קבצים` }))
+      setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.maxFiles', { max: MAX_RESUME_FILES }) }))
       return
     }
     if (file.type !== RESUME_ALLOWED_TYPE) {
-      setErrors((prev) => ({ ...prev, resumeFile: 'ניתן לצרף קובץ PDF בלבד' }))
+      setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.pdfOnly') }))
       return
     }
     if (file.size > RESUME_MAX_SIZE_BYTES) {
-      setErrors((prev) => ({ ...prev, resumeFile: 'גודל הקובץ חייב להיות עד 5MB' }))
+      setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.tooLarge', { max: RESUME_MAX_SIZE_MB }) }))
       return
     }
 
@@ -190,7 +195,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
       setResumeFiles(await uploadAndRegisterResume(file))
     } catch (error) {
       console.error('Failed to upload resume file', error)
-      setErrors((prev) => ({ ...prev, resumeFile: 'העלאת הקובץ נכשלה, נסה שוב' }))
+      setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.uploadFailed') }))
     } finally {
       setIsUploadingResume(false)
     }
@@ -209,23 +214,23 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
       setResumeFiles(response.profile.resumeFiles ?? [])
     } catch (error) {
       console.error('Failed to delete resume file', error)
-      setErrors((prev) => ({ ...prev, resumeFile: 'מחיקת הקובץ נכשלה, נסה שוב' }))
+      setErrors((prev) => ({ ...prev, resumeFile: t('professionalProfile.modal.errors.deleteFailed') }))
     }
   }
 
   const totalFileCount = resumeFiles.length + pendingFiles.length
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="modal-overlay" role="dialog" aria-modal="true" dir={dir} onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <header className="modal-header">
           <div>
-            <h2>הגדרות פרופיל מקצועי</h2>
-            <p>פעיל בלוח המכרזים בלבד — בעלי מכרזים יוכלו לצפות בו כשתגיש מועמדות</p>
+            <h2>{t('professionalProfile.modal.title')}</h2>
+            <p>{t('professionalProfile.modal.subtitle')}</p>
           </div>
           <div>
             <button type="button" className="tab-button" onClick={onClose}>
-              Close
+              {t('professionalProfile.modal.close')}
             </button>
           </div>
         </header>
@@ -233,7 +238,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
         <form className="modal-section apply-form" onSubmit={handleSubmit}>
           <div className="form-grid">
             <label className="form-field">
-              <span className="form-label">שם</span>
+              <span className="form-label">{t('professionalProfile.modal.nameLabel')}</span>
               <input
                 className="form-input"
                 type="text"
@@ -242,7 +247,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
                   setName(e.target.value)
                   if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }))
                 }}
-                placeholder="שם מלא"
+                placeholder={t('professionalProfile.modal.namePlaceholder')}
                 maxLength={INPUT_LIMITS.name}
                 required
               />
@@ -250,7 +255,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
             </label>
 
             <label className="form-field form-full">
-              <span className="form-label">תיאור</span>
+              <span className="form-label">{t('professionalProfile.modal.descriptionLabel')}</span>
               <textarea
                 className="form-textarea"
                 value={description}
@@ -258,7 +263,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
                   setDescription(e.target.value)
                   if (errors.description) setErrors((prev) => ({ ...prev, description: undefined }))
                 }}
-                placeholder="ספר על עצמך ועל ההתמחות שלך"
+                placeholder={t('professionalProfile.modal.descriptionPlaceholder')}
                 maxLength={INPUT_LIMITS.description}
                 rows={4}
               />
@@ -266,7 +271,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
             </label>
 
             <label className="form-field form-full">
-              <span className="form-label">ניסיון</span>
+              <span className="form-label">{t('professionalProfile.modal.experienceLabel')}</span>
               <textarea
                 className="form-textarea"
                 value={experience}
@@ -274,7 +279,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
                   setExperience(e.target.value)
                   if (errors.experience) setErrors((prev) => ({ ...prev, experience: undefined }))
                 }}
-                placeholder="תאר את הניסיון המקצועי שלך"
+                placeholder={t('professionalProfile.modal.experiencePlaceholder')}
                 maxLength={INPUT_LIMITS.experience}
                 rows={4}
               />
@@ -282,7 +287,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
             </label>
 
             <label className="form-field">
-              <span className="form-label">קישור לתיק עבודות</span>
+              <span className="form-label">{t('professionalProfile.modal.portfolioLabel')}</span>
               <input
                 className="form-input"
                 type="url"
@@ -298,7 +303,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
             </label>
 
             <div className="form-field form-full">
-              <span className="form-label">קבצי קורות חיים ({totalFileCount}/{MAX_RESUME_FILES})</span>
+              <span className="form-label">{t('professionalProfile.modal.resumeFilesLabel', { current: totalFileCount, max: MAX_RESUME_FILES })}</span>
 
               {totalFileCount > 0 && (
                 <ul className="resume-file-list">
@@ -306,7 +311,7 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
                     <li key={file.fileKey} className="resume-file-row">
                       <span>{file.fileName}</span>
                       <button type="button" className="secondary-button" onClick={() => handleResumeDelete(file.fileKey)}>
-                        מחיקה
+                        {t('professionalProfile.modal.delete')}
                       </button>
                     </li>
                   ))}
@@ -314,10 +319,10 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
                     <li key={`pending-${index}-${file.name}`} className="resume-file-row">
                       <span>
                         {file.name}
-                        <em className="pending-badge">ממתין לשמירה</em>
+                        <em className="pending-badge">{t('professionalProfile.modal.pendingSave')}</em>
                       </span>
                       <button type="button" className="secondary-button" onClick={() => handlePendingFileRemove(index)}>
-                        הסרה
+                        {t('professionalProfile.modal.remove')}
                       </button>
                     </li>
                   ))}
@@ -342,10 +347,10 @@ export default function ProfessionalProfileModal({ profile, onClose, onSaved }: 
 
           <div className="modal-actions mt-18 actions-row">
             <button type="submit" className="primary-button" disabled={isSaving}>
-              {isSaving ? 'שומר...' : savedProfile ? 'שמירה' : 'צור פרופיל'}
+              {isSaving ? t('professionalProfile.modal.saving') : savedProfile ? t('professionalProfile.modal.save') : t('professionalProfile.modal.create')}
             </button>
             <button type="button" className="secondary-button" onClick={onClose} disabled={isSaving}>
-              {savedProfile ? 'סגירה' : 'ביטול'}
+              {savedProfile ? t('professionalProfile.modal.close') : t('professionalProfile.modal.cancel')}
             </button>
           </div>
         </form>

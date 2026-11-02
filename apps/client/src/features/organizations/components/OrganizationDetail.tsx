@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../../i18n/useLocale";
 import * as XLSX from "xlsx";
 import {
   getOrganizationDetail,
@@ -28,6 +29,7 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
     { name: string; email: string; password: string }[]
   >([]);
   const { t } = useTranslation();
+  const { locale } = useLocale();
 
   const handleDownloadExcel = () => {
     const loginUrl = `${window.location.origin}/login`;
@@ -107,7 +109,7 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
         </div>
         <div className="org-card">
           <div className="org-card-label">{t("organizations.totalTokensCard")}</div>
-          <div className="org-card-value">{(stats?.totalTokens ?? 0).toLocaleString()}</div>
+          <div className="org-card-value">{(stats?.totalTokens ?? 0).toLocaleString(locale)}</div>
         </div>
         <div className="org-card">
           <div className="org-card-label">{t("organizations.cumulativeCostCard")}</div>
@@ -177,7 +179,7 @@ export const OrganizationDetail = ({ orgId, onBack }: OrganizationDetailProps) =
                     {u.lastLogin ? t("orgUsers.joinedLabel") : t("orgUsers.pendingFirstLoginLabel")}
                   </span>
                 </td>
-                <td>{new Date(u.createdAt).toLocaleDateString("he-IL")}</td>
+                <td>{new Date(u.createdAt).toLocaleDateString(locale)}</td>
               </tr>
             ))}
           </tbody>

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import "../styles/showcase.css";
 import { SEO } from "../components/SEO";
 import {
@@ -19,115 +20,72 @@ import { usePublicStats } from "../features/showcase/usePublicStats";
 import { useRevealOnScroll } from "../features/showcase/useRevealOnScroll";
 import { prefersReducedMotion, revealDelay } from "../features/showcase/motion";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
+/** `key` → hubIntro.areas.<key>.{title,description} */
 interface HubArea {
   icon: ReactNode;
-  title: string;
-  description: string;
+  key: string;
   path: string;
 }
 
 const HUB_AREAS: HubArea[] = [
-  {
-    icon: <NewsIcon size={22} />,
-    title: "חדשות AI",
-    description: "מה חדש בעולם הכלים — בתמצית, בשפה נקייה ובלי רעש.",
-    path: ROUTES.hub.news,
-  },
-  {
-    icon: <ChatIcon size={22} />,
-    title: "פורום",
-    description: "שואלים, עונים ומשתפים ניסיון מעשי עם קהילה שחולקת את אותם ערכים.",
-    path: ROUTES.hub.forum,
-  },
-  {
-    icon: <DocIcon size={22} />,
-    title: "מאמרים",
-    description: "הסברים מעמיקים: איך כלי AI עובדים, ואיך משתמשים בהם נכון ובבטחה.",
-    path: ROUTES.hub.articles,
-  },
-  {
-    icon: <BookIcon size={22} />,
-    title: "קורסים",
-    description: "לימוד מסודר, צעד אחר צעד — מהיסודות ועד שילוב AI בעבודה מקצועית.",
-    path: ROUTES.hub.courses,
-  },
-  {
-    icon: <CompassIcon size={22} />,
-    title: "מדריכים מומלצים",
-    description: "מדריכים שנבחרו בקפידה כדי לחסוך חיפוש במקומות לא מתאימים.",
-    path: ROUTES.hub.guides,
-  },
-  {
-    icon: <ClipboardIcon size={22} />,
-    title: "לוח פרויקטים",
-    description: "פרויקטים פתוחים לקהילה — מקום לתרום, ללמוד ולהתנסות על מוצר אמיתי.",
-    path: ROUTES.hub.projects,
-  },
-  {
-    icon: <BoxIcon size={22} />,
-    title: "סוכנים",
-    description: "סוכני AI שנבנו בקהילה למשימות ממוקדות, מוכנים לשימוש.",
-    path: ROUTES.hub.agents,
-  },
+  { icon: <NewsIcon size={22} />, key: "news", path: ROUTES.hub.news },
+  { icon: <ChatIcon size={22} />, key: "forum", path: ROUTES.hub.forum },
+  { icon: <DocIcon size={22} />, key: "articles", path: ROUTES.hub.articles },
+  { icon: <BookIcon size={22} />, key: "courses", path: ROUTES.hub.courses },
+  { icon: <CompassIcon size={22} />, key: "guides", path: ROUTES.hub.guides },
+  { icon: <ClipboardIcon size={22} />, key: "projects", path: ROUTES.hub.projects },
+  { icon: <BoxIcon size={22} />, key: "agents", path: ROUTES.hub.agents },
 ];
 
-const PRINCIPLES = [
-  {
-    title: "AI ככלי עבודה",
-    text: "לומדים להפעיל את הכלי למשימה מוגדרת — לא לנהל איתו שיחה פתוחה על כל נושא.",
-  },
-  {
-    title: "ידע עם גבולות",
-    text: "התוכן נכתב ונבחר מתוך השקפת עולם של שומרי תורה ומצוות: מה מתאים, מה לא, ואיך נזהרים.",
-  },
-  {
-    title: "קהילה שומרת ערכים",
-    text: "מקום להתייעץ ולשתף ניסיון עם אנשים שמחפשים את אותו איזון — מקצועיות בלי פשרות.",
-  },
-];
+/** Keys under hubIntro.principles.* */
+const PRINCIPLES = ["tool", "boundaries", "community"] as const;
 
-const FLOATING_CARDS = [
-  { icon: <NewsIcon size={20} />, title: "חדשות AI", subtitle: "עדכונים בתמצית" },
-  { icon: <ChatIcon size={20} />, title: "פורום הקהילה", subtitle: "שאלות ותשובות" },
-  { icon: <BookIcon size={20} />, title: "קורסים", subtitle: "לימוד צעד אחר צעד" },
-  { icon: <ShieldIcon size={20} />, title: "שימוש בטוח", subtitle: "בגבולות הנכונים" },
+/** `key` → hubIntro.floating.<key>.{title,subtitle} */
+const FLOATING_CARDS: { icon: ReactNode; key: string }[] = [
+  { icon: <NewsIcon size={20} />, key: "news" },
+  { icon: <ChatIcon size={20} />, key: "forum" },
+  { icon: <BookIcon size={20} />, key: "courses" },
+  { icon: <ShieldIcon size={20} />, key: "safe" },
 ];
 
 /** Intro page for SafeAI Hub — reached from the gateway, leads into /hub. */
 export default function HubIntroPage() {
+  const { t } = useTranslation();
+  const { dir } = useLocale();
   const pageRef = useRevealOnScroll<HTMLDivElement>();
   const publicStats = usePublicStats();
 
   const stats = useMemo<StatItem[]>(() => {
     const items: StatItem[] = [
-      { id: "areas", value: HUB_AREAS.length, label: "אזורי תוכן" },
-      { id: "free", value: 100, suffix: "%", label: "חינם לקריאה, ללא הרשמה" },
+      { id: "areas", value: HUB_AREAS.length, label: t("hubIntro.stats.areas") },
+      { id: "free", value: 100, suffix: "%", label: t("hubIntro.stats.free") },
     ];
     if (publicStats && publicStats.userCount > 0) {
-      items.push({ id: "members", value: publicStats.userCount, label: "חברי קהילה" });
+      items.push({ id: "members", value: publicStats.userCount, label: t("hubIntro.stats.members") });
     }
     if (publicStats && publicStats.tenderCount > 0) {
-      items.push({ id: "projects", value: publicStats.tenderCount, label: "פרויקטים פתוחים" });
+      items.push({ id: "projects", value: publicStats.tenderCount, label: t("hubIntro.stats.projects") });
     }
     return items;
-  }, [publicStats]);
+  }, [publicStats, t]);
 
   const scrollToAreas = () =>
     document.getElementById("areas")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
 
   return (
-    <div className="sx sx-hub" ref={pageRef} dir="rtl">
+    <div className="sx sx-hub" ref={pageRef} dir={dir}>
       <SEO
         title="SafeAI Hub"
-        description="מרכז ידע וקהילה לשימוש בטוח ומושכל בבינה מלאכותית: חדשות, פורום, מאמרים, קורסים ומדריכים — בגבולות הנכונים."
+        description={t("hubIntro.seoDescription")}
       />
 
       <ShowcaseHeader
         brand="SafeAI Hub"
         action={
           <Link to={ROUTES.hub.root} className="sx-btn sx-btn-primary sx-btn-sm">
-            כניסה ל-Hub
+            {t("hubIntro.enter")}
           </Link>
         }
       />
@@ -143,31 +101,30 @@ export default function HubIntroPage() {
               SafeAI Hub
             </span>
             <h1 id="hub-hero-title" className="sx-h1" data-reveal style={revealDelay(1)}>
-              ידע על AI.
+              {t("hubIntro.hero.line1")}
               <br />
-              <span className="sx-gradient-text">בעיניים שלנו.</span>
+              <span className="sx-gradient-text">{t("hubIntro.hero.line2")}</span>
             </h1>
             <p className="sx-lead" data-reveal style={revealDelay(2)}>
-              מרכז ידע וקהילה לשימוש בטוח ומושכל בבינה מלאכותית. חדשות, מאמרים, קורסים ומדריכים —{" "}
-              <strong>עם דגש על שימוש מקצועי וממוקד</strong>, ומותאם להשקפת עולם של שומרי תורה ומצוות.
+              <Trans i18nKey="hubIntro.hero.lead" components={{ strong: <strong /> }} />
             </p>
             <div className="sx-actions" data-reveal style={revealDelay(3)}>
               <Link to={ROUTES.hub.root} className="sx-btn sx-btn-primary">
-                כניסה ל-Hub <span className="sx-btn-arrow">←</span>
+                {t("hubIntro.enter")} <span className="sx-btn-arrow" aria-hidden="true">←</span>
               </Link>
               <button type="button" className="sx-btn sx-btn-ghost" onClick={scrollToAreas}>
-                מה יש בפנים?
+                {t("hubIntro.hero.whatsInside")}
               </button>
             </div>
           </div>
 
           <div className="sx-float-stack" aria-hidden="true">
             {FLOATING_CARDS.map((card) => (
-              <div key={card.title} className="sx-float-card">
+              <div key={card.key} className="sx-float-card">
                 <span className="sx-card-icon">{card.icon}</span>
                 <span>
-                  <strong>{card.title}</strong>
-                  <small>{card.subtitle}</small>
+                  <strong>{t(`hubIntro.floating.${card.key}.title`)}</strong>
+                  <small>{t(`hubIntro.floating.${card.key}.subtitle`)}</small>
                 </span>
               </div>
             ))}
@@ -175,9 +132,9 @@ export default function HubIntroPage() {
         </div>
       </section>
 
-      <section className="sx-section" aria-label="SafeAI Hub במספרים">
+      <section className="sx-section" aria-label={t("hubIntro.stats.label")}>
         <div className="sx-wrap">
-          <StatsBand items={stats} label="SafeAI Hub במספרים" />
+          <StatsBand items={stats} label={t("hubIntro.stats.label")} />
         </div>
       </section>
 
@@ -185,20 +142,21 @@ export default function HubIntroPage() {
         <div className="sx-wrap">
           <div className="sx-section-head">
             <span className="sx-eyebrow" data-reveal>
-              <b>{String(HUB_AREAS.length).padStart(2, "0")}</b> אזורים
+              <b>{String(HUB_AREAS.length).padStart(2, "0")}</b> {t("hubIntro.areasSection.eyebrow")}
             </span>
             <h2 id="areas-title" className="sx-h2" data-reveal style={revealDelay(1)}>
-              מה מחכה <span className="sx-gradient-text">בפנים</span>
+              {t("hubIntro.areasSection.titleStart")}{" "}
+              <span className="sx-gradient-text">{t("hubIntro.areasSection.titleAccent")}</span>
             </h2>
             <p className="sx-lead" data-reveal style={revealDelay(2)}>
-              כל אזור הוא דלת לתחום אחר. הקריאה פתוחה לכולם; כדי לפרסם, להגיב או להגיש — מתחברים.
+              {t("hubIntro.areasSection.lead")}
             </p>
           </div>
 
           <div className="sx-cards">
             {HUB_AREAS.map((area, index) => (
               <Link
-                key={area.title}
+                key={area.key}
                 to={area.path}
                 className="sx-card sx-card-link"
                 data-reveal
@@ -210,10 +168,10 @@ export default function HubIntroPage() {
                 <span className="sx-card-icon" aria-hidden="true">
                   {area.icon}
                 </span>
-                <h3 className="sx-h3">{area.title}</h3>
-                <p>{area.description}</p>
+                <h3 className="sx-h3">{t(`hubIntro.areas.${area.key}.title`)}</h3>
+                <p>{t(`hubIntro.areas.${area.key}.description`)}</p>
                 <span className="sx-card-more" aria-hidden="true">
-                  כניסה ←
+                  {t("hubIntro.areasSection.enter")} <span className="sx-btn-arrow">←</span>
                 </span>
               </Link>
             ))}
@@ -225,19 +183,20 @@ export default function HubIntroPage() {
         <div className="sx-wrap">
           <div className="sx-section-head sx-section-head-center">
             <span className="sx-eyebrow" data-reveal>
-              <b>03</b> עקרונות
+              <b>03</b> {t("hubIntro.principlesSection.eyebrow")}
             </span>
             <h2 id="principles-title" className="sx-h2" data-reveal style={revealDelay(1)}>
-              איך אנחנו <span className="sx-gradient-text">מסתכלים על AI</span>
+              {t("hubIntro.principlesSection.titleStart")}{" "}
+              <span className="sx-gradient-text">{t("hubIntro.principlesSection.titleAccent")}</span>
             </h2>
           </div>
 
           <ol className="sx-steps sx-steps-3">
             {PRINCIPLES.map((principle, index) => (
-              <li key={principle.title} className="sx-step" data-reveal style={revealDelay(index)}>
+              <li key={principle} className="sx-step" data-reveal style={revealDelay(index)}>
                 <span className="sx-step-num">{String(index + 1).padStart(2, "0")}</span>
-                <h3 className="sx-h3">{principle.title}</h3>
-                <p>{principle.text}</p>
+                <h3 className="sx-h3">{t(`hubIntro.principles.${principle}.title`)}</h3>
+                <p>{t(`hubIntro.principles.${principle}.text`)}</p>
               </li>
             ))}
           </ol>
@@ -248,15 +207,15 @@ export default function HubIntroPage() {
         <div className="sx-wrap">
           <div className="sx-cta-band sx-cta-center" data-reveal>
             <h2 id="hub-cta-title" className="sx-h2">
-              מוכנים <span className="sx-gradient-text">להתחיל?</span>
+              {t("hubIntro.cta.titleStart")} <span className="sx-gradient-text">{t("hubIntro.cta.titleAccent")}</span>
             </h2>
-            <p className="sx-lead">הקריאה פתוחה לכולם — נכנסים, בוחרים אזור, ומתחילים ללמוד.</p>
+            <p className="sx-lead">{t("hubIntro.cta.lead")}</p>
             <div className="sx-actions">
               <Link to={ROUTES.hub.root} className="sx-btn sx-btn-primary">
-                כניסה ל-Hub <span className="sx-btn-arrow">←</span>
+                {t("hubIntro.enter")} <span className="sx-btn-arrow" aria-hidden="true">←</span>
               </Link>
               <Link to={ROUTES.welcome.platform} className="sx-btn sx-btn-ghost">
-                הכירו גם את ה-Platform
+                {t("hubIntro.cta.platform")}
               </Link>
             </div>
           </div>

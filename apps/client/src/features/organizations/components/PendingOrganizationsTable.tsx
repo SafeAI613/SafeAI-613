@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../../i18n/useLocale";
 
 interface Organization {
   _id: string;
@@ -25,6 +26,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
   busyId,
 }) => {
   const { t } = useTranslation();
+  const { locale } = useLocale();
 
   if (organizations.length === 0) {
     return <div className="pending-orgs-empty">{t("pendingOrganizations.noOrgsPending")}</div>;
@@ -44,7 +46,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
         {organizations.map((org) => (
           <tr key={org._id}>
             <td className="orgs-name-cell" onClick={() => onOpenOrg(org._id)}>{org.name}</td>
-            <td>{new Date(org.createdAt).toLocaleDateString("he-IL")}</td>
+            <td>{new Date(org.createdAt).toLocaleDateString(locale)}</td>
             <td>
               <span className={`status-badge ${org.status}`}>
                 {org.status === "pending" ? t("pendingOrganizations.pendingStatus") : org.status}
@@ -54,7 +56,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
               <button
                 className="btn-view-details"
                 onClick={() => onOpenOrg(org._id)}
-                style={{ marginLeft: '8px', cursor: 'pointer' }}
+                style={{ marginInlineEnd: '8px', cursor: 'pointer' }}
               >
                 {t("pendingOrganizations.viewDetailsButton")}
               </button>
@@ -62,7 +64,7 @@ export const PendingOrganizationsTable: React.FC<PendingOrganizationsTableProps>
                 className="btn-approve"
                 onClick={() => onApprove(org._id)}
                 disabled={busyId === org._id}
-                style={{ marginLeft: '8px', cursor: 'pointer' }}
+                style={{ marginInlineEnd: '8px', cursor: 'pointer' }}
               >
                 {busyId === org._id
                   ? t("pendingOrganizations.processingButton")

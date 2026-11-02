@@ -177,7 +177,7 @@ export default function LoginForm() {
       <div className="auth-form-container">
       <div className={`auth-form-wrapper${flavor ? ` auth-flavor-${flavor}` : ""}`}>
         <h2 className="auth-title">
-          {flavor === "hub" ? "כניסה ל-Hub" : flavor === "platform" ? "כניסה ל-Platform" : t("nav.login")}
+          {flavor === "hub" ? t("login.hubTitle") : flavor === "platform" ? t("login.platformTitle") : t("nav.login")}
         </h2>
 
         {/* Google OAuth Button */}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { LimitsStatus } from "../../hooks/useUsageData";
 
 interface Props {
@@ -15,16 +16,17 @@ function ProgressBar({ used, limit }: { used: number; limit: number }) {
 }
 
 export default function BudgetCard({ limitsStatus }: Props) {
+  const { t } = useTranslation();
   const { perMinute, perDay } = limitsStatus.rateLimits;
   const { budget } = limitsStatus;
 
   return (
     <div className="card" style={{ marginTop: "24px" }}>
-      <h3>מצב Rate Limits</h3>
+      <h3>{t("userDashboard.rateLimitsTitle")}</h3>
       <div style={{ marginTop: "16px" }}>
         <div style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-            <span>בקשות לדקה:</span>
+            <span>{t("userDashboard.perMinuteLabel")}</span>
             <span>{perMinute.used} / {perMinute.limit}</span>
           </div>
           <ProgressBar used={perMinute.used} limit={perMinute.limit} />
@@ -32,7 +34,7 @@ export default function BudgetCard({ limitsStatus }: Props) {
 
         <div style={{ marginBottom: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-            <span>בקשות ליום:</span>
+            <span>{t("userDashboard.perDayLabel")}</span>
             <span>{perDay.used} / {perDay.limit}</span>
           </div>
           <ProgressBar used={perDay.used} limit={perDay.limit} />
@@ -41,12 +43,12 @@ export default function BudgetCard({ limitsStatus }: Props) {
         {budget && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-              <span>תקציב חודשי:</span>
+              <span>{t("userDashboard.monthlyBudgetLabel")}</span>
               <span>${budget.currentSpent.toFixed(4)} / ${budget.monthlyLimit.toFixed(2)}</span>
             </div>
             <ProgressBar used={budget.currentSpent} limit={budget.monthlyLimit} />
             <p style={{ marginTop: "8px", fontSize: "14px", color: "var(--text-muted)" }}>
-              נותרו: ${budget.remaining.toFixed(4)} ({(100 - budget.percentUsed).toFixed(1)}%)
+              {t("userDashboard.remainingBudget", { amount: budget.remaining.toFixed(4), percent: (100 - budget.percentUsed).toFixed(1) })}
             </p>
           </div>
         )}

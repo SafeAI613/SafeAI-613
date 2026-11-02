@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../../i18n/useLocale";
 import {
   getOrganizationFundingRequests,
   resolveFundingRequest,
@@ -26,6 +27,7 @@ function statusPillColor(status: OrganizationFundingRequest["status"]): string {
 
 export default function OrganizationFundingRequestsSection({ organizationId, onApproved }: Props) {
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const [requests, setRequests] = useState<OrganizationFundingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -117,7 +119,7 @@ export default function OrganizationFundingRequestsSection({ organizationId, onA
                     {t(`orgUsers.fundingRequests.status.${req.status}`)}
                   </span>
                 </td>
-                <td>{new Date(req.createdAt).toLocaleDateString()}</td>
+                <td>{new Date(req.createdAt).toLocaleDateString(locale)}</td>
                 <td>
                   {req.status === "pending" ? (
                     <div style={{ display: "flex", gap: "8px" }}>

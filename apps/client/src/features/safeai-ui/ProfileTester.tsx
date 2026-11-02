@@ -129,7 +129,6 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
           marginTop: "20px",
           padding: "15px",
           backgroundColor: "var(--color-danger-bg)",
-          border: "1px solid var(--color-danger-border)",
           borderRadius: "var(--radius-sm)",
           color: "var(--color-danger)"
         }}>
@@ -142,7 +141,6 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
           marginTop: "20px",
           padding: "20px",
           backgroundColor: result.allowed ? "var(--color-success-bg)" : "var(--color-danger-bg)",
-          border: `2px solid ${result.allowed ? "var(--color-success)" : "var(--color-danger)"}`,
           borderRadius: "var(--radius-sm)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" }}>

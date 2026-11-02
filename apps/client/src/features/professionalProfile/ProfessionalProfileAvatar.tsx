@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import ProfessionalProfileModal from './ProfessionalProfileModal'
 import { normalizeProfile } from './normalize'
 import type { ProfessionalProfile, RawProfessionalProfile } from './types'
 
 export default function ProfessionalProfileAvatar() {
+  const { t } = useTranslation()
   const [profile, setProfile] = useState<ProfessionalProfile | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -24,7 +26,8 @@ export default function ProfessionalProfileAvatar() {
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          title="הגדרות הפרופיל המקצועי שלי"
+          title={t('professionalProfile.avatar.editTitle')}
+          aria-label={t('professionalProfile.avatar.editTitle')}
           style={{
             width: '40px',
             height: '40px',
@@ -46,7 +49,8 @@ export default function ProfessionalProfileAvatar() {
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
-          title="יצירת פרופיל מקצועי"
+          title={t('professionalProfile.avatar.createTitle')}
+          aria-label={t('professionalProfile.avatar.createTitle')}
           style={{
             width: '40px',
             height: '40px',

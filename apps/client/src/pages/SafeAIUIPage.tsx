@@ -132,7 +132,7 @@ export default function SafeAIUIPage({ area }: { area: "account" | "admin" }) {
 
         setNewRequestCount(count);
       } catch (err) {
-        console.error("שגיאה בטעינת מספר הפניות החדשות:", err);
+        console.error("Failed to load the new-requests count:", err);
       }
     };
 

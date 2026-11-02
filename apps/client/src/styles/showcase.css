@@ -34,6 +34,11 @@
   --sx-radius: 22px;
   --sx-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
+  /* Sign of "forward" on the x axis: in RTL forward is to the left (-1), in
+     LTR to the right (+1). Hover nudges and slide-ins multiply by it, so they
+     always move in the reading direction. */
+  --sx-forward: -1;
+
   position: relative;
   min-height: 100vh;
   background: var(--sx-bg);
@@ -63,6 +68,10 @@
   --sx-glow-1: rgba(47, 93, 138, 0.26);
   --sx-glow-2: rgba(16, 163, 127, 0.2);
   --sx-glow-3: rgba(108, 155, 201, 0.18);
+}
+
+.sx[dir="ltr"] {
+  --sx-forward: 1;
 }
 
 [data-theme="dark"] .sx {
@@ -145,6 +154,12 @@
   background-clip: text;
   color: transparent;
   animation: sx-shine 7s linear infinite;
+}
+
+/* Mirror the sweep for LTR so the shine travels with the reading direction. */
+.sx[dir="ltr"] .sx-gradient-text {
+  background-image: linear-gradient(270deg, var(--sx-accent), var(--sx-accent-2) 55%, var(--sx-accent));
+  animation-name: sx-shine-ltr;
 }
 
 .sx-outline-text {
@@ -284,12 +299,17 @@
   font-size: 0.92rem;
 }
 
+/* The arrow glyph is "←" (forward in RTL); scaleX flips it to point forward
+   in LTR too, and the hover nudge moves it forward in either direction. */
 .sx-btn-arrow {
+  display: inline-block;
+  transform: scaleX(calc(-1 * var(--sx-forward)));
   transition: transform 0.25s var(--sx-ease);
 }
 
-.sx-btn:hover .sx-btn-arrow {
-  transform: translateX(-4px);
+.sx-btn:hover .sx-btn-arrow,
+.sx-card-link:hover .sx-btn-arrow {
+  transform: translateX(calc(4px * var(--sx-forward))) scaleX(calc(-1 * var(--sx-forward)));
 }
 
 .sx-chip {
@@ -298,7 +318,6 @@
   gap: 10px;
   margin-bottom: 26px;
   padding: 7px 18px;
-  border: 1px solid var(--sx-accent-soft);
   border-radius: 999px;
   background: var(--sx-accent-soft);
   color: var(--sx-accent-strong);
@@ -344,7 +363,7 @@
   width: 460px;
   height: 460px;
   top: -140px;
-  right: -120px;
+  inset-inline-start: -120px;
   background: var(--sx-glow-1);
 }
 
@@ -352,7 +371,7 @@
   width: 400px;
   height: 400px;
   top: 220px;
-  left: -160px;
+  inset-inline-end: -160px;
   background: var(--sx-glow-2);
   animation-delay: -6s;
 }
@@ -361,7 +380,7 @@
   width: 320px;
   height: 320px;
   bottom: -80px;
-  right: 30%;
+  inset-inline-start: 30%;
   background: var(--sx-glow-3);
   animation-delay: -11s;
 }
@@ -414,6 +433,8 @@
   justify-content: center;
 }
 
+/* Centered with left: 50% + a negative half-width margin — symmetric, so it
+   needs no mirroring. */
 .sx-scroll-hint {
   position: absolute;
   bottom: 28px;
@@ -432,10 +453,10 @@
   content: "";
   position: absolute;
   top: 8px;
-  left: 50%;
+  inset-inline: 0;
   width: 4px;
   height: 8px;
-  margin-left: -2px;
+  margin-inline: auto;
   border-radius: 2px;
   background: var(--sx-accent);
   animation: sx-scroll 1.8s ease-in-out infinite;
@@ -460,15 +481,13 @@
 
 /* ---------- Stats ---------- */
 
+/* Stats: separate borderless tiles — a white surface lifted by a soft
+   shadow, no frame and no line-colored gaps between them. */
 .sx-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1px;
+  gap: 18px;
   margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--sx-line);
-  border-radius: 26px;
-  background: var(--sx-line);
 }
 
 .sx-stat {
@@ -476,7 +495,9 @@
   flex-direction: column-reverse;
   justify-content: flex-end;
   padding: 36px 26px;
+  border-radius: var(--sx-radius);
   background: var(--sx-card);
+  box-shadow: var(--shadow-card);
   text-align: center;
 }
 
@@ -518,6 +539,11 @@
   display: flex;
   width: max-content;
   animation: sx-marquee 40s linear infinite;
+}
+
+/* In LTR the track starts at the left edge, so it scrolls the other way. */
+.sx[dir="ltr"] .sx-marquee-track {
+  animation-name: sx-marquee-ltr;
 }
 
 .sx-marquee-track span {
@@ -576,10 +602,10 @@
   gap: 4px;
   padding: 30px 28px;
   overflow: hidden;
-  border: 1px solid var(--sx-line);
   border-radius: var(--sx-radius);
   background: var(--sx-card);
-  transition: transform 0.35s var(--sx-ease), border-color 0.35s, box-shadow 0.35s;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.35s var(--sx-ease), box-shadow 0.35s;
 }
 
 .sx-card::before {
@@ -592,10 +618,13 @@
   pointer-events: none;
 }
 
+.sx[dir="ltr"] .sx-card::before {
+  background: radial-gradient(420px circle at 0% 0%, var(--sx-accent-soft), transparent 55%);
+}
+
 .sx-card:hover {
   transform: translateY(-6px);
-  border-color: var(--sx-accent);
-  box-shadow: 0 24px 50px -28px var(--sx-glow-1);
+  box-shadow: var(--shadow-md), 0 24px 50px -28px var(--sx-glow-1);
 }
 
 .sx-card:hover::before {
@@ -615,13 +644,15 @@
 .sx-card-num {
   position: absolute;
   top: 12px;
-  left: 22px;
+  inset-inline-end: 22px;
   font-size: 4.4rem;
   font-weight: 900;
   line-height: 1;
   color: transparent;
   -webkit-text-stroke: 1px var(--sx-line);
-  direction: ltr;
+  /* No direction:ltr here — logical insets resolve against the element's own
+     direction, and a bare number needs only isolation. */
+  unicode-bidi: isolate;
   transition: -webkit-text-stroke-color 0.35s;
   pointer-events: none;
 }
@@ -674,15 +705,15 @@
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  border: 1px solid var(--sx-line);
   border-radius: 16px;
   background: var(--sx-card);
-  transition: transform 0.3s var(--sx-ease), border-color 0.3s;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.3s var(--sx-ease), box-shadow 0.3s;
 }
 
 .sx-mini:hover {
-  transform: translateX(-4px);
-  border-color: var(--sx-accent);
+  transform: translateX(calc(4px * var(--sx-forward)));
+  box-shadow: var(--shadow-md);
 }
 
 .sx-mini-num {
@@ -690,7 +721,7 @@
   color: var(--sx-accent-strong);
   font-size: 0.85rem;
   font-weight: 800;
-  direction: ltr;
+  unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
 }
 
@@ -745,14 +776,18 @@
 
 /* ---------- Terminal ---------- */
 
+/* The terminal shows code, which is always LTR; its window dots follow the
+   page direction (start side) through the flex row. */
 .sx-terminal {
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--sx-line);
   border-radius: 18px;
   background: var(--sx-terminal-bg);
-  box-shadow: 0 40px 80px -40px var(--sx-glow-1), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  text-align: left;
+  box-shadow: var(--shadow-card), 0 40px 80px -40px var(--sx-glow-1);
+}
+
+.sx-terminal-body {
+  text-align: start; /* the <pre> is dir="ltr", so this is its left edge */
 }
 
 .sx-terminal-bar {
@@ -805,7 +840,7 @@
   display: inline-block;
   width: 9px;
   height: 17px;
-  margin-left: 2px;
+  margin-inline-start: 2px;
   vertical-align: -3px;
   background: #7fe3c6;
   animation: sx-blink 1s steps(1) infinite;
@@ -831,8 +866,7 @@
   content: "";
   position: absolute;
   top: 0;
-  right: 0;
-  left: 0;
+  inset-inline: 0;
   height: 2px;
   background: var(--sx-line);
 }
@@ -841,7 +875,7 @@
   content: "";
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-start: 0;
   width: 0;
   height: 2px;
   background: var(--sx-accent);
@@ -859,8 +893,8 @@
   color: var(--sx-accent-strong);
   font-size: 0.9rem;
   font-weight: 800;
-  direction: ltr;
-  text-align: right;
+  unicode-bidi: isolate;
+  text-align: start;
 }
 
 .sx-step p {
@@ -885,6 +919,10 @@
   background: linear-gradient(135deg, var(--sx-accent-soft), transparent 70%), var(--sx-card);
 }
 
+.sx[dir="ltr"] .sx-bento .sx-card-wide {
+  background: linear-gradient(225deg, var(--sx-accent-soft), transparent 70%), var(--sx-card);
+}
+
 /* ---------- Floating visual (Hub hero) ---------- */
 
 .sx-float-stack {
@@ -899,33 +937,32 @@
   gap: 14px;
   width: min(330px, 86%);
   padding: 18px 20px;
-  border: 1px solid var(--sx-line);
   border-radius: 18px;
   background: var(--sx-card);
-  box-shadow: 0 30px 60px -30px var(--sx-glow-1);
+  box-shadow: var(--shadow-card), 0 30px 60px -30px var(--sx-glow-1);
   animation: sx-bob 7s ease-in-out infinite;
 }
 
 .sx-float-card:nth-child(1) {
   top: 10px;
-  right: 0;
+  inset-inline-start: 0;
 }
 
 .sx-float-card:nth-child(2) {
   top: 120px;
-  left: 0;
+  inset-inline-end: 0;
   animation-delay: -2s;
 }
 
 .sx-float-card:nth-child(3) {
   top: 240px;
-  right: 8%;
+  inset-inline-start: 8%;
   animation-delay: -4s;
 }
 
 .sx-float-card:nth-child(4) {
   top: 350px;
-  left: 6%;
+  inset-inline-end: 6%;
   animation-delay: -5.5s;
 }
 
@@ -946,11 +983,18 @@
   position: relative;
   overflow: hidden;
   padding: 70px 56px;
-  border: 1px solid var(--sx-line);
   border-radius: 32px;
   background:
     radial-gradient(circle at 85% 0%, var(--sx-glow-1), transparent 50%),
     radial-gradient(circle at 10% 100%, var(--sx-glow-2), transparent 50%),
+    var(--sx-card);
+  box-shadow: var(--shadow-card);
+}
+
+.sx[dir="ltr"] .sx-cta-band {
+  background:
+    radial-gradient(circle at 15% 0%, var(--sx-glow-1), transparent 50%),
+    radial-gradient(circle at 90% 100%, var(--sx-glow-2), transparent 50%),
     var(--sx-card);
 }
 
@@ -971,15 +1015,14 @@
   align-items: center;
   gap: 14px;
   padding: 18px 20px;
-  border: 1px solid var(--sx-line);
   border-radius: 18px;
-  background: var(--sx-bg);
-  transition: transform 0.3s var(--sx-ease), border-color 0.3s;
+  background: var(--bg-elevated);
+  transition: transform 0.3s var(--sx-ease), box-shadow 0.3s;
 }
 
 .sx-contact-option:hover {
-  transform: translateX(-4px);
-  border-color: var(--sx-accent);
+  transform: translateX(calc(4px * var(--sx-forward)));
+  box-shadow: var(--shadow-md);
 }
 
 .sx-contact-option .sx-card-icon {
@@ -1027,7 +1070,7 @@
 .sx-dots {
   position: fixed;
   top: 50%;
-  left: 22px;
+  inset-inline-end: 22px;
   z-index: 20;
   display: flex;
   flex-direction: column;
@@ -1038,8 +1081,11 @@
   transform: translateY(-50%);
 }
 
+/* The dots sit on the inline-end edge; row-reverse keeps the dot on the
+   outside and the label toward the page in both directions. */
 .sx-dots button {
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   gap: 10px;
   padding: 4px;
@@ -1050,7 +1096,6 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  direction: ltr;
 }
 
 .sx-dots button::before {
@@ -1064,7 +1109,7 @@
 
 .sx-dots button span {
   opacity: 0;
-  transform: translateX(-6px);
+  transform: translateX(calc(6px * var(--sx-forward)));
   transition: all 0.3s var(--sx-ease);
 }
 
@@ -1099,13 +1144,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 8px 10px 8px 20px;
-  border: 1px solid var(--sx-line);
+  padding-block: 8px;
+  padding-inline: 10px 20px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--sx-bg) 78%, transparent);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
-  box-shadow: 0 10px 30px -20px rgba(15, 29, 34, 0.25);
+  box-shadow: var(--shadow-card);
 }
 
 .sx-header-back {
@@ -1118,6 +1163,11 @@
 
 .sx-header-back:hover {
   color: var(--sx-accent-strong);
+}
+
+/* The chevron points "back" (toward the start edge) — flip it for LTR. */
+.sx[dir="ltr"] .sx-header-back svg {
+  transform: scaleX(-1);
 }
 
 .sx-logo {
@@ -1141,6 +1191,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Language switcher inside the pill-shaped header: match the round theme
+   toggle next to it. Its menu drops down from the inline-end edge, which is
+   the bar's outer side, so it opens back toward the page. */
+.sx-header-actions .language-switcher-trigger {
+  height: 34px;
+  border-radius: 999px;
 }
 
 /* ---------- Scroll reveal ----------
@@ -1176,6 +1234,12 @@
   }
 }
 
+@keyframes sx-shine-ltr {
+  to {
+    background-position: -200% center;
+  }
+}
+
 @keyframes sx-pulse {
   50% {
     box-shadow: 0 0 0 6px var(--sx-accent-soft);
@@ -1204,6 +1268,12 @@
 @keyframes sx-marquee {
   to {
     transform: translateX(50%);
+  }
+}
+
+@keyframes sx-marquee-ltr {
+  to {
+    transform: translateX(-50%);
   }
 }
 
@@ -1272,6 +1342,10 @@
 
   .sx-header-bar {
     padding-inline-start: 12px;
+  }
+
+  .sx-header-actions {
+    gap: 6px;
   }
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
 import { useAlert } from "../../context/alertStore";
 
@@ -21,6 +22,7 @@ interface ProviderKeysManagementProps {
 
 export default function ProviderKeysManagement({ userId, userEmail, onClose }: ProviderKeysManagementProps) {
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const { showAlert } = useAlert();
   const [keys, setKeys] = useState<ProviderKey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -162,7 +164,6 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
         <div style={{ padding: "20px" }}>
           <div style={{ 
             backgroundColor: "var(--color-info-bg)",
-            border: "1px solid var(--color-info-border)",
             borderRadius: "var(--radius-sm)", 
             padding: "15px", 
             marginBottom: "20px" 
@@ -198,10 +199,10 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
                 <div 
                   key={key._id} 
                   style={{
-                    border: "1px solid var(--border-default)",
                     borderRadius: "var(--radius-sm)",
                     padding: "15px",
-                    backgroundColor: key.isActive ? "var(--bg-surface)" : "var(--bg-elevated)",
+                    backgroundColor: "var(--bg-elevated)",
+                    opacity: key.isActive ? 1 : 0.7,
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -209,7 +210,7 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
                       <span style={{ fontSize: "24px" }}>{getProviderIcon(key.provider)}</span>
                       <div>
                         <h4 style={{ margin: 0 }}>{getProviderName(key.provider)}</h4>
-                        <p dir="ltr" style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-muted)", fontFamily: "monospace", textAlign: "left" }}>
+                        <p dir="ltr" style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-muted)", fontFamily: "monospace", textAlign: "start" }}>
                           {key.keyPrefix}...
                         </p>
                       </div>
@@ -236,7 +237,7 @@ export default function ProviderKeysManagement({ userId, userEmail, onClose }: P
                   </div>
                   {key.createdAt && (
                     <p style={{ margin: "10px 0 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
-                      {t("providerKeysManagement.createdAtTimeLabel", { date: new Date(key.createdAt).toLocaleDateString("he-IL"), time: new Date(key.createdAt).toLocaleTimeString("he-IL") })}
+                      {t("providerKeysManagement.createdAtTimeLabel", { date: new Date(key.createdAt).toLocaleDateString(locale), time: new Date(key.createdAt).toLocaleTimeString(locale) })}
                     </p>
                   )}
                 </div>

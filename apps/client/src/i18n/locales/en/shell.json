@@ -1,0 +1,385 @@
+{
+  "shell": {
+    "sidebar": {
+      "home": "Home",
+      "login": "Log in",
+      "tools": "Display settings",
+      "hub": {
+        "news": "AI News",
+        "forum": "Forum",
+        "articles": "Articles",
+        "courses": "Courses",
+        "guides": "Recommended Guides",
+        "projects": "Project Board",
+        "agents": "Agents"
+      },
+      "platform": {
+        "docs": "Documentation",
+        "admin": "System Administration",
+        "personalArea": "Account & API Keys",
+        "changelog": "What's New",
+        "contact": "Contact Us"
+      }
+    },
+    "theme": {
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode",
+      "light": "Light mode",
+      "dark": "Dark mode"
+    },
+    "footer": {
+      "privacy": "Privacy Policy"
+    },
+    "errorBoundary": {
+      "title": "Something went wrong",
+      "unexpected": "An unexpected error occurred",
+      "retry": "Try again"
+    },
+    "alertPopup": {
+      "ok": "OK"
+    },
+    "feed": {
+      "loading": "Loading…",
+      "failed": "Unable to load right now.",
+      "defaultAuthor": "User"
+    },
+    "checklist": {
+      "done": " — completed",
+      "notDone": " — not completed yet"
+    },
+    "statTile": {
+      "loading": "Loading {{label}}…"
+    },
+    "errors": {
+      "screenCaptureTimeout": "Screen capture failed (timed out)",
+      "screenCaptureLoad": "Failed to load the shared screen",
+      "screenCaptureCanvas": "Could not create a canvas for the screenshot",
+      "screenCaptureFile": "Failed to create the screenshot file"
+    }
+  },
+  "hubHome": {
+    "greeting": "Hello",
+    "greetingNamed": "Hello, {{name}}",
+    "subtitle": "Every resource for developers in one place — forum, courses, guides, projects and news.",
+    "postsTitle": "Latest forum posts",
+    "postsEmpty": "There are no forum posts yet.",
+    "updatesTitle": "Updates",
+    "updatesEmpty": "There are no new updates right now."
+  },
+  "platformHome": {
+    "greeting": "Hello",
+    "greetingNamed": "Hello, {{name}}",
+    "subtitle": "Everything you need to manage your SafeAI API Platform usage, in one place.",
+    "getStarted": "Get started",
+    "createKey": "Create an API key",
+    "createKeyDesc": "Required to make API calls",
+    "firstCall": "Make your first call",
+    "firstCallDesc": "Follow the guide in the documentation",
+    "requests7d": "Requests (last 7 days)",
+    "tokensUsed": "Tokens used",
+    "activeKeys": "Active API keys",
+    "recentUpdates": "Recent updates",
+    "updatesEmpty": "There are no new updates right now."
+  },
+  "showcaseHeader": {
+    "backHome": "Back to the SafeAI613 home page"
+  },
+  "gateway": {
+    "seoTitle": "Safe and Responsible Use of Artificial Intelligence",
+    "seoDescription": "SafeAI613 — an open-source community for safe use of AI: knowledge and community in SafeAI Hub, and a filtered API service in SafeAI Platform.",
+    "sectionsNav": "Page sections",
+    "sections": {
+      "about": "SafeAI",
+      "hub": "Hub",
+      "platform": "Platform",
+      "why": "Why?",
+      "contact": "Contact"
+    },
+    "marquee": {
+      "inputFilter": "Input filtering",
+      "outputFilter": "Output filtering",
+      "filterProfiles": "Filter profiles",
+      "openSource": "Open source",
+      "aiNews": "AI news",
+      "forum": "Forum",
+      "articles": "Articles",
+      "courses": "Courses",
+      "guides": "Guides",
+      "projectBoard": "Project board",
+      "agents": "Agents",
+      "apiKeys": "API keys"
+    },
+    "hubAreas": {
+      "news": "AI News",
+      "forum": "Forum",
+      "articles": "Articles",
+      "courses": "Courses",
+      "guides": "Recommended Guides",
+      "projects": "Project Board",
+      "agents": "Agents"
+    },
+    "stats": {
+      "label": "SafeAI in numbers",
+      "platforms": "Complementary platforms",
+      "layers": "Filtering layers — input and output",
+      "openSource": "Open source",
+      "users": "Registered users",
+      "hubAreas": "Knowledge areas in the Hub"
+    },
+    "hero": {
+      "chip": "Open-source community · BETA",
+      "line1": "Artificial intelligence.",
+      "line2": "Safe and focused.",
+      "line3": "Our way.",
+      "lead": "SafeAI613 builds open-source infrastructure for safe and responsible use of AI — <strong>knowledge and community</strong> in the Hub, and a <strong>filtered API service</strong> in the Platform. All aligned with the values of the Torah-observant community.",
+      "exploreHub": "Explore the Hub",
+      "explorePlatform": "Explore the Platform",
+      "scrollNext": "Scroll to the next section"
+    },
+    "statement": {
+      "start": "AI is a powerful force.",
+      "dim": "The question is",
+      "accent": "who holds the wheel."
+    },
+    "hub": {
+      "line1": "Everything about AI.",
+      "line2": "Within the right boundaries.",
+      "lead": "A knowledge and community center: how to work with artificial intelligence properly, what is worthwhile and what is not, and how to integrate it into professional work <strong>without compromising on values</strong> — including guidance from a Haredi perspective on using these tools.",
+      "cta": "Go to the Hub page"
+    },
+    "platform": {
+      "line1": "Leading language models.",
+      "line2": "With built-in filtering.",
+      "lead": "An API gateway that connects to the tools and applications you already use — get a key, change the URL, and everything else happens along the way.",
+      "points": {
+        "compatible": "An API compatible with the common formats — change the URL and keep working",
+        "filtered": "Every request and every response is filtered along the way",
+        "profiles": "Filter profiles per organization and per professional domain",
+        "keys": "Bring your own key (BYOK) or use managed keys, with usage and budget tracking"
+      },
+      "cta": "Go to the Platform page",
+      "terminalCaption": "Demo: an API call that passes input and output filtering"
+    },
+    "why": {
+      "line1": "Because AI is a tool.",
+      "line2": "Not a conversation partner.",
+      "lead": "AI tools have entered every professional field, and using them is already unavoidable. But a language model can also hold a conversation, offer compliments, give advice and go on and on. We do not accept this change with indifference — <strong>we are preparing for it.</strong>",
+      "principles": {
+        "professional": {
+          "title": "Professional use only",
+          "text": "AI for solving focused tasks — not as a “person” to chat with about any topic."
+        },
+        "core": {
+          "title": "Core filtering",
+          "text": "Blocking forbidden content entirely, in both the question and the answer, before it reaches the user."
+        },
+        "domain": {
+          "title": "Domain filtering",
+          "text": "Defining a professional domain for each system, so the conversation stays focused on the purpose it was built for."
+        }
+      },
+      "cta": "Read the full background"
+    },
+    "contact": {
+      "line1": "Have a question?",
+      "line2": "Want to join?",
+      "lead": "For users, developers, institutions and organizations. Tell us what you need — and together we will find the right way forward.",
+      "cta": "Go to the contact form",
+      "options": {
+        "support": {
+          "title": "Questions or technical support",
+          "description": "Write to us and we will get back to you soon"
+        },
+        "devTeam": {
+          "title": "Join the development team",
+          "description": "An open-source community looking for skilled hands"
+        },
+        "organizations": {
+          "title": "Organizations and institutions",
+          "description": "Open an organization account with tailored filtering"
+        }
+      }
+    }
+  },
+  "hubIntro": {
+    "seoDescription": "A knowledge and community center for safe and thoughtful use of artificial intelligence: news, forum, articles, courses and guides — within the right boundaries.",
+    "enter": "Enter the Hub",
+    "areas": {
+      "news": {
+        "title": "AI News",
+        "description": "What is new in the world of tools — concise, in clean language and without noise."
+      },
+      "forum": {
+        "title": "Forum",
+        "description": "Ask, answer and share practical experience with a community that shares the same values."
+      },
+      "articles": {
+        "title": "Articles",
+        "description": "In-depth explanations: how AI tools work, and how to use them properly and safely."
+      },
+      "courses": {
+        "title": "Courses",
+        "description": "Structured learning, step by step — from the basics to integrating AI into professional work."
+      },
+      "guides": {
+        "title": "Recommended Guides",
+        "description": "Carefully selected guides that save you from searching in unsuitable places."
+      },
+      "projects": {
+        "title": "Project Board",
+        "description": "Projects open to the community — a place to contribute, learn and gain hands-on experience with a real product."
+      },
+      "agents": {
+        "title": "Agents",
+        "description": "AI agents built by the community for focused tasks, ready to use."
+      }
+    },
+    "principles": {
+      "tool": {
+        "title": "AI as a work tool",
+        "text": "Learning to operate the tool for a defined task — not to hold an open conversation with it about any topic."
+      },
+      "boundaries": {
+        "title": "Knowledge with boundaries",
+        "text": "The content is written and selected from the worldview of the Torah-observant community: what is suitable, what is not, and how to stay careful."
+      },
+      "community": {
+        "title": "A values-driven community",
+        "text": "A place to consult and share experience with people seeking the same balance — professionalism without compromise."
+      }
+    },
+    "floating": {
+      "news": {
+        "title": "AI News",
+        "subtitle": "Concise updates"
+      },
+      "forum": {
+        "title": "Community Forum",
+        "subtitle": "Questions and answers"
+      },
+      "courses": {
+        "title": "Courses",
+        "subtitle": "Step-by-step learning"
+      },
+      "safe": {
+        "title": "Safe use",
+        "subtitle": "Within the right boundaries"
+      }
+    },
+    "stats": {
+      "label": "SafeAI Hub in numbers",
+      "areas": "Content areas",
+      "free": "Free to read, no sign-up required",
+      "members": "Community members",
+      "projects": "Open projects"
+    },
+    "hero": {
+      "line1": "Knowledge about AI.",
+      "line2": "Through our eyes.",
+      "lead": "A knowledge and community center for safe and thoughtful use of artificial intelligence. News, articles, courses and guides — <strong>with an emphasis on professional, focused use</strong>, aligned with the worldview of the Torah-observant community.",
+      "whatsInside": "What's inside?"
+    },
+    "areasSection": {
+      "eyebrow": "Areas",
+      "titleStart": "What awaits",
+      "titleAccent": "inside",
+      "lead": "Each area opens the door to a different field. Reading is open to everyone; to post, comment or submit — log in.",
+      "enter": "Enter"
+    },
+    "principlesSection": {
+      "eyebrow": "Principles",
+      "titleStart": "How we",
+      "titleAccent": "look at AI"
+    },
+    "cta": {
+      "titleStart": "Ready",
+      "titleAccent": "to begin?",
+      "lead": "Reading is open to everyone — come in, choose an area, and start learning.",
+      "platform": "Discover the Platform as well"
+    }
+  },
+  "platformIntro": {
+    "seoDescription": "An API gateway for language models with built-in input and output filtering, key management, usage tracking and organization accounts.",
+    "enter": "Enter the Platform",
+    "loginAndContinue": "Log in and continue",
+    "register": "Sign up",
+    "steps": {
+      "register": {
+        "title": "Sign up",
+        "text": "Open a personal or organization account in a few minutes."
+      },
+      "createKey": {
+        "title": "Create an API key",
+        "text": "A personal key that identifies you and your filter profile."
+      },
+      "switchUrl": {
+        "title": "Change the URL",
+        "text": "Point your existing code or tool to the SafeAI address."
+      },
+      "work": {
+        "title": "Work with peace of mind",
+        "text": "Every request and every response is filtered — automatically."
+      }
+    },
+    "features": {
+      "profiles": {
+        "title": "Filter profiles",
+        "text": "Core filtering that blocks forbidden content, and domain filtering that keeps the system focused on its purpose. Each organization chooses the profiles that suit it."
+      },
+      "keys": {
+        "title": "Key management",
+        "text": "Create, revoke and track — all in one place."
+      },
+      "usage": {
+        "title": "Usage tracking",
+        "text": "Requests and tokens per day, with clear charts."
+      },
+      "organizations": {
+        "title": "Organizations",
+        "text": "Users, budget and invoices for each organization."
+      },
+      "byok": {
+        "title": "BYOK or managed",
+        "text": "Bring your own provider key, or use the system's keys."
+      },
+      "compat": {
+        "title": "Developer tool compatibility",
+        "text": "An interface compatible with the common formats, so existing tools connect without code changes."
+      },
+      "openSource": {
+        "title": "Open source",
+        "text": "All the code is open and transparent — you can review it, learn from it and contribute."
+      }
+    },
+    "stats": {
+      "label": "SafeAI Platform in numbers",
+      "layers": "Filtering layers — input and output",
+      "formats": "Supported API formats",
+      "keyModes": "Key modes — BYOK and managed",
+      "organizations": "Active organizations"
+    },
+    "hero": {
+      "line1": "Filtered AI.",
+      "line2": "In a single API call.",
+      "lead": "An API gateway for language models, with a <strong>built-in filtering layer on input and output</strong>. Connect your tools and applications, and receive professional, safe responses.",
+      "terminalCaption": "Demo: an API call that passes a filter profile, input filtering and output filtering"
+    },
+    "stepsSection": {
+      "eyebrow": "Steps",
+      "titleStart": "Get started",
+      "titleAccent": "in four steps"
+    },
+    "featuresSection": {
+      "eyebrow": "Capabilities",
+      "titleStart": "Everything you need.",
+      "titleAccent": "In one place."
+    },
+    "cta": {
+      "titleStart": "Ready",
+      "titleAccent": "to connect?",
+      "leadAuthenticated": "Everything is waiting for you in the Dashboard: keys, usage and account.",
+      "leadGuest": "Log in, create a key — and your first request goes out within minutes.",
+      "hub": "Discover the Hub as well"
+    }
+  }
+}

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import ThemeToggle from "../../components/ThemeToggle";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { ROUTES } from "../../router/paths";
 
 interface ShowcaseHeaderProps {
@@ -11,11 +13,12 @@ interface ShowcaseHeaderProps {
 
 /** Slim floating bar for the Hub / Platform intro pages, which sit outside the site's top navigation. */
 export default function ShowcaseHeader({ brand, action }: ShowcaseHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header className="sx-header">
       <div className="sx-wrap">
         <nav className="sx-header-bar" aria-label={brand}>
-          <Link to={ROUTES.home} className="sx-header-back">
+          <Link to={ROUTES.home} className="sx-header-back" aria-label={t("showcaseHeader.backHome")}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M9 5l7 7-7 7" />
             </svg>
@@ -26,6 +29,7 @@ export default function ShowcaseHeader({ brand, action }: ShowcaseHeaderProps) {
           <span className="sx-header-brand">{brand}</span>
           <div className="sx-header-actions">
             <ThemeToggle />
+            <LanguageSwitcher />
             {action}
           </div>
         </nav>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from './Card'
 import ManageTenderDetails from './ManageTenderDetails.tsx'
 import TenderOffers from './TenderOffers.tsx'
@@ -23,6 +24,7 @@ export default function ManageMyTenders({
   initialOffersTenderId,
   initialHighlightApplicantId,
 }: Props) {
+  const { t } = useTranslation()
   // סינון מכרזים השייכים למשתמש ושהם פעילים (isActive אינו false)
   const publishedTenders = useMemo(
     () => tenders.filter((tender) => tender.publisherUserCode === currentUserCode && tender.isActive !== false),
@@ -94,11 +96,11 @@ export default function ManageMyTenders({
     <section className="manage-shell">
       <div className="manage-header">
         <div>
-          <h1>המכרזים שלי</h1>
+          <h1>{t('tenders.myTendersTitle')}</h1>
         </div>
         <div className="manage-summary">
           {publishedTenders.length}
-          <strong>סה"כ מכרזים פעילים:</strong>
+          <strong>{t('tenders.totalActiveTendersLabel')}</strong>
         </div>
       </div>
 
@@ -110,19 +112,18 @@ export default function ManageMyTenders({
             padding: '14px 18px',
             borderRadius: 'var(--radius-md)',
             backgroundColor: 'var(--color-warning-bg)',
-            border: '1px solid var(--color-warning-border)',
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
           }}
         >
           <strong style={{ color: 'var(--color-warning)', fontSize: '15px' }}>
-            יש לך {totalNewOffers} הצעות חדשות
+            {t('tenders.manage.newOffersTotal', { count: totalNewOffers })}
           </strong>
           <ul style={{ margin: 0, paddingInlineStart: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {tendersWithNewOffers.map((tender) => (
               <li key={tender.id} style={{ color: 'var(--color-warning)', fontSize: '14px' }}>
-                יש {getNewOffersCount(tender)} הצעות חדשות למכרז: <strong>{tender.title}</strong>
+                {t('tenders.manage.newOffersForTender', { count: getNewOffersCount(tender) })} <strong>{tender.title}</strong>
               </li>
             ))}
           </ul>
@@ -150,8 +151,8 @@ export default function ManageMyTenders({
             ))
           ) : (
             <div className="empty-state" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px' }}>
-              <h2>אין מכרזים פעילים</h2>
-              <p>לא נמצאו מכרזים פעילים עם קוד משתמש זה. נסה להוסיף או לפרסם מכרז חדש.</p>
+              <h2>{t('tenders.noActiveTendersTitle')}</h2>
+              <p>{t('tenders.noActiveTendersMessage')}</p>
             </div>
           )}
         </div>

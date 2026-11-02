@@ -250,7 +250,7 @@ export default function UsersManagement() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{t("usersManagement.newUserTitle")}</h2>
-              <button className="modal-close" onClick={() => setModal(null)}>×</button>
+              <button className="modal-close" onClick={() => setModal(null)} aria-label={t("common.close")}>×</button>
             </div>
             <form onSubmit={handleCreate}>
               <div className="form-group"><label>{t("register.emailLabel")}</label>
@@ -292,7 +292,7 @@ export default function UsersManagement() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{t("usersManagement.editUserTitle", { email: editingUser.email })}</h2>
-              <button className="modal-close" onClick={() => setModal(null)}>×</button>
+              <button className="modal-close" onClick={() => setModal(null)} aria-label={t("common.close")}>×</button>
             </div>
             <form onSubmit={handleEdit}>
               <div className="form-group"><label>{t("usersManagement.emailNoChangeLabel")}</label>
@@ -328,13 +328,13 @@ export default function UsersManagement() {
               <div className="form-group">
                 <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <input type="checkbox" checked={editFormData.canCreatePosts} onChange={(e) => setEditFormData({ ...editFormData, canCreatePosts: e.target.checked })} />
-                  מורשה לפרסם פוסטים בפורום
+                  {t("usersManagement.canCreatePostsCheckbox")}
                 </label>
               </div>
               <div className="form-group">
                 <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <input type="checkbox" checked={editFormData.canComment} onChange={(e) => setEditFormData({ ...editFormData, canComment: e.target.checked })} />
-                  מורשה להגיב בפורום
+                  {t("usersManagement.canCommentCheckbox")}
                 </label>
               </div>
               <div className="modal-footer">

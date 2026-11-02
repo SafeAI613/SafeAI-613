@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import ProviderKeysManagement from "./ProviderKeysManagement";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
 import { useAuth } from "../../context/authStore";
@@ -24,6 +25,7 @@ interface ProxyKeyInfo {
 
 export default function UserApiKeysPage() {
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const { user } = useAuth();
   const { showAlert } = useAlert();
   const [keys, setKeys] = useState<ProviderKey[]>([]);
@@ -138,7 +140,7 @@ export default function UserApiKeysPage() {
         `Key: ${newProxyKey}\n\n`,
         `⚠️ IMPORTANT: Keep this key secure and never share it publicly.\n`,
         `This is the only time you will see this key.\n\n`,
-        `Generated: ${new Date().toLocaleString("he-IL")}\n`,
+        `Generated: ${new Date().toLocaleString(locale)}\n`,
       ],
       { type: "text/plain" }
     );
@@ -191,7 +193,6 @@ export default function UserApiKeysPage() {
           <div>
             <div
               style={{
-                border: "2px solid var(--brand-secondary)",
                 borderRadius: "var(--radius-sm)",
                 padding: "20px",
                 backgroundColor: proxyKey.isActive ? "var(--brand-secondary-soft)" : "var(--bg-elevated)",
@@ -212,7 +213,7 @@ export default function UserApiKeysPage() {
 
               {proxyKey.createdAt && (
                 <p style={{ margin: "0 0 15px 0", fontSize: "12px", color: "var(--text-muted)" }}>
-                  {t("userApiKeys.createdLabel", { date: new Date(proxyKey.createdAt).toLocaleDateString("he-IL") })}
+                  {t("userApiKeys.createdLabel", { date: new Date(proxyKey.createdAt).toLocaleDateString(locale) })}
                 </p>
               )}
 
@@ -278,10 +279,10 @@ export default function UserApiKeysPage() {
                   <div 
                     key={key._id} 
                     style={{
-                      border: "1px solid var(--border-default)",
                       borderRadius: "var(--radius-sm)",
                       padding: "15px",
-                      backgroundColor: key.isActive ? "var(--bg-surface)" : "var(--bg-elevated)",
+                      backgroundColor: "var(--bg-elevated)",
+                      opacity: key.isActive ? 1 : 0.7,
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -297,7 +298,7 @@ export default function UserApiKeysPage() {
                              key.provider === "anthropic" ? "Anthropic (Claude)" : 
                              key.provider === "google" ? "Google (Gemini)" : "Groq"}
                           </h4>
-                          <p dir="ltr" style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-muted)", fontFamily: "monospace", textAlign: "left" }}>
+                          <p dir="ltr" style={{ margin: "5px 0 0 0", fontSize: "13px", color: "var(--text-muted)", fontFamily: "monospace", textAlign: "start" }}>
                             {key.keyPrefix}...
                           </p>
                         </div>
@@ -308,7 +309,7 @@ export default function UserApiKeysPage() {
                     </div>
                     {key.createdAt && (
                       <p style={{ margin: "10px 0 0 0", fontSize: "12px", color: "var(--text-muted)" }}>
-                        {t("userApiKeys.createdLabel", { date: new Date(key.createdAt).toLocaleDateString("he-IL") })}
+                        {t("userApiKeys.createdLabel", { date: new Date(key.createdAt).toLocaleDateString(locale) })}
                       </p>
                     )}
                   </div>
@@ -342,10 +343,7 @@ export default function UserApiKeysPage() {
         <div
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundColor: "var(--bg-overlay)",
             display: "flex",
             alignItems: "center",
@@ -409,7 +407,6 @@ export default function UserApiKeysPage() {
               className="alert alert-warning"
               style={{
                 background: "var(--color-warning-bg)",
-                border: "2px solid var(--color-warning-border)",
                 borderRadius: "var(--radius-sm)",
                 padding: "15px",
                 marginBottom: "20px",
@@ -418,7 +415,7 @@ export default function UserApiKeysPage() {
               <h4 style={{ color: "var(--color-warning)", marginTop: 0, marginBottom: "10px" }}>
                 ⚠️ {t("userApiKeys.importantTitle")}
               </h4>
-              <ul style={{ margin: 0, paddingRight: "20px", color: "var(--color-warning)" }}>
+              <ul style={{ margin: 0, paddingInlineStart: "20px", color: "var(--color-warning)" }}>
                 <li>{t("userApiKeys.saveKeySafely")}</li>
                 <li>
                   <strong>{t("userApiKeys.lastChanceToSee")}</strong>

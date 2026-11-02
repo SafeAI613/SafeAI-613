@@ -44,7 +44,7 @@ export const PendingOrganizationsPage = () => {
 
   const handleApprove = async (id: string) => {
     const org = organizations.find((o) => o._id === id);
-    if (!window.confirm(`לאשר את הארגון "${org?.name ?? ""}"?`)) return;
+    if (!window.confirm(t("pendingOrganizations.approveConfirm", { name: org?.name ?? "" }))) return;
 
     try {
       setBusyId(id);
@@ -61,7 +61,7 @@ export const PendingOrganizationsPage = () => {
 
   const handleReject = async (id: string) => {
     const org = organizations.find((o) => o._id === id);
-    if (!window.confirm(`לדחות את הארגון "${org?.name ?? ""}"? הפעולה אינה הפיכה.`)) return;
+    if (!window.confirm(t("pendingOrganizations.rejectConfirm", { name: org?.name ?? "" }))) return;
 
     try {
       setBusyId(id);

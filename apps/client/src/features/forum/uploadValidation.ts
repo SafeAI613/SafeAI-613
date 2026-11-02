@@ -3,6 +3,8 @@
 // בשרת/S3 - בדיקה כאן היא נוחות בלבד, לא הגנה, כי אפשר לעקוף קוד שרץ
 // בדפדפן בקלות.
 
+import i18n from "../../i18n";
+
 export type FileCategory = "video" | "image" | "document";
 
 const VIDEO_EXTENSIONS = ["mp4", "mov", "avi", "mkv", "webm", "wmv", "flv", "m4v", "3gp"];
@@ -87,13 +89,13 @@ export async function validateFileForUpload(
   if (context === "comment") {
     const isVideoByMagicBytes = await looksLikeVideoByMagicBytes(file).catch(() => false);
     if (category === "video" || isVideoByMagicBytes) {
-      return "העלאת קבצי וידאו אינה נתמכת בתגובות";
+      return i18n.t("forum.upload.videoNotAllowed");
     }
   }
 
   const maxSizeBytes = getMaxSizeBytes(category);
   if (file.size > maxSizeBytes) {
-    return `הקובץ חורג מהגודל המרבי המותר (${formatSize(maxSizeBytes, category)}) עבור סוג קובץ זה`;
+    return i18n.t("forum.upload.tooLarge", { size: formatSize(maxSizeBytes, category) });
   }
 
   return null;

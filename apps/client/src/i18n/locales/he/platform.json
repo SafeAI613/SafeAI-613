@@ -1,0 +1,70 @@
+{
+  "requests": {
+    "backToList": "חזרה לרשימת הפניות",
+    "detailsTitle": "פרטי הפנייה",
+    "attachmentAlt": "צירוף לפנייה",
+    "alreadyClosedTitle": "לא ניתן לסגור פנייה שכבר נסגרה",
+    "requestClosedLabel": "הפנייה סגורה",
+    "sendingReply": "שולח...",
+    "sendReplyBtn": "שלח תגובה",
+    "closeConfirmTitle": "סגירת פנייה",
+    "closeConfirmText": "האם את/ה בטוח/ה שברצונך לסגור את הפנייה? לא ניתן לשלוח תגובות נוספות לאחר הסגירה.",
+    "closingBtn": "סוגר...",
+    "confirmCloseBtn": "כן, סגור פנייה"
+  },
+  "profilesManagement": {
+    "promptCount_one": "prompt אחד",
+    "promptCount_other": "{{count}} prompts",
+    "promptCount": "{{count}} prompts",
+    "createdByLabel": "נוצר על ידי:",
+    "emailLabel": "אימייל:"
+  },
+  "userDashboard": {
+    "chartTokensLabel": "Tokens",
+    "freeYes": "כן",
+    "freeNo": "לא"
+  },
+  "usersManagement": {
+    "nameColonLabel": "שם:",
+    "canCreatePostsCheckbox": "מורשה לפרסם פוסטים בפורום",
+    "canCommentCheckbox": "מורשה להגיב בפורום"
+  },
+  "organizations": {
+    "payme": {
+      "missingDetails": "חסרים פרטי עסקה",
+      "statusCheckFailed": "שגיאה בבדיקת סטטוס התשלום",
+      "checkingStatus": "בודק את סטטוס התשלום...",
+      "pleaseWait": "אנא המתן",
+      "successTitle": "הטעינה הצליחה!",
+      "updatedBalanceLabel": "יתרת הארנק המעודכנת:",
+      "backToOrgButton": "חזרה לניהול הארגון",
+      "failedTitle": "הטעינה נכשלה",
+      "notCompleted": "התשלום לא הושלם או בוטל.",
+      "retryButton": "נסה שוב"
+    }
+  },
+  "pendingOrganizations": {
+    "approveConfirm": "לאשר את הארגון \"{{name}}\"?",
+    "rejectConfirm": "לדחות את הארגון \"{{name}}\"? הפעולה אינה הפיכה."
+  },
+  "orgUsers": {
+    "paymentRequestFailed": "נכשלה יצירת בקשת התשלום",
+    "profilesTitle": "פרופילי AI מורשים לארגון",
+    "profilesDescription": "בחרו אילו פרופילי AI מאושרים יהיו זמינים למשתמשי הארגון.",
+    "profilesLoading": "טוען פרופילים...",
+    "profilesEmpty": "אין כרגע פרופילים מאושרים במערכת.",
+    "profilesCreatedByLabel": "נוצר על ידי:",
+    "profilesFetchErrorFallback": "שגיאה בטעינת הפרופילים",
+    "profilesSaveFailedFallback": "שמירת הפרופילים נכשלה",
+    "profilesSaveSuccess": "הפרופילים המורשים נשמרו בהצלחה",
+    "profilesSavingButton": "שומר...",
+    "profilesSaveButton": "שמירת פרופילים"
+  },
+  "inquiries": {
+    "namePlaceholder": "שם",
+    "emailPlaceholder": "אימייל",
+    "subjectPlaceholder": "נושא",
+    "messagePlaceholder": "הודעה",
+    "attachmentAlt": "קובץ מצורף {{index}}"
+  }
+}

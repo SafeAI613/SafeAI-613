@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { Link, generatePath } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { he } from "date-fns/locale";
+import { enUS, he } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import { stripMarkdown } from "../utils/markdown";
 import "../styles/news-page.css";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
 interface NewsItem {
   _id: string;
@@ -33,9 +35,9 @@ const initialFormState: NewsFormState = {
   imageUrl: "",
 };
 
-function formatRelativeTime(value?: string) {
+function formatRelativeTime(value: string | undefined, language: string) {
   if (!value) return "";
-  return formatDistanceToNow(new Date(value), { locale: he, addSuffix: true });
+  return formatDistanceToNow(new Date(value), { locale: language === "en" ? enUS : he, addSuffix: true });
 }
 
 // מילות קישור נפוצות בעברית ובאנגלית - לא מוצעות כתגיות מוצע מילות מפתח
@@ -131,6 +133,8 @@ function SkeletonList({ count }: { count: number }) {
 }
 
 export default function AiNewsPage() {
+  const { t } = useTranslation();
+  const { language } = useLocale();
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -181,7 +185,7 @@ export default function AiNewsPage() {
       setNews((prev) => (pageNumber === 1 ? data : [...prev, ...data]));
       setHasMore(data.length === PAGE_LIMIT);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בטעינת החדשות");
+      setError(err instanceof Error ? err.message : t("newsPage.loadError"));
     } finally {
       setLoading(false);
     }
@@ -261,11 +265,11 @@ export default function AiNewsPage() {
         body: file,
       });
 
-      if (!s3Response.ok) throw new Error("העלאת התמונה נכשלה");
+      if (!s3Response.ok) throw new Error(t("newsPage.imageUploadFailed"));
 
       setFormData((prev) => ({ ...prev, imageUrl: fileUrl }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בהעלאת התמונה");
+      setError(err instanceof Error ? err.message : t("newsPage.imageUploadError"));
     } finally {
       setUploadingImage(false);
       e.target.value = "";
@@ -281,7 +285,7 @@ export default function AiNewsPage() {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.content.trim()) {
-      setError("יש למלא כותרת ותוכן");
+      setError(t("newsPage.titleContentRequired"));
       return;
     }
 
@@ -313,7 +317,7 @@ export default function AiNewsPage() {
       void loadAllTags();
       resetForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה בשמירת החדשות");
+      setError(err instanceof Error ? err.message : t("newsPage.saveError"));
     } finally {
       setSubmitting(false);
     }
@@ -357,7 +361,7 @@ export default function AiNewsPage() {
         resetForm();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "שגיאה במחיקת החדשות");
+      setError(err instanceof Error ? err.message : t("newsPage.deleteError"));
     } finally {
       setSubmitting(false);
       setDeleteTarget(null);
@@ -396,13 +400,13 @@ export default function AiNewsPage() {
           <div className="news-brand">
             <div className="news-brand-mark">AI</div>
             <div className="news-brand-text">
-              <h1>AI News</h1>
-              <p>חדשות AI הכי חמות שיש</p>
+              <h1>{t("newsPage.title")}</h1>
+              <p>{t("newsPage.subtitle")}</p>
             </div>
           </div>
           {isAdmin && (
             <button type="button" onClick={handleStartCreate} className="btn-add-news">
-              + הוספת חדשות
+              {t("newsPage.addNews")}
             </button>
           )}
         </div>
@@ -413,7 +417,7 @@ export default function AiNewsPage() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="חיפוש לפי כותרת"
+              placeholder={t("newsPage.searchPlaceholder")}
               className="news-search-input"
             />
             <span className="news-search-icon">
@@ -428,7 +432,7 @@ export default function AiNewsPage() {
                 onClick={() => setActiveTag(null)}
                 className={`news-tag-pill${activeTag === null ? " active" : ""}`}
               >
-                הכל
+                {t("newsPage.filterAll")}
               </button>
               {allExistingTags.map((tag) => (
                 <button
@@ -452,19 +456,19 @@ export default function AiNewsPage() {
           <SkeletonList count={7} />
         ) : news.length === 0 ? (
           <div className="news-empty">
-            <h3>אין חדשות עדיין</h3>
-            <p>ברגע שיתווספו חדשות הן יופיעו כאן</p>
+            <h3>{t("newsPage.emptyTitle")}</h3>
+            <p>{t("newsPage.emptyText")}</p>
             {isAdmin && (
               <button type="button" onClick={handleStartCreate} className="btn-add-news">
-                צור חדשות ראשונה
+                {t("newsPage.createFirst")}
               </button>
             )}
           </div>
         ) : filteredNews.length === 0 ? (
-          <p className="news-empty-message">אין חדשות מתאימות.</p>
+          <p className="news-empty-message">{t("newsPage.noMatches")}</p>
         ) : (
           <>
-            <div className="news-results-count">{filteredNews.length} תוצאות</div>
+            <div className="news-results-count">{t("newsPage.resultsCount", { count: filteredNews.length })}</div>
 
             <div className="news-list">
               {featured && (
@@ -479,7 +483,7 @@ export default function AiNewsPage() {
                     )}
                   </Link>
                   <div className="news-list-body">
-                    <span className="news-lead-badge">הכתבה המובילה</span>
+                    <span className="news-lead-badge">{t("newsPage.leadBadge")}</span>
                     {featured.tags?.[0] && <span className="news-card-eyebrow">#{featured.tags[0]}</span>}
                     <Link to={generatePath(ROUTES.hub.newsItem, { id: featured._id })} className="news-article-title">
                       {featured.title}
@@ -489,15 +493,15 @@ export default function AiNewsPage() {
                       <div className="news-item-meta">
                         <span className="news-byline-source">{featured.source || "User"}</span>
                         <span className="news-byline-dot">·</span>
-                        <span className="news-date">{formatRelativeTime(featured.createdAt)}</span>
+                        <span className="news-date">{formatRelativeTime(featured.createdAt, language)}</span>
                       </div>
                       {isAdmin && (
                         <div className="news-card-actions">
                           <button type="button" onClick={() => handleEdit(featured)} className="btn-edit">
-                            ערוך
+                            {t("common.edit")}
                           </button>
                           <button type="button" onClick={() => openDeleteModal(featured)} className="btn-delete">
-                            מחק
+                            {t("common.delete")}
                           </button>
                         </div>
                       )}
@@ -527,15 +531,15 @@ export default function AiNewsPage() {
                       <div className="news-item-meta">
                         <span className="news-byline-source">{item.source || "User"}</span>
                         <span className="news-byline-dot">·</span>
-                        <span className="news-date">{formatRelativeTime(item.createdAt)}</span>
+                        <span className="news-date">{formatRelativeTime(item.createdAt, language)}</span>
                       </div>
                       {isAdmin && (
                         <div className="news-card-actions">
                           <button type="button" onClick={() => handleEdit(item)} className="btn-edit">
-                            ערוך
+                            {t("common.edit")}
                           </button>
                           <button type="button" onClick={() => openDeleteModal(item)} className="btn-delete">
-                            מחק
+                            {t("common.delete")}
                           </button>
                         </div>
                       )}
@@ -553,7 +557,7 @@ export default function AiNewsPage() {
                   disabled={loading}
                   className="load-more-btn"
                 >
-                  {loading ? "טוען..." : "טען עוד"}
+                  {loading ? t("common.loading") : t("newsPage.loadMore")}
                 </button>
               </div>
             )}
@@ -567,19 +571,19 @@ export default function AiNewsPage() {
             className="modal-content news-form-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="news-form-title">{editingId ? "עריכת חדשות" : "יצירת חדשות"}</h3>
+            <h3 className="news-form-title">{editingId ? t("newsPage.editTitle") : t("newsPage.createTitle")}</h3>
 
             <form onSubmit={handleSubmit} className="news-form-inputs">
               <input
                 type="text"
-                placeholder="כותרת"
+                placeholder={t("newsPage.titlePlaceholder")}
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="news-input-field"
               />
 
               <textarea
-                placeholder="תוכן (נתמכת כתיבה במארקדאון - Markdown)"
+                placeholder={t("newsPage.contentPlaceholder")}
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 rows={6}
@@ -588,7 +592,7 @@ export default function AiNewsPage() {
 
               <input
                 type="text"
-                placeholder="מקור (אופציונלי)"
+                placeholder={t("newsPage.sourcePlaceholder")}
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                 className="news-input-field"
@@ -602,7 +606,7 @@ export default function AiNewsPage() {
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        aria-label={`הסר תגית ${tag}`}
+                        aria-label={t("newsPage.removeTagAria", { tag })}
                         className="news-tag-chip-remove"
                       >
                         ×
@@ -614,7 +618,7 @@ export default function AiNewsPage() {
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagInputKeyDown}
-                    placeholder={formData.tags.length ? "" : "הקלד תגית ולחץ Enter"}
+                    placeholder={formData.tags.length ? "" : t("newsPage.tagInputPlaceholder")}
                     className="news-tags-input"
                     role="combobox"
                     aria-expanded={tagAutocompleteMatches.length > 0}
@@ -643,7 +647,7 @@ export default function AiNewsPage() {
 
                 {!tagInput && keywordTagSuggestions.length > 0 && (
                   <div className="news-tag-keyword-suggestions">
-                    <span className="news-tag-keyword-label">הצעות תגיות לפי התוכן:</span>
+                    <span className="news-tag-keyword-label">{t("newsPage.tagSuggestionsLabel")}</span>
                     {keywordTagSuggestions.map((tag) => (
                       <button
                         key={tag}
@@ -661,9 +665,9 @@ export default function AiNewsPage() {
               <div className="news-image-upload">
                 {formData.imageUrl ? (
                   <div className="news-image-preview-wrapper">
-                    <img src={formData.imageUrl} alt="תצוגה מקדימה" className="news-image-preview" />
+                    <img src={formData.imageUrl} alt={t("newsPage.imagePreviewAlt")} className="news-image-preview" />
                     <button type="button" onClick={handleRemoveImage} className="btn-reset">
-                      הסר תמונה
+                      {t("newsPage.removeImage")}
                     </button>
                   </div>
                 ) : (
@@ -677,24 +681,24 @@ export default function AiNewsPage() {
                       accept="image/png, image/jpeg, image/webp, image/gif"
                       onChange={handleImageChange}
                       disabled={uploadingImage}
-                      aria-label="בחירת תמונה לכתבה"
+                      aria-label={t("newsPage.chooseImageAria")}
                       className="news-file-input-hidden"
                     />
-                    <span className="news-file-button">בחירת קובץ</span>
+                    <span className="news-file-button">{t("newsPage.chooseFile")}</span>
                     <span className="news-file-name">
-                      {selectedFileName || "לא נבחר קובץ"}
+                      {selectedFileName || t("newsPage.noFileChosen")}
                     </span>
                   </label>
                 )}
-                {uploadingImage && <span className="news-upload-status">מעלה תמונה...</span>}
+                {uploadingImage && <span className="news-upload-status">{t("newsPage.uploadingImage")}</span>}
               </div>
 
               <div className="news-form-buttons">
                 <button type="submit" disabled={submitting || uploadingImage} className="btn-submit">
-                  {submitting ? "שומר..." : editingId ? "עדכון" : "שמירה"}
+                  {submitting ? t("common.saving") : editingId ? t("newsPage.update") : t("newsPage.save")}
                 </button>
                 <button type="button" onClick={resetForm} className="btn-reset">
-                  ביטול
+                  {t("common.cancel")}
                 </button>
               </div>
             </form>
@@ -705,16 +709,16 @@ export default function AiNewsPage() {
       {deleteTarget && (
         <div className="modal-overlay" onClick={cancelDelete}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-title">אישור מחיקה</h2>
+            <h2 className="modal-title">{t("newsPage.confirmDeleteTitle")}</h2>
             <p className="modal-message">
-              האם אתה בטוח שברצונך למחוק את הפריט "{deleteTarget.title}"?
+              {t("newsPage.confirmDeleteMessage", { title: deleteTarget.title })}
             </p>
             <div className="modal-buttons">
               <button type="button" onClick={cancelDelete} className="btn-cancel">
-                לא
+                {t("newsPage.no")}
               </button>
               <button type="button" onClick={confirmDelete} disabled={submitting} className="btn-confirm-delete">
-                כן
+                {t("newsPage.yes")}
               </button>
             </div>
           </div>

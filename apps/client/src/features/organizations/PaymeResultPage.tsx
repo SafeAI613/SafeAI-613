@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../../config/api";
 import { ROUTES } from "../../router/paths";
 
@@ -17,7 +18,8 @@ type ViewState =
   | { phase: "loading" }
   | { phase: "success"; walletBalance: number }
   | { phase: "failed" }
-  | { phase: "error"; message: string };
+  // `message` is a server error text; `messageKey` a locale key used when there is none.
+  | { phase: "error"; message?: string; messageKey?: string };
 
 /**
  * Landing page PayMe redirects the browser to after a wallet top-up
@@ -30,12 +32,13 @@ export default function PaymeResultPage() {
   const { id: organizationId } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const requestId = searchParams.get("requestId");
 
   const [view, setView] = useState<ViewState>(() =>
     organizationId && requestId
       ? { phase: "loading" }
-      : { phase: "error", message: "חסרים פרטי עסקה" }
+      : { phase: "error", messageKey: "organizations.payme.missingDetails" }
   );
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function PaymeResultPage() {
         if (!cancelled) {
           setView({
             phase: "error",
-            message: err instanceof Error ? err.message : "שגיאה בבדיקת סטטוס התשלום",
+            ...(err instanceof Error ? { message: err.message } : { messageKey: "organizations.payme.statusCheckFailed" }),
           });
         }
       }
@@ -88,8 +91,8 @@ export default function PaymeResultPage() {
         <div className="auth-form-wrapper">
           <div style={{ textAlign: "center", padding: "40px" }}>
             <div className="spinner" style={{ margin: "0 auto 20px" }}></div>
-            <h2>בודק את סטטוס התשלום...</h2>
-            <p style={{ color: "var(--text-muted)" }}>אנא המתן</p>
+            <h2>{t("organizations.payme.checkingStatus")}</h2>
+            <p style={{ color: "var(--text-muted)" }}>{t("organizations.payme.pleaseWait")}</p>
           </div>
         </div>
       </div>
@@ -101,10 +104,10 @@ export default function PaymeResultPage() {
       <div className="auth-form-container">
         <div className="auth-form-wrapper">
           <div style={{ textAlign: "center", padding: "40px" }}>
-            <h2>הטעינה הצליחה!</h2>
-            <p>יתרת הארנק המעודכנת: <strong>{view.walletBalance.toFixed(2)}</strong></p>
+            <h2>{t("organizations.payme.successTitle")}</h2>
+            <p>{t("organizations.payme.updatedBalanceLabel")} <strong>{view.walletBalance.toFixed(2)}</strong></p>
             <button className="btn-primary" onClick={() => navigate(ROUTES.platform.organizationUsers)}>
-              חזרה לניהול הארגון
+              {t("organizations.payme.backToOrgButton")}
             </button>
           </div>
         </div>
@@ -116,12 +119,14 @@ export default function PaymeResultPage() {
     <div className="auth-form-container">
       <div className="auth-form-wrapper">
         <div style={{ textAlign: "center", padding: "40px" }}>
-          <h2>הטעינה נכשלה</h2>
+          <h2>{t("organizations.payme.failedTitle")}</h2>
           <p style={{ color: "var(--text-muted)" }}>
-            {view.phase === "error" ? view.message : "התשלום לא הושלם או בוטל."}
+            {view.phase === "error"
+              ? view.message ?? t(view.messageKey ?? "organizations.payme.statusCheckFailed")
+              : t("organizations.payme.notCompleted")}
           </p>
           <button className="btn-primary" onClick={() => navigate(ROUTES.platform.organizationUsers)}>
-            נסה שוב
+            {t("organizations.payme.retryButton")}
           </button>
         </div>
       </div>

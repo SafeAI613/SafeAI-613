@@ -1,18 +1,20 @@
+import { useTranslation } from "react-i18next";
 import { useTheme } from "../hooks/useTheme";
 import "../styles/theme-toggle.css";
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const { t } = useTranslation();
 
   return (
     <button
       type="button"
       className="theme-toggle"
       onClick={toggleTheme}
-      aria-label={isDark ? "עבור למצב יום" : "עבור למצב לילה"}
+      aria-label={isDark ? t("shell.theme.switchToLight") : t("shell.theme.switchToDark")}
       aria-pressed={isDark}
-      title={isDark ? "מצב יום" : "מצב לילה"}
+      title={isDark ? t("shell.theme.light") : t("shell.theme.dark")}
     >
       {isDark ? (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLocale } from '../../i18n/useLocale'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import type { Tender } from './types'
 
@@ -10,6 +12,8 @@ interface TenderOffersProps {
 }
 
 export default function TenderOffers({ tender, onClose, onUpdateTender, highlightApplicantId }: TenderOffersProps) {
+  const { t } = useTranslation()
+  const { dir } = useLocale()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const highlightedRef = useRef<HTMLElement | null>(null)
 
@@ -38,17 +42,17 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
       })
       .catch((error) => {
         console.error('Failed to mark tender offers as viewed', error)
-        setErrorMessage('לא ניתן היה לסמן את ההצעות כנצפו')
+        setErrorMessage(t('tenders.offers.markViewedError'))
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tender.id])
 
   return (
-    <article className="detail-panel content-page-full" style={{ padding: '24px', maxWidth: '95%', margin: '0 auto', boxSizing: 'border-box' }} dir="rtl">
+    <article className="detail-panel content-page-full" style={{ padding: '24px', maxWidth: '95%', margin: '0 auto', boxSizing: 'border-box' }} dir={dir}>
       <header className="detail-panel__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h2>הצעות למכרז: {tender.title}</h2>
+        <h2>{t('tenders.offers.title', { title: tender.title })}</h2>
         <button type="button" className="tab-button" onClick={onClose}>
-          חזור לרשימה
+          {t('tenders.backToListBtn')}
         </button>
       </header>
 
@@ -59,7 +63,7 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
       )}
 
       <section className="applicants-section">
-        <h3>מועמדים ({tender.applicants?.length ?? 0})</h3>
+        <h3>{t('tenders.applicantsHeading', { count: tender.applicants?.length ?? 0 })}</h3>
         {tender.applicants && tender.applicants.length > 0 ? (
           tender.applicants.map((applicant, index) => {
             const isHighlighted = Boolean(highlightApplicantId) && applicant._id === highlightApplicantId
@@ -70,37 +74,39 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
                 className="applicant-card"
                 style={{
                   padding: '12px',
-                  border: isHighlighted ? '2px solid var(--color-info)' : '1px solid var(--border-default)',
+                  // No frame: a soft fill separates the card; the highlighted
+                  // offer gets a thick accent bar on the start side instead.
+                  borderInlineStart: isHighlighted ? '4px solid var(--color-info)' : undefined,
                   borderRadius: 'var(--radius-sm)',
                   marginBottom: '10px',
-                  backgroundColor: isHighlighted ? 'var(--color-info-bg)' : undefined,
+                  backgroundColor: isHighlighted ? 'var(--color-info-bg)' : 'var(--bg-elevated)',
                 }}
               >
                 <h4>{applicant.name}</h4>
-                <p><strong>אימייל:</strong> {applicant.email}</p>
-                <p><strong>פרטים:</strong> {applicant.details}</p>
-                {applicant.proposal && <p><strong>הצעה:</strong> {applicant.proposal}</p>}
-                {applicant.contactMethod && <p><strong>דרכי קשר:</strong> {applicant.contactMethod}</p>}
+                <p><strong>{t('tenders.applicantEmailLabel')}</strong> {applicant.email}</p>
+                <p><strong>{t('tenders.applicantDetailsLabel')}</strong> {applicant.details}</p>
+                {applicant.proposal && <p><strong>{t('tenders.applicantProposalLabel')}</strong> {applicant.proposal}</p>}
+                {applicant.contactMethod && <p><strong>{t('tenders.applicantContactMethodLabel')}</strong> {applicant.contactMethod}</p>}
                 {applicant.professionalProfile && (
-                  <div style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)' }}>
-                    <p><strong>פרופיל מקצועי - {applicant.professionalProfile.name}</strong></p>
+                  <div style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)' }}>
+                    <p><strong>{t('tenders.offers.professionalProfile', { name: applicant.professionalProfile.name })}</strong></p>
                     {applicant.professionalProfile.description && <p>{applicant.professionalProfile.description}</p>}
                     {applicant.professionalProfile.experience && (
-                      <p><strong>ניסיון:</strong> {applicant.professionalProfile.experience}</p>
+                      <p><strong>{t('tenders.offers.experience')}</strong> {applicant.professionalProfile.experience}</p>
                     )}
                   </div>
                 )}
                 {applicant.resumeFileKey && (
                   <p>
-                    <strong>קורות חיים:</strong>{' '}
+                    <strong>{t('tenders.offers.resume')}</strong>{' '}
                     <a href={applicant.resumeFileKey} target="_blank" rel="noopener noreferrer">
-                      לפתיחת הקובץ
+                      {t('tenders.offers.openFile')}
                     </a>
                   </p>
                 )}
                 {applicant.portfolioLink && (
                   <p>
-                    <strong>תיק עבודות:</strong>{' '}
+                    <strong>{t('tenders.offers.portfolio')}</strong>{' '}
                     <a href={applicant.portfolioLink} target="_blank" rel="noopener noreferrer">
                       {applicant.portfolioLink}
                     </a>
@@ -110,7 +116,7 @@ export default function TenderOffers({ tender, onClose, onUpdateTender, highligh
             )
           })
         ) : (
-          <p style={{ color: 'var(--text-muted)' }}>אין עדיין מועמדים שנרשמו למכרז זה.</p>
+          <p style={{ color: 'var(--text-muted)' }}>{t('tenders.noApplicantsMessage')}</p>
         )}
       </section>
     </article>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { API_ENDPOINTS, apiCall } from "../config/api";
+import i18n from "../i18n";
 
 export interface Profile {
   _id: string;
@@ -21,7 +22,7 @@ export function useProfiles() {
       setProfiles(data);
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        setError("שגיאה בטעינת הפרופילים");
+        setError(i18n.t("profilesManagement.errorLoading"));
       }
     } finally {
       setLoading(false);
