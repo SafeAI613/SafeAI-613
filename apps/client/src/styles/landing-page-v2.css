@@ -94,3 +94,17 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* Dark mode resets --lv2-accent on .landing-v2 above; re-apply each
+   platform's own (dark-mode) accent so Hub stays copper and Platform blue. */
+[data-theme="dark"] .landing-v2.theme-hub {
+  --lv2-accent: var(--hub-accent);
+  --lv2-accent-hover: var(--hub-accent-hover);
+  --lv2-accent-soft: var(--hub-accent-soft);
+}
+
+[data-theme="dark"] .landing-v2.theme-platform {
+  --lv2-accent: var(--platform-accent);
+  --lv2-accent-hover: var(--platform-accent-hover);
+  --lv2-accent-soft: var(--platform-accent-soft);
+}
