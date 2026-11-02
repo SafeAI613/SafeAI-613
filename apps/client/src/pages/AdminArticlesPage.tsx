@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, generatePath } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import "./admin-articles-page.css";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
 interface Article {
   _id: string;
@@ -15,21 +17,36 @@ interface Article {
   createdAt: string;
 }
 
-const EMPTY_FORM = {
-  title: "",
-  slug: "",
-  description: "",
-  category: "כללי",
-  content: "",
-  published: true,
-};
+interface ArticleForm {
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  content: string;
+  published: boolean;
+}
+
+// The default category is a translated label, so the empty form is built at
+// render time (with t()) rather than as a module-level constant.
+function emptyForm(defaultCategory: string): ArticleForm {
+  return {
+    title: "",
+    slug: "",
+    description: "",
+    category: defaultCategory,
+    content: "",
+    published: true,
+  };
+}
 
 export default function AdminArticlesPage() {
+  const { t } = useTranslation();
+  const { dir, locale } = useLocale();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editSlug, setEditSlug] = useState<string | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<ArticleForm>(() => emptyForm(t("adminArticles.defaultCategory")));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,11 +59,11 @@ export default function AdminArticlesPage() {
       );
       setArticles(data.articles);
     } catch (err) {
-      if ((err as Error).name !== "AbortError") setError("שגיאה בטעינה");
+      if ((err as Error).name !== "AbortError") setError(t("adminArticles.loadError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -55,7 +72,7 @@ export default function AdminArticlesPage() {
   }, [load]);
 
   const openNew = () => {
-    setForm(EMPTY_FORM);
+    setForm(emptyForm(t("adminArticles.defaultCategory")));
     setEditSlug(null);
     setShowForm(true);
     setError(null);
@@ -77,7 +94,7 @@ export default function AdminArticlesPage() {
 
   const handleSave = async () => {
     if (!form.title || !form.slug || !form.content) {
-      setError("כותרת, slug ותוכן הם שדות חובה");
+      setError(t("adminArticles.requiredFields"));
       return;
     }
     setSaving(true);
@@ -97,19 +114,19 @@ export default function AdminArticlesPage() {
       setShowForm(false);
       load();
     } catch (err) {
-      setError((err as Error).message || "שגיאה בשמירה");
+      setError((err as Error).message || t("adminArticles.saveError"));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (slug: string) => {
-    if (!confirm("למחוק את המאמר?")) return;
+    if (!confirm(t("adminArticles.confirmDelete"))) return;
     try {
       await apiCall(API_ENDPOINTS.articles.bySlug(slug), { method: "DELETE" });
       load();
     } catch (err) {
-      setError((err as Error).message || "שגיאה במחיקה");
+      setError((err as Error).message || t("adminArticles.deleteError"));
     }
   };
 
@@ -120,11 +137,11 @@ export default function AdminArticlesPage() {
       .replace(/[^\w֐-׿-]/g, "");
 
   return (
-    <div className="admin-articles-page" dir="rtl">
+    <div className="admin-articles-page" dir={dir}>
       <div className="admin-articles-header">
-        <h1>ניהול מאמרי Docs</h1>
+        <h1>{t("adminArticles.title")}</h1>
         <button className="admin-articles-new-btn" onClick={openNew}>
-          + מאמר חדש
+          {t("adminArticles.newArticleButton")}
         </button>
       </div>
 
@@ -133,9 +150,9 @@ export default function AdminArticlesPage() {
       {showForm && (
         <div className="admin-articles-form-overlay">
           <div className="admin-articles-form">
-            <h2>{editSlug ? "עריכת מאמר" : "מאמר חדש"}</h2>
+            <h2>{editSlug ? t("adminArticles.editArticle") : t("adminArticles.newArticle")}</h2>
 
-            <label>כותרת *</label>
+            <label>{t("adminArticles.titleLabel")}</label>
             <input
               value={form.title}
               onChange={(e) => {
@@ -146,10 +163,10 @@ export default function AdminArticlesPage() {
                   slug: f.slug || autoSlug(title),
                 }));
               }}
-              placeholder="כותרת המאמר"
+              placeholder={t("adminArticles.titlePlaceholder")}
             />
 
-            <label>Slug *</label>
+            <label>{t("adminArticles.slugLabel")}</label>
             <input
               value={form.slug}
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
@@ -157,33 +174,33 @@ export default function AdminArticlesPage() {
               dir="ltr"
             />
 
-            <label>תיאור קצר</label>
+            <label>{t("adminArticles.descriptionLabel")}</label>
             <input
               value={form.description}
               onChange={(e) =>
                 setForm((f) => ({ ...f, description: e.target.value }))
               }
-              placeholder="תיאור קצר שיופיע בכרטיסיה"
+              placeholder={t("adminArticles.descriptionPlaceholder")}
             />
 
-            <label>קטגוריה</label>
+            <label>{t("adminArticles.categoryLabel")}</label>
             <input
               value={form.category}
               onChange={(e) =>
                 setForm((f) => ({ ...f, category: e.target.value }))
               }
-              placeholder="כללי"
+              placeholder={t("adminArticles.defaultCategory")}
             />
 
-            <label>תוכן (Markdown) *</label>
+            <label>{t("adminArticles.contentLabel")}</label>
             <textarea
               value={form.content}
               onChange={(e) =>
                 setForm((f) => ({ ...f, content: e.target.value }))
               }
-              placeholder="# כותרת&#10;&#10;תוכן המאמר בפורמט Markdown..."
+              placeholder={t("adminArticles.contentPlaceholder")}
               rows={16}
-              dir="rtl"
+              dir={dir}
             />
 
             <label className="admin-articles-checkbox-label">
@@ -194,7 +211,7 @@ export default function AdminArticlesPage() {
                   setForm((f) => ({ ...f, published: e.target.checked }))
                 }
               />
-              פרסם מאמר
+              {t("adminArticles.publishLabel")}
             </label>
 
             {error && <div className="admin-articles-error">{error}</div>}
@@ -205,13 +222,13 @@ export default function AdminArticlesPage() {
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? "שומר..." : "שמור"}
+                {saving ? t("common.saving") : t("common.save")}
               </button>
               <button
                 className="admin-articles-cancel-btn"
                 onClick={() => setShowForm(false)}
               >
-                ביטול
+                {t("common.cancel")}
               </button>
             </div>
           </div>
@@ -219,24 +236,24 @@ export default function AdminArticlesPage() {
       )}
 
       {loading ? (
-        <div className="admin-articles-loading">טוען...</div>
+        <div className="admin-articles-loading">{t("common.loading")}</div>
       ) : (
         <table className="admin-articles-table">
           <thead>
             <tr>
-              <th>כותרת</th>
-              <th>Slug</th>
-              <th>קטגוריה</th>
-              <th>מפורסם</th>
-              <th>תאריך</th>
-              <th>פעולות</th>
+              <th>{t("adminArticles.colTitle")}</th>
+              <th>{t("adminArticles.colSlug")}</th>
+              <th>{t("adminArticles.colCategory")}</th>
+              <th>{t("adminArticles.colPublished")}</th>
+              <th>{t("adminArticles.colDate")}</th>
+              <th>{t("adminArticles.colActions")}</th>
             </tr>
           </thead>
           <tbody>
             {articles.length === 0 && (
               <tr>
                 <td colSpan={6} className="admin-articles-empty">
-                  אין מאמרים עדיין
+                  {t("adminArticles.empty")}
                 </td>
               </tr>
             )}
@@ -245,15 +262,23 @@ export default function AdminArticlesPage() {
                 <td>{a.title}</td>
                 <td dir="ltr">{a.slug}</td>
                 <td>{a.category}</td>
-                <td>{a.published ? "✅" : "❌"}</td>
-                <td>{new Date(a.createdAt).toLocaleDateString("he-IL")}</td>
+                <td>
+                  <span
+                    role="img"
+                    aria-label={a.published ? t("adminArticles.published") : t("adminArticles.notPublished")}
+                    title={a.published ? t("adminArticles.published") : t("adminArticles.notPublished")}
+                  >
+                    {a.published ? "✅" : "❌"}
+                  </span>
+                </td>
+                <td>{new Date(a.createdAt).toLocaleDateString(locale)}</td>
                 <td className="admin-articles-actions">
-                  <button onClick={() => openEdit(a)}>ערוך</button>
+                  <button onClick={() => openEdit(a)}>{t("common.edit")}</button>
                   <button
                     className="admin-articles-delete-btn"
                     onClick={() => handleDelete(a.slug)}
                   >
-                    מחק
+                    {t("common.delete")}
                   </button>
                   <Link
                     to={generatePath(ROUTES.hub.article, { slug: a.slug })}
@@ -261,7 +286,7 @@ export default function AdminArticlesPage() {
                     rel="noreferrer"
                     className="admin-articles-view-link"
                   >
-                    צפה
+                    {t("adminArticles.view")}
                   </Link>
                 </td>
               </tr>

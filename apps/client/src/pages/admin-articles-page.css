@@ -4,21 +4,21 @@
   padding: 2rem 1.5rem 4rem;
 }
 
-.admin-articles-header {
+.admin-articles-page .admin-articles-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.admin-articles-header h1 {
+.admin-articles-page .admin-articles-header h1 {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
-.admin-articles-new-btn {
+.admin-articles-page .admin-articles-new-btn {
   background: var(--brand-primary);
   color: var(--text-inverse);
   border: none;
@@ -31,72 +31,71 @@
   transition: background-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out);
 }
 
-.admin-articles-new-btn:hover {
+.admin-articles-page .admin-articles-new-btn:hover {
   background: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-.admin-articles-error {
+.admin-articles-page .admin-articles-error {
   background: var(--color-danger-bg);
   color: var(--color-danger);
-  border: 1px solid var(--color-danger-border);
   padding: 0.75rem 1rem;
   border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
 
-.admin-articles-loading {
+.admin-articles-page .admin-articles-loading {
   text-align: center;
   padding: 3rem;
   color: var(--text-muted);
 }
 
-.admin-articles-table {
+.admin-articles-page .admin-articles-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--bg-surface);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 0 0 1px var(--border-default), var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
-.admin-articles-table th {
+.admin-articles-page .admin-articles-table th {
   background: var(--bg-elevated);
   padding: 0.75rem 1rem;
-  text-align: right;
+  text-align: start;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-default);
 }
 
-.admin-articles-table td {
+.admin-articles-page .admin-articles-table td {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   border-bottom: 1px solid var(--border-muted);
   color: var(--text-secondary);
 }
 
-.admin-articles-table tr:last-child td {
+.admin-articles-page .admin-articles-table tr:last-child td {
   border-bottom: none;
 }
 
-.admin-articles-empty {
+.admin-articles-page .admin-articles-empty {
   text-align: center;
   color: var(--text-muted);
   padding: 2rem;
 }
 
-.admin-articles-actions {
+.admin-articles-page .admin-articles-actions {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.admin-articles-actions button,
-.admin-articles-view-link {
+.admin-articles-page .admin-articles-actions button,
+.admin-articles-page .admin-articles-view-link {
   padding: 0.3rem 0.7rem;
   border-radius: var(--radius-sm);
   font-family: inherit;
@@ -109,32 +108,32 @@
   transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
-.admin-articles-actions button:hover,
-.admin-articles-view-link:hover {
+.admin-articles-page .admin-articles-actions button:hover,
+.admin-articles-page .admin-articles-view-link:hover {
   border-color: var(--brand-primary);
   color: var(--brand-primary-hover);
 }
 
-.admin-articles-actions button:focus-visible,
-.admin-articles-view-link:focus-visible,
-.admin-articles-new-btn:focus-visible,
-.admin-articles-save-btn:focus-visible,
-.admin-articles-cancel-btn:focus-visible {
+.admin-articles-page .admin-articles-actions button:focus-visible,
+.admin-articles-page .admin-articles-view-link:focus-visible,
+.admin-articles-page .admin-articles-new-btn:focus-visible,
+.admin-articles-page .admin-articles-save-btn:focus-visible,
+.admin-articles-page .admin-articles-cancel-btn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.admin-articles-delete-btn {
+.admin-articles-page .admin-articles-delete-btn {
   color: var(--color-danger) !important;
   border-color: var(--color-danger-border) !important;
 }
 
-.admin-articles-delete-btn:hover {
+.admin-articles-page .admin-articles-delete-btn:hover {
   background: var(--color-danger-bg) !important;
 }
 
 /* Form overlay */
-.admin-articles-form-overlay {
+.admin-articles-page .admin-articles-form-overlay {
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
@@ -146,9 +145,8 @@
   overflow-y: auto;
 }
 
-.admin-articles-form {
+.admin-articles-page .admin-articles-form {
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 2rem;
@@ -159,21 +157,21 @@
   gap: 0.6rem;
 }
 
-.admin-articles-form h2 {
+.admin-articles-page .admin-articles-form h2 {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
-.admin-articles-form label {
+.admin-articles-page .admin-articles-form label {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   margin-top: 0.4rem;
 }
 
-.admin-articles-form input,
-.admin-articles-form textarea {
+.admin-articles-page .admin-articles-form input:not([type="checkbox"]),
+.admin-articles-page .admin-articles-form textarea {
   width: 100%;
   padding: 0.6rem 0.9rem;
   border: 1px solid var(--border-default);
@@ -187,20 +185,20 @@
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
-.admin-articles-form textarea {
+.admin-articles-page .admin-articles-form textarea {
   resize: vertical;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; /* markdown editor */
   font-size: 0.88rem;
   line-height: 1.5;
 }
 
-.admin-articles-form input:focus,
-.admin-articles-form textarea:focus {
+.admin-articles-page .admin-articles-form input:focus,
+.admin-articles-page .admin-articles-form textarea:focus {
   border-color: var(--brand-primary);
   box-shadow: var(--focus-ring);
 }
 
-.admin-articles-checkbox-label {
+.admin-articles-page .admin-articles-checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -208,13 +206,13 @@
   cursor: pointer;
 }
 
-.admin-articles-form-actions {
+.admin-articles-page .admin-articles-form-actions {
   display: flex;
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
 
-.admin-articles-save-btn {
+.admin-articles-page .admin-articles-save-btn {
   background: var(--brand-primary);
   color: var(--text-inverse);
   border: none;
@@ -227,16 +225,16 @@
   transition: background-color 0.2s var(--ease-out);
 }
 
-.admin-articles-save-btn:hover:not(:disabled) {
+.admin-articles-page .admin-articles-save-btn:hover:not(:disabled) {
   background: var(--brand-primary-hover);
 }
 
-.admin-articles-save-btn:disabled {
+.admin-articles-page .admin-articles-save-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.admin-articles-cancel-btn {
+.admin-articles-page .admin-articles-cancel-btn {
   background: var(--bg-surface);
   color: var(--text-secondary);
   border: 1px solid var(--border-default);
@@ -248,17 +246,17 @@
   transition: border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
-.admin-articles-cancel-btn:hover {
+.admin-articles-page .admin-articles-cancel-btn:hover {
   border-color: var(--brand-primary);
   color: var(--brand-primary-hover);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-articles-new-btn {
+  .admin-articles-page .admin-articles-new-btn {
     transition: none;
   }
 
-  .admin-articles-new-btn:hover {
+  .admin-articles-page .admin-articles-new-btn:hover {
     transform: none;
   }
 }

@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { API_ENDPOINTS, apiCall } from "../config/api";
 import "../styles/news-page.css";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
 interface NewsItem {
   _id: string;
@@ -19,6 +20,7 @@ interface NewsItem {
 
 export default function AiNewsDetailsPage() {
   const { t } = useTranslation();
+  const { locale } = useLocale();
   const { id } = useParams();
   const [news, setNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ export default function AiNewsDetailsPage() {
     <div className="news-details-page">
       <div className="news-details-container">
         <Link to={ROUTES.hub.news} className="news-back-link">
-          → חזרה לחדשות
+          {t("newsPage.backToNews")}
         </Link>
 
         {news.tags?.length ? (
@@ -95,7 +97,7 @@ export default function AiNewsDetailsPage() {
         <div className="news-byline">
           <span className="news-byline-source">{news.source || "User"}</span>
           <span className="news-byline-dot">·</span>
-          <span>{new Date(news.createdAt || "").toLocaleDateString("he-IL", {
+          <span>{new Date(news.createdAt || "").toLocaleDateString(locale, {
             year: "numeric",
             month: "long",
             day: "numeric",

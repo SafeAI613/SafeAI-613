@@ -5,6 +5,7 @@ import { apiCall, API_ENDPOINTS } from "../config/api";
 import { SEO } from "../components/SEO";
 import "./articles-page.css";
 import { ROUTES } from "../router/paths";
+import { useLocale } from "../i18n/useLocale";
 
 interface Article {
   _id: string;
@@ -16,7 +17,8 @@ interface Article {
 }
 
 export default function ArticlesPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,9 +109,7 @@ export default function ArticlesPage() {
                   )}
                   <div className="article-card-footer">
                     <span className="article-card-date">
-                      {new Date(article.createdAt).toLocaleDateString(
-                        i18n.language === "he" ? "he-IL" : "en-US"
-                      )}
+                      {new Date(article.createdAt).toLocaleDateString(locale)}
                     </span>
                     <span className="article-card-link">{t("docs.readMoreLink")}</span>
                   </div>

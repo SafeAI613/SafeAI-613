@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import "../styles/recommended-guides-page.css";
 import { SEO } from "../components/SEO";
 
@@ -20,7 +20,10 @@ interface Guide {
 type ViewMode = "cards" | "table";
 
 interface SheetInfo {
+  /** Stable id of the spreadsheet tab; used as the filter value and in logs. */
   name: string;
+  /** Translation key for the visible category label. */
+  labelKey: string;
   gid: string;
 }
 
@@ -74,14 +77,15 @@ function parseCsv(text: string): string[][] {
 }
 
 const SHEETS: SheetInfo[] = [
-  { name: "AI Engineering (פיתוח סוכנים-Workflows)", gid: "593094152" },
-  { name: "Data Science (AI & ML)", gid: "0" },
-  {
-    name: "שימוש בכלי AI לפיתוח לעבודה יומיומית (Claude Code, Copilot)",
-    gid: "825625850",
-  },
-  { name: "ויב קודינג (Vibe Coding / בניית אתרים בקלטקס)", gid: "1806937289" },
+  { name: "ai-engineering", labelKey: "guidesPage.sheets.aiEngineering", gid: "593094152" },
+  { name: "data-science", labelKey: "guidesPage.sheets.dataScience", gid: "0" },
+  { name: "daily-dev-tools", labelKey: "guidesPage.sheets.dailyTools", gid: "825625850" },
+  { name: "vibe-coding", labelKey: "guidesPage.sheets.vibeCoding", gid: "1806937289" },
 ];
+
+const SHEET_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  SHEETS.map((sheet) => [sheet.name, sheet.labelKey]),
+);
 
 export default function RecommendedGuidesPage() {
   const { t } = useTranslation();
@@ -180,7 +184,7 @@ export default function RecommendedGuidesPage() {
           guide.description.toLowerCase().includes(query) ||
           guide.technologies.toLowerCase().includes(query) ||
           guide.language.toLowerCase().includes(query) ||
-          guide.sheet.toLowerCase().includes(query),
+          t(SHEET_LABEL_KEYS[guide.sheet] ?? "").toLowerCase().includes(query),
       );
     }
 
@@ -201,7 +205,7 @@ export default function RecommendedGuidesPage() {
     }
 
     return result;
-  }, [guides, searchQuery, languageFilter, ratingFilter, sheetFilter]);
+  }, [guides, searchQuery, languageFilter, ratingFilter, sheetFilter, t]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -328,7 +332,7 @@ export default function RecommendedGuidesPage() {
                 <option value="all">{t("recommendedGuides.allCategories")}</option>
                 {SHEETS.map((sheet) => (
                   <option key={sheet.gid} value={sheet.name}>
-                    {sheet.name}
+                    {t(sheet.labelKey)}
                   </option>
                 ))}
               </select>
@@ -383,7 +387,11 @@ export default function RecommendedGuidesPage() {
         {/* Results count */}
         <div className="results-info">
           <p>
-            {t("recommendedGuides.resultsShowingPrefix")} <strong>{filteredGuides.length}</strong> {t("recommendedGuides.resultsShowingSuffix")}
+            <Trans
+              i18nKey="guidesPage.resultsShowing"
+              values={{ count: filteredGuides.length }}
+              components={{ strong: <strong /> }}
+            />
             {filteredGuides.length !== stats.total && ` ${t("recommendedGuides.resultsShowingOutOf", { total: stats.total })}`}
           </p>
         </div>
@@ -416,7 +424,7 @@ export default function RecommendedGuidesPage() {
                     <div className="guide-feedback">💬 {guide.feedback}</div>
                   )}
                   <div className="guide-card-footer">
-                    <span className="guide-link-text">{t("recommendedGuides.learnNowLink")}</span>
+                    <span className="guide-link-text">{t("guidesPage.learnNow")}</span>
                   </div>
                 </a>
               ))}
@@ -452,7 +460,7 @@ export default function RecommendedGuidesPage() {
                           rel="noopener noreferrer"
                           className="table-link-button"
                         >
-                          {t("recommendedGuides.viewGuideLink")}
+                          {t("guidesPage.viewGuide")}
                         </a>
                       </td>
                     </tr>
