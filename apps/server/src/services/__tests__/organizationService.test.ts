@@ -79,6 +79,61 @@ describe("organizationService.addUserToOrganization", () => {
     });
   });
 
+  it.each(["admin", "superuser", { $ne: null }])(
+    "rejects requested role %p from an org owner without touching the user",
+    async (role) => {
+      mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+      mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
+
+      await expect(
+        organizationService.addUserToOrganization("org1", "user1", role, "org_owner")
+      ).rejects.toThrow("Invalid role");
+      expect(mockedUserRepo.updateUser).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not let an org owner grant org_owner", async () => {
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+    mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
+
+    await expect(
+      organizationService.addUserToOrganization("org1", "user1", "org_owner", "org_owner")
+    ).rejects.toThrow("Invalid role");
+  });
+
+  it("lets a system admin grant org_owner", async () => {
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+    mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
+    mockedUserRepo.countUsersByOrganization.mockResolvedValue(0);
+
+    await organizationService.addUserToOrganization("org1", "user1", "org_owner", "admin");
+
+    expect(mockedUserRepo.updateUser).toHaveBeenCalledWith("user1", {
+      organizationId: "org1",
+      role: "org_owner",
+    });
+  });
+
+  it("never changes the role of a system admin", async () => {
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+    mockedUserRepo.getUserById.mockResolvedValue({ _id: "admin1", role: "admin" } as any);
+
+    await expect(
+      organizationService.addUserToOrganization("org1", "admin1", "user", "org_owner")
+    ).rejects.toThrow("system admin");
+    expect(mockedUserRepo.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("does not let an org owner pull a user out of another organization", async () => {
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+    mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1", organizationId: "org2" } as any);
+
+    await expect(
+      organizationService.addUserToOrganization("org1", "user1", "user", "org_owner")
+    ).rejects.toThrow("another organization");
+    expect(mockedUserRepo.updateUser).not.toHaveBeenCalled();
+  });
+
   it("defaults maxUsers to 10 when settings are missing", async () => {
     mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
     mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
@@ -318,12 +373,24 @@ describe("organizationService.addUserToOrganizationByEmail", () => {
     mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
     mockedUserRepo.countUsersByOrganization.mockResolvedValue(0);
 
-    await organizationService.addUserToOrganizationByEmail("org1", "user@example.com", "admin");
+    await organizationService.addUserToOrganizationByEmail("org1", "user@example.com", "user", "org_owner");
 
     expect(mockedUserRepo.updateUser).toHaveBeenCalledWith("user1", {
       organizationId: "org1",
-      role: "admin",
+      role: "user",
     });
+  });
+
+  it("refuses to grant the system admin role (privilege escalation)", async () => {
+    mockedUserRepo.findUserByEmail.mockResolvedValue({ _id: "user1" } as any);
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+    mockedUserRepo.getUserById.mockResolvedValue({ _id: "user1" } as any);
+
+    await expect(
+      organizationService.addUserToOrganizationByEmail("org1", "user@example.com", "admin", "org_owner")
+    ).rejects.toThrow("Invalid role");
+
+    expect(mockedUserRepo.updateUser).not.toHaveBeenCalled();
   });
 });
 
@@ -381,6 +448,16 @@ describe("organizationService.createOrganizationMember", () => {
     expect(result.temporaryPassword.length).toBeGreaterThan(0);
   });
 
+  it("refuses to create a member with the system admin role", async () => {
+    mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
+
+    await expect(
+      organizationService.createOrganizationMember("org1", { ...memberData, role: "admin" }, "org_owner")
+    ).rejects.toThrow("Invalid role");
+
+    expect(mockedRegister).not.toHaveBeenCalled();
+  });
+
   it("sends an invite email with the generated temporary password and reports success", async () => {
     mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
     mockedUserRepo.countUsersByOrganization.mockResolvedValue(0);
@@ -417,15 +494,15 @@ describe("organizationService.createOrganizationMember", () => {
     expect(result.emailSent).toBe(false);
   });
 
-  it("uses the given role instead of the default", async () => {
+  it("lets a system admin create a member with the org_owner role", async () => {
     mockedRepo.getOrganizationById.mockResolvedValue({ _id: "org1" } as any);
     mockedUserRepo.countUsersByOrganization.mockResolvedValue(0);
     mockedRegister.mockResolvedValue({ user: { _id: "newUser1" } } as any);
 
-    await organizationService.createOrganizationMember("org1", { ...memberData, role: "admin" });
+    await organizationService.createOrganizationMember("org1", { ...memberData, role: "org_owner" }, "admin");
 
     expect(mockedRegister).toHaveBeenCalledWith(
-      expect.objectContaining({ role: "admin" })
+      expect.objectContaining({ role: "org_owner" })
     );
   });
 });

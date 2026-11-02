@@ -27,6 +27,7 @@ import { SEO } from '../../components/SEO';
 import { useAlert } from '../../context/alertStore';
 import '../../styles/forum.css';
 import { ROUTES, loginPath } from "../../router/paths";
+import DOMPurify from 'dompurify';
 
 // Builds a meta description of roughly 160 characters, without cutting a
 // word in half - post.content is plain text (rendered unescaped as a React
@@ -163,7 +164,7 @@ export const PostThreadPage: React.FC = () => {
     if (!window.confirm(t('forum.thread.confirmDelete'))) return;
 
     try {
-      const response = await deleteComment(commentId, currentUser?._id);
+      const response = await deleteComment(commentId);
 
       if (response.ok) {
         setComments((prev) => prev.filter((comment) => comment._id !== commentId));
@@ -262,7 +263,7 @@ export const PostThreadPage: React.FC = () => {
     setUserRating(selectedRating);
 
     try {
-      const response = await ratePost(post._id, currentUser?._id, selectedRating);
+      const response = await ratePost(post._id, selectedRating);
 
       if (response.ok) {
         const data = await response.json();
@@ -526,7 +527,8 @@ export const PostThreadPage: React.FC = () => {
                   </div>
 
                   <div
-                    dangerouslySetInnerHTML={{ __html: comment.content }}
+                    // ניקוי גם בצד הלקוח: מגן גם על תגובות ישנות שנשמרו לפני שהשרת התחיל לנקות HTML
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}
                     className="forum-comment-content"
                   />
 
