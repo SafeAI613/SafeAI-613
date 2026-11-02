@@ -86,10 +86,7 @@ export default function ProfileSelectionModal({
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         backgroundColor: "var(--bg-overlay)",
         display: "flex",
         alignItems: "center",

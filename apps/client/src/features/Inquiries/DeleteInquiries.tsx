@@ -2,6 +2,7 @@ import { type FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import "./inquiries.css";
 import { removeInquiry } from "./inquiriesSlice";
 import type { AppDispatch } from "../../app/store";
 import type { RootState } from "../../app/store";
@@ -37,7 +38,7 @@ const DeleteInquiries: FC = () => {
   }
 
   return (
-    <div>
+    <div className="inquiries-page">
       <h2>{t("inquiries.deleteTitle")}</h2>
       <p>{t("inquiries.deleteConfirmQuestion")}</p>
 

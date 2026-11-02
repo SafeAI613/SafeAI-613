@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import { useUsageData } from "../../hooks/useUsageData";
 import { useAuth } from "../../context/authStore";
 import { API_ENDPOINTS, apiCall } from "../../config/api";
@@ -17,6 +18,7 @@ function ProgressBar({ used, limit }: { used: number; limit: number }) {
 
 function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequestCreated: () => void }) {
   const { t } = useTranslation();
+  const { dir } = useLocale();
   const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [amount, setAmount] = useState("");
@@ -56,13 +58,13 @@ function TopUpModal({ onClose, onRequestCreated }: { onClose: () => void; onRequ
     }} onClick={onClose}>
       <div style={{
         backgroundColor: "var(--bg-surface)", borderRadius: "var(--radius-lg)", padding: "40px", maxWidth: "480px",
-        width: "90%", boxShadow: "var(--shadow-lg)", direction: "rtl",
+        width: "90%", boxShadow: "var(--shadow-lg)", direction: dir,
       }} onClick={(e) => e.stopPropagation()}>
         {!submitted ? (
           <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
               <h2 style={{ margin: 0, fontSize: "22px" }}>{t("billing.topUpModal.title")}</h2>
-              <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "var(--text-muted)" }}>✕</button>
+              <button onClick={onClose} aria-label={t("common.close")} style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", color: "var(--text-muted)" }}>✕</button>
             </div>
             <p style={{ color: "var(--text-muted)", marginBottom: "24px", lineHeight: 1.6 }}>
               {t("billing.topUpModal.description")}

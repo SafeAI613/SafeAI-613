@@ -1,5 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "../../i18n/useLocale";
 import type { UsageStats, DailyUsage, ModelUsage } from "../../hooks/useUsageData";
 
 interface Props {
@@ -9,26 +10,30 @@ interface Props {
 }
 
 export default function UsageChart({ usageStats, dailyUsage, modelUsage }: Props) {
+  const { t } = useTranslation();
+  const { locale } = useLocale();
+  const shortDate = (v: unknown) => new Date(v as string).toLocaleDateString(locale, { day: "2-digit", month: "2-digit" });
+  const fullDate = (v: unknown) => new Date(v as string).toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "numeric" });
   return (
     <>
       <div className="card" style={{ marginTop: "24px" }}>
-        <h3>סטטיסטיקות שימוש (7 ימים אחרונים)</h3>
+        <h3>{t("userDashboard.usageStatsTitle")}</h3>
         <div className="dashboard-grid" style={{ marginTop: "16px" }}>
           <div className="stat-card">
-            <h4>סה"כ Tokens</h4>
-            <p className="stat-value">{usageStats.totalTokens.toLocaleString()}</p>
-            <p className="stat-change">ממוצע: {Math.round(usageStats.totalTokens / (usageStats.totalRequests || 1))} לבקשה</p>
+            <h4>{t("userDashboard.totalTokensLabel")}</h4>
+            <p className="stat-value">{usageStats.totalTokens.toLocaleString(locale)}</p>
+            <p className="stat-change">{t("userDashboard.avgTokensPerRequest", { avg: Math.round(usageStats.totalTokens / (usageStats.totalRequests || 1)) })}</p>
           </div>
           <div className="stat-card">
-            <h4>זמן תגובה ממוצע</h4>
+            <h4>{t("userDashboard.avgResponseTimeLabel")}</h4>
             <p className="stat-value">{Math.round(usageStats.avgResponseTime)}ms</p>
           </div>
           <div className="stat-card">
-            <h4>עלות כוללת</h4>
+            <h4>{t("userDashboard.totalCostLabel")}</h4>
             <p className="stat-value">${usageStats.totalCost.toFixed(4)}</p>
           </div>
           <div className="stat-card">
-            <h4>שיעור הצלחה</h4>
+            <h4>{t("userDashboard.successRateLabel")}</h4>
             <p className="stat-value">
               {((usageStats.successfulRequests / (usageStats.totalRequests || 1)) * 100).toFixed(1)}%
             </p>
@@ -38,17 +43,17 @@ export default function UsageChart({ usageStats, dailyUsage, modelUsage }: Props
 
       {dailyUsage.length > 0 && (
         <div className="card" style={{ marginTop: "24px" }}>
-          <h3>שימוש יומי</h3>
+          <h3>{t("userDashboard.dailyUsageTitle")}</h3>
           <ResponsiveContainer width="100%" height={300} style={{ marginTop: "16px" }}>
             <LineChart data={dailyUsage}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="_id" tickFormatter={(v) => format(new Date(v), "dd/MM")} />
+              <XAxis dataKey="_id" tickFormatter={shortDate} />
               <YAxis yAxisId="left" />
               <YAxis yAxisId="right" orientation="right" />
-              <Tooltip labelFormatter={(v) => format(new Date(v as string), "dd/MM/yyyy")} />
+              <Tooltip labelFormatter={fullDate} />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="requests" stroke="#8884d8" name="בקשות" />
-              <Line yAxisId="right" type="monotone" dataKey="tokens" stroke="#82ca9d" name="Tokens" />
+              <Line yAxisId="left" type="monotone" dataKey="requests" stroke="#8884d8" name={t("userDashboard.chartRequestsLabel")} />
+              <Line yAxisId="right" type="monotone" dataKey="tokens" stroke="#82ca9d" name={t("userDashboard.chartTokensLabel")} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -56,17 +61,17 @@ export default function UsageChart({ usageStats, dailyUsage, modelUsage }: Props
 
       {modelUsage.length > 0 && (
         <div className="card" style={{ marginTop: "24px" }}>
-          <h3>שימוש לפי מודל (30 ימים אחרונים)</h3>
+          <h3>{t("userDashboard.modelUsageTitle")}</h3>
           <div style={{ overflowX: "auto", marginTop: "16px" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid var(--border-default)" }}>
-                  <th style={{ padding: "12px", textAlign: "right" }}>מודל</th>
-                  <th style={{ padding: "12px", textAlign: "right" }}>ספק</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>בקשות</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>Tokens</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>עלות</th>
-                  <th style={{ padding: "12px", textAlign: "center" }}>חינמי</th>
+                  <th style={{ padding: "12px", textAlign: "start" }}>{t("userDashboard.modelHeaderLabel")}</th>
+                  <th style={{ padding: "12px", textAlign: "start" }}>{t("userDashboard.providerHeaderLabel")}</th>
+                  <th style={{ padding: "12px", textAlign: "center" }}>{t("userDashboard.requestsHeaderLabel")}</th>
+                  <th style={{ padding: "12px", textAlign: "center" }}>{t("userDashboard.chartTokensLabel")}</th>
+                  <th style={{ padding: "12px", textAlign: "center" }}>{t("userDashboard.costHeaderLabel")}</th>
+                  <th style={{ padding: "12px", textAlign: "center" }}>{t("userDashboard.freeHeaderLabel")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -75,9 +80,9 @@ export default function UsageChart({ usageStats, dailyUsage, modelUsage }: Props
                     <td style={{ padding: "12px" }}>{m._id.model}</td>
                     <td style={{ padding: "12px" }}><span className="badge badge-secondary">{m._id.provider}</span></td>
                     <td style={{ padding: "12px", textAlign: "center" }}>{m.requests}</td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>{m.tokens.toLocaleString()}</td>
+                    <td style={{ padding: "12px", textAlign: "center" }}>{m.tokens.toLocaleString(locale)}</td>
                     <td style={{ padding: "12px", textAlign: "center" }}>${m.cost.toFixed(4)}</td>
-                    <td style={{ padding: "12px", textAlign: "center" }}>{m.isFree ? "✅" : "❌"}</td>
+                    <td style={{ padding: "12px", textAlign: "center" }}><span aria-label={m.isFree ? t("userDashboard.freeYes") : t("userDashboard.freeNo")}>{m.isFree ? "✅" : "❌"}</span></td>
                   </tr>
                 ))}
               </tbody>

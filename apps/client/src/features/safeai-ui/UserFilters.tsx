@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Profile, Organization } from "./UsersManagement";
 
 interface Props {
@@ -14,40 +15,41 @@ interface Props {
 }
 
 const selectStyle = { padding: "5px 10px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-default)" };
-const labelStyle = { marginLeft: "8px", fontWeight: "bold" as const };
+const labelStyle = { marginInlineEnd: "8px", fontWeight: "bold" as const };
 
 export default function UserFilters({ filterStatus, filterMode, filterProfile, filterOrganization, profiles, organizations, onStatusChange, onModeChange, onProfileChange, onOrganizationChange }: Props) {
+  const { t } = useTranslation();
   return (
     <div style={{ display: "flex", gap: "15px", marginBottom: "20px", flexWrap: "wrap" }}>
       <div>
-        <label style={labelStyle}>סטטוס:</label>
+        <label style={labelStyle}>{t("usersManagement.statusLabel")}</label>
         <select value={filterStatus} onChange={(e) => onStatusChange(e.target.value as "all" | "active" | "inactive")} style={selectStyle}>
-          <option value="all">הכל</option>
-          <option value="active">פעיל</option>
-          <option value="inactive">לא פעיל</option>
+          <option value="all">{t("common.all")}</option>
+          <option value="active">{t("orgUsers.active")}</option>
+          <option value="inactive">{t("orgUsers.inactive")}</option>
         </select>
       </div>
       <div>
-        <label style={labelStyle}>מצב:</label>
+        <label style={labelStyle}>{t("usersManagement.modeLabel")}</label>
         <select value={filterMode} onChange={(e) => onModeChange(e.target.value as "all" | "BYOK" | "MANAGED")} style={selectStyle}>
-          <option value="all">הכל</option>
+          <option value="all">{t("common.all")}</option>
           <option value="BYOK">BYOK</option>
           <option value="MANAGED">MANAGED</option>
         </select>
       </div>
       <div>
-        <label style={labelStyle}>פרופיל:</label>
+        <label style={labelStyle}>{t("usersManagement.profileLabel")}</label>
         <select value={filterProfile} onChange={(e) => onProfileChange(e.target.value)} style={selectStyle}>
-          <option value="all">הכל</option>
-          <option value="none">ללא פרופיל</option>
+          <option value="all">{t("common.all")}</option>
+          <option value="none">{t("usersManagement.noProfile")}</option>
           {profiles.map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
         </select>
       </div>
       <div>
-        <label style={labelStyle}>ארגון:</label>
+        <label style={labelStyle}>{t("usersManagement.organizationLabel")}</label>
         <select value={filterOrganization} onChange={(e) => onOrganizationChange(e.target.value)} style={selectStyle}>
-          <option value="all">הכל</option>
-          <option value="none">ללא ארגון</option>
+          <option value="all">{t("common.all")}</option>
+          <option value="none">{t("usersManagement.noOrganization")}</option>
           {organizations.map((o) => <option key={o._id} value={o._id}>{o.name}</option>)}
         </select>
       </div>

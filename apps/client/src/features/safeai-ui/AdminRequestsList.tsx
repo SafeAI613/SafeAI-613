@@ -73,7 +73,7 @@ export default function AdminRequestsList() {
       await apiCall(`${API_ENDPOINTS.contact}/${id}`, { method: "DELETE" });
       setRequests((prev) => prev.filter((req) => req._id !== id));
     } catch (err) {
-      console.error("שגיאה במחיקת הפנייה:", err);
+      console.error("Failed to delete request:", err);
       showAlert(t("requests.deleteFailedAlert"), { type: "error" });
     } finally {
       setDeletingRequestId(null);
@@ -86,7 +86,7 @@ export default function AdminRequestsList() {
         const response = await apiCall<{ data: ContactType[] }>(API_ENDPOINTS.contactTypes);
         setContactTypes(response.data);
       } catch (err) {
-        console.error("שגיאה בטעינת סוגי הפניות:", err);
+        console.error("Failed to load request types:", err);
       }
     };
     fetchTypes();
@@ -112,7 +112,7 @@ export default function AdminRequestsList() {
         );
         setRequests(data || []);
       } catch (err) {
-        console.error("שגיאה בטעינה:", err);
+        console.error("Failed to load requests:", err);
         setError(t("requests.loadAllFailedError"));
       } finally {
         setLoading(false);

@@ -3,6 +3,7 @@ import { updateStatus, setCurrentInquiry } from "./inquiriesSlice";
 import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent, type FC } from "react";
 import { useTranslation } from "react-i18next";
+import "./inquiries.css";
 import { useAlert } from "../../context/alertStore";
 import type { AppDispatch } from "../../app/store";
 import type { RootState } from "../../app/store";
@@ -55,7 +56,7 @@ const InquiriesDetails: FC = () => {
   const handleCreateTask = (): void => showAlert(t("inquiries.taskCreatedAlert"), { type: "success" });
 
   return (
-    <>
+    <div className="inquiries-page">
       <div className="inquiry-details">
         <h2>{t("inquiries.detailsTitle")}</h2>
 
@@ -68,7 +69,7 @@ const InquiriesDetails: FC = () => {
 
         <div className="details-images">
           {inquiry.attachments?.map((a, i) => (
-            <img key={i} src={a.url} alt={`attachment ${i}`} />
+            <img key={i} src={a.url} alt={t("inquiries.attachmentAlt", { index: i + 1 })} />
           ))}
         </div>
 
@@ -100,7 +101,7 @@ const InquiriesDetails: FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

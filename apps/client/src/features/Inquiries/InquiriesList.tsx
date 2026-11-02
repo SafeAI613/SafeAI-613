@@ -110,7 +110,7 @@ const InquiriesList: FC = () => {
   };
 
   return (
-    <div>
+    <div className="inquiries-page">
       <h2>{t("inquiries.title")}</h2>
       <button className="btn btn-primary inquiry-add-btn" onClick={() => navigate("/inquiry-add")}>{t("inquiries.addNew")}</button>
 

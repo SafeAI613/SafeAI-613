@@ -5,6 +5,7 @@ import type { RootState } from "../../app/store";
 import type { AppDispatch } from "../../app/store";
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
+import "./inquiries.css";
 import { useAlert } from "../../context/alertStore";
 
 const UpdateInquiries: React.FC = () => {
@@ -53,21 +54,21 @@ const UpdateInquiries: React.FC = () => {
   if (!currentInquiry) return <p>{t("inquiries.noInquiryToEdit")}</p>;
 
   return (
-    <div>
+    <div className="inquiries-page">
       <h2>{t("inquiries.editTitle")}</h2>
       <form onSubmit={(e) => { e.preventDefault(); update(); }}>
-        <input type="text" placeholder="Name" value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
+        <input type="text" placeholder={t("inquiries.namePlaceholder")} value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
         <br />
-        <input type="email" placeholder="Email" value={email} onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} />
+        <input type="email" placeholder={t("inquiries.emailPlaceholder")} value={email} onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} />
         <br />
-        <input type="text" placeholder="Subject" value={subject} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)} />
+        <input type="text" placeholder={t("inquiries.subjectPlaceholder")} value={subject} onChange={(e: ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)} />
         <br />
-        <textarea placeholder="Message" value={message} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)} />
+        <textarea placeholder={t("inquiries.messagePlaceholder")} value={message} onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)} />
         <br />
         <input type="file" accept="image/*" multiple onChange={(e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files)} />
         <br />
         <div>
-          {attachments.map((a, i) => <img key={i} src={a.url} width={120} alt={`attachment ${i}`} />)}
+          {attachments.map((a, i) => <img key={i} src={a.url} width={120} alt={t("inquiries.attachmentAlt", { index: i + 1 })} />)}
         </div>
         <button type="submit" className="btn btn-primary">{t("inquiries.updateBtn")}</button>
       </form>

@@ -1,19 +1,20 @@
-/* Inquiries styles — use global design tokens from `styles/design-system.css` */
-/* This file only scopes layout and minor overrides for the Inquiries feature. */
+/* Inquiries styles — use global design tokens from `styles/design-system.css`.
+   Every rule is scoped under .inquiries-page, the root of each Inquiries view
+   (list, add, edit, delete, details); see docs/UI_STYLE_GUIDE.md rule 11.
+   The card component (InquiriesCard) keeps its own styles in InquiriesCard.css. */
 
 /* Headings inherit global typography; keep local spacing consistent */
-h2 { margin-bottom: 1rem }
+.inquiries-page h2 { margin-bottom: 1rem }
 
-/* כפתורים */
 /* Buttons: prefer global `.btn` / `.btn-primary` / `.btn-secondary` from design system */
-.inquiry-add-btn { display:inline-flex }
-.filter-buttons .btn { margin-left: 0 }
+.inquiries-page .inquiry-add-btn { display: inline-flex; margin-bottom: 12px }
+.inquiries-page .filter-buttons .btn { margin-inline-end: 0; padding: 8px 12px }
 
-/* שדות קלט (Inputs & Textarea) */
-input[type="text"],
-input[type="email"],
-input[type="date"],
-textarea {
+/* Inputs & textarea */
+.inquiries-page input[type="text"],
+.inquiries-page input[type="email"],
+.inquiries-page input[type="date"],
+.inquiries-page textarea {
   width: 100%;
   padding: 10px 12px;
   margin-bottom: 12px;
@@ -23,47 +24,38 @@ textarea {
   background-color: var(--bg-surface);
   box-sizing: border-box;
 }
-.email-textarea { width: 100%; height: 130px; padding: 10px 12px; border-radius: var(--radius-sm); border:1px solid var(--border-default); font-family: inherit; font-size:14px }
-.inquiry-buttons { display:flex; gap:10px }
 
-input:focus, textarea:focus {
+.inquiries-page .email-textarea { width: 100%; height: 130px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-default); font-family: inherit; font-size: 14px }
+.inquiries-page .inquiry-buttons { display: flex; gap: 10px }
+
+.inquiries-page input:focus,
+.inquiries-page textarea:focus {
   outline: none;
   border-color: var(--brand-primary);
   box-shadow: var(--focus-ring);
 }
 
-/* כרטיסי סינון ורשימה */
-.filters-card {
+/* Filters card */
+.inquiries-page .filters-card {
   background: var(--bg-surface);
   padding: 18px;
   border-radius: var(--radius-md);
   margin-bottom: 20px;
-  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
 }
 
-/* framed button group for filters to look cohesive */
-
-.filter-buttons {
+/* Button group for the filters: a tinted strip inside the white filters card */
+.inquiries-page .filter-buttons {
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 6px;
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
 }
 
-.filter-buttons .btn { padding: 8px 12px; }
-
-/* Buttons inside the Inquiries feature use the global brand colors from
-   design-system.css (.btn-primary green / .btn-secondary outline). The old
-   monochrome (black/white) overrides were removed so the feature matches
-   the rest of the site. */
-
-.inquiry-add-btn { margin-bottom: 12px; display:inline-flex }
-
 /* Compact single-line filters row: keep inputs short and aligned */
-.filters-row {
+.inquiries-page .filters-row {
   display: grid;
   /* columns: label + small date, label + small date, search (flexible), checkbox, buttons */
   grid-template-columns: auto 160px auto 160px 1fr auto auto;
@@ -72,12 +64,12 @@ input:focus, textarea:focus {
   margin-bottom: 12px;
 }
 
-.filters-row.small { grid-template-columns: auto 1fr; gap: 10px }
+.inquiries-page .filters-row.small { grid-template-columns: auto 1fr; gap: 10px }
 
 /* Force single-line height for text inputs (search) */
-.filters-row input[type="text"],
-.filters-row input[type="date"],
-.filters-row input[type="email"] {
+.inquiries-page .filters-row input[type="text"],
+.inquiries-page .filters-row input[type="date"],
+.inquiries-page .filters-row input[type="email"] {
   height: 40px; /* single-line height */
   padding: 8px 12px; /* reduce vertical padding */
   line-height: 1.2;
@@ -85,101 +77,70 @@ input:focus, textarea:focus {
 }
 
 /* If the filters-row contains only a single input (search row), make it span the wide area */
-.filters-row > input:only-child,
-.filters-row > textarea:only-child {
+.inquiries-page .filters-row > input:only-child,
+.inquiries-page .filters-row > textarea:only-child {
   grid-column: 2 / -1; /* span from the second column to the end */
   height: 40px;
 }
 
 /* Ensure inputs fill their grid cell fully */
-.filters-row input,
-.filters-row textarea {
+.inquiries-page .filters-row input,
+.inquiries-page .filters-row textarea {
   width: 100%;
 }
 
 /* search input spans the large middle column */
-.filters-search { grid-column: 5 / 6; min-width: 220px }
+.inquiries-page .filters-search { grid-column: 5 / 6; min-width: 220px }
 
 @media (max-width: 980px) {
-  .filters-row { grid-template-columns: 1fr; grid-auto-rows: auto; }
-  .filters-search { grid-column: 1 / -1 }
-  .filters-row label { margin-bottom: 4px }
+  .inquiries-page .filters-row { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .inquiries-page .filters-search { grid-column: 1 / -1 }
+  .inquiries-page .filters-row label { margin-bottom: 4px }
 }
 
 /* For smaller variant keep the checkbox row compact */
-.filters-row.small .checkbox-label { align-items: center }
+.inquiries-page .filters-row.small .checkbox-label { align-items: center }
 
-
-.inquiry-compact {
+/* Compact list rows (InquiriesList) — separated by row dividers */
+.inquiries-page .inquiry-compact {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-default);
-  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  transition: background-color 0.2s var(--ease-out);
 }
 
-.inquiry-compact:hover { background: var(--bg-elevated) }
+.inquiries-page .inquiry-compact:hover { background: var(--bg-elevated) }
 
-.inquiry-subject { font-weight: 600; font-size: 15px; color: var(--text-primary) }
+.inquiries-page .inquiry-compact-main { display: flex; flex-direction: column; gap: 6px }
 
-.inquiry-time { font-size: 12px; color: var(--text-muted) }
+.inquiries-page .inquiry-subject { font-weight: 600; font-size: 15px; color: var(--text-primary) }
 
-.inquiries-card {
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  margin-bottom: 18px;
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-sm);
-}
+.inquiries-page .inquiry-status { font-size: 12px; font-weight: 600 }
 
-.inquiries-status.open {
-  background: var(--color-info-bg);
-  color: var(--color-info);
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  border: 1px solid var(--color-info-border);
-}
+.inquiries-page .inquiry-time { font-size: 12px; color: var(--text-muted) }
 
-.inquiries-status.closed {
-  background: transparent;
-  color: var(--text-muted);
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 12px;
-  border: 1px solid var(--border-default);
-}
-
-.inquiries-card-field { margin-bottom: 10px }
-
-.inquiries-card-label { color: var(--text-muted); font-size: 13px; display:block }
-
-.inquiries-card-value { font-weight: 600; color: var(--text-primary) }
+.inquiries-page .inquiry-actions .btn { padding: 6px 10px; border-radius: var(--radius-sm) }
 
 /* Details view styling */
-.inquiry-details {
+.inquiries-page .inquiry-details {
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   padding: 18px;
   margin-bottom: 20px;
 }
 
-.inquiry-details p { margin: 8px 0; color: var(--text-secondary) }
-.inquiry-details p strong { display:inline-block; width: 110px; color: var(--text-muted) }
+.inquiries-page .inquiry-details p { margin: 8px 0; color: var(--text-secondary) }
+.inquiries-page .inquiry-details p strong { display: inline-block; width: 110px; color: var(--text-muted) }
 
-.details-images { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap }
-.details-images img { max-width:160px; border-radius: var(--radius-sm); border:1px solid var(--border-default) }
+.inquiries-page .details-images { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap }
+.inquiries-page .details-images img { max-width: 160px; border-radius: var(--radius-sm); border: 1px solid var(--border-default) }
 
-.email-modal-content { padding: 20px; }
-.email-modal {
+.inquiries-page .email-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: var(--bg-overlay);
   display: flex;
   justify-content: center;
@@ -187,18 +148,17 @@ input:focus, textarea:focus {
   z-index: 1000;
 }
 
-.email-modal-content {
+.inquiries-page .email-modal-content {
   background: var(--bg-surface);
   padding: 32px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
   width: 90%;
   max-width: 500px;
   box-shadow: var(--shadow-lg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inquiry-compact {
+  .inquiries-page .inquiry-compact {
     transition: none;
   }
 }

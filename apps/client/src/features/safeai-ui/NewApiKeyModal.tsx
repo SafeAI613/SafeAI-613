@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAlert } from "../../context/alertStore";
 
 interface Props {
@@ -7,17 +8,18 @@ interface Props {
 
 export default function NewApiKeyModal({ apiKey, onClose }: Props) {
   const { showAlert } = useAlert();
+  const { t } = useTranslation();
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>🔑 API Key נוצר בהצלחה!</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h2>🔑 {t("usersManagement.apiKeyCreatedTitle")}</h2>
+          <button className="modal-close" onClick={onClose} aria-label={t("common.close")}>×</button>
         </div>
         <div style={{ padding: "20px" }}>
-          <div style={{ backgroundColor: "var(--color-warning-bg)", border: "1px solid var(--color-warning-border)", borderRadius: "var(--radius-sm)", padding: "15px", marginBottom: "20px" }}>
-            <strong>⚠️ אזהרה חשובה:</strong>
-            <p style={{ margin: "10px 0 0 0" }}>זוהי ההזדמנות היחידה שלך לשמור את המפתח הזה. לא תוכל לראות אותו שוב!</p>
+          <div style={{ backgroundColor: "var(--color-warning-bg)", borderRadius: "var(--radius-sm)", padding: "15px", marginBottom: "20px" }}>
+            <strong>⚠️ {t("usersManagement.importantWarningLabel")}</strong>
+            <p style={{ margin: "10px 0 0 0" }}>{t("usersManagement.apiKeyOneTimeWarning")}</p>
           </div>
           <div className="form-group">
             <label>API Key:</label>
@@ -32,13 +34,13 @@ export default function NewApiKeyModal({ apiKey, onClose }: Props) {
           <button
             className="btn btn-primary"
             style={{ width: "100%" }}
-            onClick={() => { navigator.clipboard.writeText(apiKey); showAlert("המפתח הועתק ללוח!", { type: "success" }); }}
+            onClick={() => { navigator.clipboard.writeText(apiKey); showAlert(t("usersManagement.keyCopiedAlert"), { type: "success" }); }}
           >
-            📋 העתק ללוח
+            📋 {t("usersManagement.copyToClipboardButton")}
           </button>
         </div>
         <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>סגור</button>
+          <button className="btn btn-secondary" onClick={onClose}>{t("common.close")}</button>
         </div>
       </div>
     </div>

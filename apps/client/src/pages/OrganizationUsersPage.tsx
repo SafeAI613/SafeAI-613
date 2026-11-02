@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocale } from "../i18n/useLocale";
 import { Link } from "react-router-dom";
 import * as XLSX from "xlsx";
 import {
@@ -48,6 +49,7 @@ interface OrganizationOwner {
 
 export default function OrganizationUsersPage() {
   const { t, i18n } = useTranslation();
+  const { locale } = useLocale();
   const { showAlert } = useAlert();
   const [users, setUsers] = useState<User[]>([]);
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -132,7 +134,7 @@ export default function OrganizationUsersPage() {
       window.location.href = iframeUrl;
     } catch (err: unknown) {
       console.error("Error initiating wallet top-up:", err);
-      showAlert(err instanceof Error ? err.message : "נכשלה יצירת בקשת התשלום", { type: "error" });
+      showAlert(err instanceof Error ? err.message : t("orgUsers.paymentRequestFailed"), { type: "error" });
       setIsSubmitting(false);
     }
   };
@@ -333,7 +335,7 @@ export default function OrganizationUsersPage() {
       [t("orgUsers.tableHeaders.joinStatus")]: u.lastLogin
         ? t("orgUsers.joinedLabel")
         : t("orgUsers.pendingFirstLoginLabel"),
-      [t("orgUsers.tableHeaders.joinedDate")]: new Date(u.createdAt).toLocaleDateString(),
+      [t("orgUsers.tableHeaders.joinedDate")]: new Date(u.createdAt).toLocaleDateString(locale),
     }));
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
@@ -610,7 +612,7 @@ export default function OrganizationUsersPage() {
                     {user.lastLogin ? `✓ ${t("orgUsers.joinedLabel")}` : `⏳ ${t("orgUsers.pendingFirstLoginLabel")}`}
                   </span>
                 </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td>{new Date(user.createdAt).toLocaleDateString(locale)}</td>
                 <td dir="ltr">${user.costLimits?.monthlyBudget ?? 0}</td>
                 <td>
                   <button

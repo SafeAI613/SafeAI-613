@@ -2,6 +2,7 @@ import { useState, type ChangeEvent,  } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import "./inquiries.css";
 import { addInquiry } from "./inquiriesSlice";
 import { useAlert } from "../../context/alertStore";
 import type { AppDispatch } from "../../app/store";
@@ -66,12 +67,12 @@ const AddInquiries: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="inquiries-page">
       <h2>{t("inquiries.addNew")}</h2>
       <form>
         <input
           type="text"
-          placeholder="Name"
+          placeholder={t("inquiries.namePlaceholder")}
           value={name}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
         />
@@ -79,7 +80,7 @@ const AddInquiries: React.FC = () => {
 
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t("inquiries.emailPlaceholder")}
           value={email}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
         />
@@ -87,14 +88,14 @@ const AddInquiries: React.FC = () => {
 
         <input
           type="text"
-          placeholder="Subject"
+          placeholder={t("inquiries.subjectPlaceholder")}
           value={subject}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setSubject(e.target.value)}
         />
         <br />
 
         <textarea
-          placeholder="Message"
+          placeholder={t("inquiries.messagePlaceholder")}
           value={message}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setMessage(e.target.value)}
         />
@@ -110,7 +111,7 @@ const AddInquiries: React.FC = () => {
 
         <div>
           {attachments.map((a, i) => (
-            <img key={i} src={a.url} width={120} alt={`attachment ${i}`} />
+            <img key={i} src={a.url} width={120} alt={t("inquiries.attachmentAlt", { index: i + 1 })} />
           ))}
         </div>
 

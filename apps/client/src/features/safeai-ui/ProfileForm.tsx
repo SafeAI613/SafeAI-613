@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Profile } from "./ProfilesManagement";
 import ArrayInput from "./ArrayInput";
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function ProfileForm({ formData, setFormData, onSubmit, onCancel, saving, title, submitLabel }: Props) {
+  const { t } = useTranslation();
   const update = (patch: Partial<Profile>) => setFormData({ ...formData, ...patch });
 
   const updateArray = (field: keyof Profile, index: number, value: string) => {
@@ -25,39 +27,39 @@ export default function ProfileForm({ formData, setFormData, onSubmit, onCancel,
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxHeight: "90vh", overflowY: "auto" }}>
         <div className="modal-header">
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onCancel}>×</button>
+          <button className="modal-close" onClick={onCancel} aria-label={t("common.close")}>×</button>
         </div>
 
         <form onSubmit={onSubmit}>
           <div className="form-group">
-            <label>שם הפרופיל *</label>
-            <input type="text" value={formData.name ?? ""} onChange={(e) => update({ name: e.target.value })} required placeholder="למשל: פרופיל בסיסי" />
+            <label>{t("profilesManagement.profileNameLabel")}</label>
+            <input type="text" value={formData.name ?? ""} onChange={(e) => update({ name: e.target.value })} required placeholder={t("profilesManagement.profileNamePlaceholder")} />
           </div>
 
           <div className="form-group">
-            <label>נוצר על ידי *</label>
+            <label>{t("profilesManagement.createdByRequiredLabel")}</label>
             <input type="text" value={formData.createdBy ?? ""} onChange={(e) => update({ createdBy: e.target.value })} required />
           </div>
 
           <div className="form-group">
-            <label>אימייל יוצר *</label>
+            <label>{t("profilesManagement.creatorEmailRequiredLabel")}</label>
             <input type="email" value={formData.creatorEmail ?? ""} onChange={(e) => update({ creatorEmail: e.target.value })} required />
           </div>
 
           <div className="form-group">
-            <label>סטטוס אישור *</label>
+            <label>{t("profilesManagement.approvalStatusRequiredLabel")}</label>
             <select value={formData.approvalStatus} onChange={(e) => update({ approvalStatus: e.target.value as Profile["approvalStatus"] })} required>
-              <option value="pending">⏳ ממתין לאישור</option>
-              <option value="approved">✅ מאושר</option>
-              <option value="rejected">❌ נדחה</option>
+              <option value="pending">⏳ {t("profilesManagement.pendingBadge")}</option>
+              <option value="approved">✅ {t("profilesManagement.approvedBadge")}</option>
+              <option value="rejected">❌ {t("profilesManagement.rejectedBadge")}</option>
             </select>
           </div>
 
           <div className="form-group">
-            <label>נראות *</label>
+            <label>{t("profilesManagement.visibilityRequiredLabel")}</label>
             <select value={formData.visibility} onChange={(e) => update({ visibility: e.target.value as Profile["visibility"] })} required>
-              <option value="public">🌐 ציבורי</option>
-              <option value="internal">🔒 פנימי</option>
+              <option value="public">🌐 {t("profilesManagement.publicBadge")}</option>
+              <option value="internal">🔒 {t("profilesManagement.internalBadge")}</option>
             </select>
           </div>
 
@@ -66,9 +68,9 @@ export default function ProfileForm({ formData, setFormData, onSubmit, onCancel,
           {(["allowedCategories", "blockedCategories"] as const).map((field) => (
             <ArrayInput
               key={field}
-              label={field === "allowedCategories" ? "קטגוריות מותרות" : "קטגוריות חסומות"}
+              label={field === "allowedCategories" ? t("profilesManagement.allowedCategoriesInputLabel") : t("profilesManagement.blockedCategoriesInputLabel")}
               items={(formData[field] as string[]) ?? []}
-              placeholder={field === "allowedCategories" ? "הוסף קטגוריה מותרת" : "הוסף קטגוריה חסומה"}
+              placeholder={field === "allowedCategories" ? t("profilesManagement.allowedCategoryPlaceholder") : t("profilesManagement.blockedCategoryPlaceholder")}
               onAdd={(v) => update({ [field]: [...((formData[field] as string[]) ?? []), v] })}
               onRemove={(i) => update({ [field]: ((formData[field] as string[]) ?? []).filter((_, idx) => idx !== i) })}
               onUpdate={(i, v) => updateArray(field, i, v)}
@@ -80,7 +82,7 @@ export default function ProfileForm({ formData, setFormData, onSubmit, onCancel,
               key={field}
               label={field === "contentPrompts" ? "Content Prompts" : field === "behaviorPrompts" ? "Behavior Prompts" : "Knowledge Prompts"}
               items={(formData[field] as string[]) ?? []}
-              placeholder={`הוסף ${field === "contentPrompts" ? "Content" : field === "behaviorPrompts" ? "Behavior" : "Knowledge"} Prompt`}
+              placeholder={field === "contentPrompts" ? t("profilesManagement.contentPromptsPlaceholder") : field === "behaviorPrompts" ? t("profilesManagement.behaviorPromptsPlaceholder") : t("profilesManagement.knowledgePromptsPlaceholder")}
               onAdd={(v) => update({ [field]: [...((formData[field] as string[]) ?? []), v] })}
               onRemove={(i) => update({ [field]: ((formData[field] as string[]) ?? []).filter((_, idx) => idx !== i) })}
               onUpdate={(i, v) => updateArray(field, i, v)}
@@ -88,9 +90,9 @@ export default function ProfileForm({ formData, setFormData, onSubmit, onCancel,
           ))}
 
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>ביטול</button>
+            <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={saving}>{t("common.cancel")}</button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? "שומר..." : submitLabel}
+              {saving ? t("common.saving") : submitLabel}
             </button>
           </div>
         </form>
