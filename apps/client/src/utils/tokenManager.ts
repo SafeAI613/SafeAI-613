@@ -4,7 +4,7 @@
  */
 
 import { API_ENDPOINTS } from '../config/api';
-import i18n from '../i18n';
+import { appUrl, ROUTES } from '../router/paths';
 
 interface TokenRefreshResponse {
   success: boolean;
@@ -115,34 +115,44 @@ export function handleSessionExpired() {
   // Stop activity tracking
   stopActivityTracking();
   
-  // Redirect to home page
-  window.location.href = '/';
+  // Redirect to the app's home page (respecting the deploy base path, e.g. /console/)
+  window.location.href = appUrl(ROUTES.home);
+}
+
+/** Event the app listens to in order to show the in-app session warning dialog. */
+export const SESSION_WARNING_EVENT = 'safeai:session-warning';
+
+/**
+ * Called when the warning timer fires. The user is warned only after a real
+ * idle period: if there was activity since the timer was scheduled, the timer
+ * is simply rescheduled for the remaining idle time (OWASP idle-timeout
+ * guidance; WCAG 2.2.1 "Timing Adjustable" — warn before ending a session and
+ * let the user extend it).
+ */
+function showSessionWarning() {
+  const idleFor = Date.now() - lastActivityTime;
+  if (idleFor < INACTIVITY_WARNING_TIME) {
+    scheduleWarning(INACTIVITY_WARNING_TIME - idleFor);
+    return;
+  }
+
+  // Let the React layer render an accessible, non-blocking dialog
+  // (SessionWarningDialog) instead of a blocking window.confirm.
+  window.dispatchEvent(new CustomEvent(SESSION_WARNING_EVENT));
 }
 
 /**
- * Show session expiration warning dialog
+ * User chose to stay signed in from the session warning dialog.
  */
-function showSessionWarning() {
-  const shouldStayLoggedIn = window.confirm(
-    i18n.t('tokenManager.sessionExpiredConfirm')
-  );
-
-  if (shouldStayLoggedIn) {
-    // User wants to stay logged in - refresh the token
-    updateActivity();
-    refreshAccessToken().then(token => {
-      if (token) {
-        // Successfully refreshed - reset activity tracking
-        resetActivityTimer();
-      } else {
-        // Failed to refresh - logout
-        handleSessionExpired();
-      }
-    });
-  } else {
-    // User chose to logout
+export async function extendSession(): Promise<boolean> {
+  updateActivity();
+  const token = await refreshAccessToken();
+  if (!token) {
     handleSessionExpired();
+    return false;
   }
+  resetActivityTimer();
+  return true;
 }
 
 /**
@@ -156,15 +166,14 @@ function updateActivity() {
  * Reset activity timer and schedule next warning
  */
 function resetActivityTimer() {
-  // Clear existing timeout
+  scheduleWarning(INACTIVITY_WARNING_TIME);
+}
+
+function scheduleWarning(delayMs: number) {
   if (sessionWarningTimeout) {
     clearTimeout(sessionWarningTimeout);
   }
-
-  // Schedule warning before token expires
-  sessionWarningTimeout = setTimeout(() => {
-    showSessionWarning();
-  }, INACTIVITY_WARNING_TIME);
+  sessionWarningTimeout = setTimeout(showSessionWarning, delayMs);
 }
 
 /**

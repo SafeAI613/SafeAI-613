@@ -124,3 +124,18 @@ export function safeNextPath(path: string | null | undefined, fallback: string =
 export function loginPath(next: string): string {
   return `${ROUTES.login}?next=${encodeURIComponent(next)}`;
 }
+
+/**
+ * Router basename derived from Vite's `base` (e.g. "/console" in production,
+ * "" locally). Shared by BrowserRouter and full-page redirects.
+ */
+export const ROUTER_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+/**
+ * Absolute URL for a full page load (`window.location.href = ...`) outside
+ * React Router. Router paths in ROUTES are relative to the basename, so a raw
+ * "/login" would leave the app when it is served under a sub-path.
+ */
+export function appUrl(path: string): string {
+  return `${ROUTER_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+}

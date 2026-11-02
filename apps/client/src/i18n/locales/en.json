@@ -1226,7 +1226,10 @@
     }
   },
   "tokenManager": {
-    "sessionExpiredConfirm": "Your session has expired. Would you like to stay logged in?\n\nClick \"OK\" to stay logged in, or \"Cancel\" to log out."
+    "warningTitle": "Still there?",
+    "warningBody": "We haven't detected any activity for a while, so your session is about to end. Would you like to stay signed in?",
+    "stayButton": "Stay signed in",
+    "logoutButton": "Sign out"
   },
   "tasks": {
     "searchByTitlePlaceholder": "Search by title",

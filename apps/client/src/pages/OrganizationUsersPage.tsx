@@ -15,7 +15,7 @@ import OrganizationProfilesSection from "../features/organizations/components/Or
 import { apiCall, API_ENDPOINTS } from "../config/api";
 import { useAlert } from "../context/alertStore";
 import "../styles/organization-wallet.css";
-import { ROUTES } from "../router/paths";
+import { ROUTES, appUrl } from "../router/paths";
 
 interface User {
   _id: string;
@@ -303,7 +303,7 @@ export default function OrganizationUsersPage() {
   };
 
   const handleDownloadExcel = () => {
-    const loginUrl = `${window.location.origin}/login`;
+    const loginUrl = `${window.location.origin}${appUrl(ROUTES.login)}`;
     const rows = createdMembers.map((m) => ({
       [t("orgUsers.excelHeaderName")]: m.name,
       [t("orgUsers.excelHeaderEmail")]: m.email,

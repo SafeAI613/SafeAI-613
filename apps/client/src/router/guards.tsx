@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/authStore";
 import { loginPath, safeNextPath } from "./paths";
+import { ProfileGate } from "./ProfileGate";
 
 // Tokens live only in localStorage (see utils/tokenManager); the user object
 // comes from AuthContext, the single source of truth for auth state.
@@ -18,7 +19,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
     return <Navigate to={loginPath(location.pathname + location.search + location.hash)} replace />;
   }
 
-  return <>{children}</>;
+  return <ProfileGate>{children}</ProfileGate>;
 }
 
 /**
