@@ -15,10 +15,19 @@
 1. **רק tokens, בלי צבעים קשיחים.** משתמשים ב-`var(--text-primary)`, `var(--bg-surface)`, `var(--border-default)`, `var(--brand-primary)` וכו'. צבע hex מותר רק בתוך הגדרת token. כך מצב לילה עובד אוטומטית.
 2. **צבעי מותג:** ירוק SafeAI `--brand-primary` (פעולה ראשית), כחול Platform `--brand-secondary` (משני/קישורים), נחושת Hub `--brand-hub`. גרסאות רכות לרקע: `--brand-primary-soft`, `--brand-secondary-soft`, `--brand-hub-soft`.
 3. **פינות:** `--radius-sm` (10px) לכפתורים ושדות, `--radius-md` (14px) לכרטיסים, `--radius-lg` (22px) לפאנלים גדולים, `--radius-pill` לתגיות ו-chips.
-4. **צללים:** `--shadow-sm/md/lg` בלבד. ברירת מחדל לכרטיס: גבול `--border-default` בלי צל; ב-hover: `--shadow-md`.
+4. **בלי מסגרות לקופסאות:** כרטיסים, פאנלים, אריחים, מודלים ותגיות **לא** מקבלים `border` דק. ההפרדה מהרקע היא משטח `--bg-surface` על רקע הדף `--bg-page` + `box-shadow: var(--shadow-card)`; ב-hover: `--shadow-md`. קופסה בתוך קופסה לבנה מקבלת רקע `--bg-elevated` במקום מסגרת. **כן נשארים עם גבול:** שדות קלט, כפתורים משניים, קווי הפרדה בין שורות (`border-bottom` בטבלאות/רשימות), פס הדגשה עבה בצד (3px ומעלה), ואזורי גרירת קבצים (dashed).
 5. **טיפוגרפיה:** Heebo (`--font-family`). כותרת דף: 28–32px, משקל 800, `letter-spacing: -0.02em`. כותרת משנה: 20px/700. טקסט גוף 15px בצבע `--text-secondary`; טקסט משני `--text-muted`.
 6. **כפתורים:** ראשי = רקע `--brand-primary`, טקסט `--text-inverse`; משני = רקע `--bg-surface` + גבול `--border-default`, וב-hover גבול וטקסט בצבע המותג. ב-hover: הרמה של 1px לכל היותר.
 7. **שדות טופס:** פינה `--radius-sm`, גבול `--border-default`, ובפוקוס גבול `--brand-primary` + `box-shadow: var(--focus-ring)`.
 8. **תנועה (סולידית):** `transition` של 0.2–0.3s עם `var(--ease-out)`. כרטיס ב-hover: `translateY(-2px)` לכל היותר. דפים מקבלים אנימציית כניסה דרך ה-layout (אין צורך להוסיף בכל דף). כל אנימציה חדשה חייבת כיבוי ב-`@media (prefers-reduced-motion: reduce)`.
 9. **תגיות סטטוס:** משתמשים ב-`--color-success/danger/warning/info` עם `-bg` ו-`-border` התואמים.
 10. **נגישות:** לא מורידים `outline` בלי תחליף (`--focus-ring`). ניגודיות טקסט לפחות 4.5:1.
+
+11. **CSS מוגבל לדף:** כל קובץ CSS של דף מגדיר כללים רק תחת ה-class של הדף שלו (למשל `.forum-page .modal-content`). אסור לכתוב selector גלובלי (`input`, `h2`, `.btn`, `.modal-content`, `:root`) בקובץ של דף — הוא דורס את שאר האתר ברגע שהדף נטען.
+12. **כיווניות (עברית/אנגלית):** משתמשים ב-logical properties — `margin-inline-start`, `padding-inline-end`, `inset-inline-start`, `border-inline-start`, `text-align: start/end` — ולא `left`/`right`. אייקון חץ שצריך להתהפך: `[dir="ltr"] .x { transform: scaleX(-1) }`.
+
+## טקסטים ותרגום (i18n)
+
+- אין טקסט קשיח ב-JSX. כל טקסט עובר דרך `t("area.key")` מ-`react-i18next`.
+- כל אזור שומר את הטקסטים שלו בקובץ משלו: `apps/client/src/i18n/locales/he/<area>.json` ו-`.../en/<area>.json` (אותם מפתחות בשני הקבצים). הקבצים מתמזגים אוטומטית ל-namespace הראשי.
+- `dir` ותאריכים: `const { dir, locale } = useLocale()` מ-`i18n/useLocale.ts` — `dir={dir}` במקום `dir="rtl"`, ו-`toLocaleDateString(locale)` במקום `"he-IL"`.
