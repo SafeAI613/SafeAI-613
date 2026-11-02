@@ -105,8 +105,11 @@ router.post("/:id/users/by-email", requireApprovedOrg, addUserByEmailToOrganizat
 // budget - blocked until org is approved (admins bypass)
 router.patch("/:id/users/:userId/allocate-budget", requireApprovedOrg, allocateBudgetToUserHandler); // Admin or approved Org Owner
 
-// Wallet Management (Mock) - blocked until org is approved (admins bypass)
-router.post("/:id/top-up", requireApprovedOrg, topUpOrganizationWalletHandler); // Admin or approved Org Owner
+// Manual wallet credit (no payment involved) - SYSTEM ADMIN ONLY.
+// Org owners must never be able to credit their own wallet for free; until PayMe
+// is enabled in production, an admin credits wallets manually through this route.
+// Once PayMe is live, wallets are credited only by the verified PayMe webhook.
+router.post("/:id/top-up", requireAdmin, topUpOrganizationWalletHandler); // Admin only
 
 // Org admin's approval screen for members' FundingRequests - blocked until
 // org is approved (admins bypass). Approving reuses allocateBudgetToUser's

@@ -12,6 +12,7 @@ import { buildPostListPipeline, buildPostListWithCountPipeline } from '../servic
 import { resolveOrCreateTagByName } from '../services/tagService';
 import logger from '../logger';
 import { getOrganizationIdForLog } from '../utils/forumLogContext';
+import { sanitizeRichText } from '../utils/sanitizeRichText';
 
 // אתחול זיכרון המטמון הגלובלי בשרת
 const recommendationCache = new NodeCache({ stdTTL: 1800, checkperiod: 60 });
@@ -454,7 +455,13 @@ export const createComment = async (req: Request, res: Response) => {
     const { postId, content, fileUrl } = req.body;
     const authenticatedUserId = (req as any).user?.userId;
 
-    if (!content || content.trim() === '') {
+    if (typeof content !== 'string' || content.trim() === '') {
+      return res.status(400).json({ message: 'תוכן התגובה אינו יכול להיות ריק' });
+    }
+
+    // ה-HTML מוצג בדפדפן של כל הצופים - מנקים אותו לפני שמירה (הגנה מפני XSS)
+    const safeContent = sanitizeRichText(content);
+    if (safeContent.replace(/<[^>]*>/g, '').trim() === '') {
       return res.status(400).json({ message: 'תוכן התגובה אינו יכול להיות ריק' });
     }
 
@@ -467,7 +474,7 @@ export const createComment = async (req: Request, res: Response) => {
 
     const newComment = new Comment({
       postId,
-      content,
+      content: safeContent,
       attachments,
       author: authenticatedUserId
     });
@@ -511,7 +518,8 @@ export const createComment = async (req: Request, res: Response) => {
 export const deleteCommentByAdmin = async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
-    const { userId } = req.body; 
+    // זהות המנהל נלקחת מהטוקן המאומת בלבד (authenticateToken + requireAdmin בראוטר)
+    const userId = (req as any).user?.userId;
 
     const user = await User.findById(userId);
     if (!user || user.role !== 'admin') {
@@ -535,8 +543,8 @@ export const deleteCommentByAdmin = async (req: Request, res: Response) => {
     logger.error('Failed to delete comment as admin', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       commentId: req.params.commentId,
     });
@@ -547,7 +555,9 @@ export const deleteCommentByAdmin = async (req: Request, res: Response) => {
 export const moderatePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params; 
-    const { userId, actionType } = req.body; 
+    const { actionType } = req.body;
+    // זהות המנהל נלקחת מהטוקן המאומת בלבד (authenticateToken + requireAdmin בראוטר)
+    const userId = (req as any).user?.userId;
 
     const user = await User.findById(userId);
     if (!user || user.role !== 'admin') {
@@ -595,8 +605,8 @@ export const moderatePost = async (req: Request, res: Response) => {
     logger.error('Failed to moderate post', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       postId: req.params.id,
       actionType: req.body.actionType,
@@ -608,7 +618,9 @@ export const moderatePost = async (req: Request, res: Response) => {
 export const ratePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params; 
-    const { userId, rating } = req.body; 
+    const { rating } = req.body;
+    // זהות המדרג נלקחת מהטוקן המאומת בלבד, כדי שאי אפשר יהיה לדרג בשם משתמש אחר
+    const userId: string = (req as any).user?.userId;
 
     const ratingNum = Number(rating);
     if (!ratingNum || ratingNum < 1 || ratingNum > 5) {
@@ -630,7 +642,7 @@ export const ratePost = async (req: Request, res: Response) => {
         existingRating.score = ratingNum;
       }
     } else {
-      post.ratedBy.push({ userId, score: ratingNum });
+      post.ratedBy.push({ userId: new mongoose.Types.ObjectId(userId), score: ratingNum });
       post.ratingCount += 1;
       post.ratingSum += ratingNum;
     }
@@ -647,8 +659,8 @@ export const ratePost = async (req: Request, res: Response) => {
     logger.error('Failed to rate post', {
       error: error.message,
       stack: error.stack,
-      userId: req.body.userId,
-      organizationId: await getOrganizationIdForLog(req.body.userId),
+      userId: (req as any).user?.userId,
+      organizationId: await getOrganizationIdForLog((req as any).user?.userId),
       requestId: (req as any).requestId,
       postId: req.params.id,
       rating: req.body.rating,
