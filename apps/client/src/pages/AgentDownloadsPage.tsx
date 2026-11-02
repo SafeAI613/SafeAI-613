@@ -62,7 +62,7 @@ export default function AgentDownloadsPage() {
   ];
 
   return (
-    <>
+    <div className="agent-downloads-page">
       <nav className="dashboard-sub-nav">
         <div className="sub-nav-container">
           {navItems.map((item) => (
@@ -166,6 +166,6 @@ export default function AgentDownloadsPage() {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

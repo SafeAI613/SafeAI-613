@@ -7,22 +7,26 @@
  */
 
 import { NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../../styles/agents.css";
 import { ROUTES } from "../../router/paths";
+import { useLocale } from "../../i18n/useLocale";
 
 const TABS = [
-  { to: ROUTES.hub.agents, label: "🏠 גלריה", end: true },
-  { to: ROUTES.hub.agentsSubmit, label: "➕ הוסיפי אייג'נט" },
-  { to: ROUTES.hub.agentsStats, label: "📊 סטטיסטיקות" },
-  { to: ROUTES.hub.agentsDownload, label: "⬇️ אפליקציית Desktop" },
+  { to: ROUTES.hub.agents, labelKey: "agents.tabs.gallery", end: true },
+  { to: ROUTES.hub.agentsSubmit, labelKey: "agents.tabs.submit" },
+  { to: ROUTES.hub.agentsStats, labelKey: "agents.tabs.stats" },
+  { to: ROUTES.hub.agentsDownload, labelKey: "agents.tabs.desktop" },
 ];
 
 export default function AgentsIndexPage() {
+  const { t } = useTranslation();
+  const { dir } = useLocale();
   return (
-    <div className="agents-layout">
+    <div className="agents-layout" dir={dir}>
       <div className="agents-header">
-        <h1 className="agents-title">🤖 Agents Marketplace</h1>
-        <p className="agents-subtitle">גלי, הורידי והוסיפי אייג'נטים לקהילה</p>
+        <h1 className="agents-title">{t("agents.title")}</h1>
+        <p className="agents-subtitle">{t("agents.subtitle")}</p>
       </div>
 
       <nav className="agents-tabs">
@@ -35,7 +39,7 @@ export default function AgentsIndexPage() {
               isActive ? "agents-tab agents-tab--active" : "agents-tab"
             }
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </NavLink>
         ))}
       </nav>

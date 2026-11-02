@@ -2,63 +2,52 @@
    TENDER BOARD SYSTEM - COMPLETE UNITED STYLESHEET
    ========================================================================== */
 
-/* Page-level aliases. They stay on :root because news-page.css also reads
-   --primary-color; the radius tokens come from design-system.css and must
-   not be redefined here (doing so used to shrink corners site-wide). */
-:root {
-  --primary-color: var(--brand-secondary);
-  --primary-hover: var(--brand-secondary-hover);
-  --secondary-bg: var(--bg-elevated);
-  --text-main: var(--text-primary);
-  --border-color: var(--border-default);
-  --border-focused: var(--border-strong);
-}
+/* Every rule in this file is scoped to the tender board root
+   (.tender-board-shell, on the <main> in TenderBoardPage.tsx), which wraps
+   all three screens and their modals. Generic class names used here
+   (.modal-content, .form-group, .tab-button, ...) must never leak into the
+   rest of the site once this stylesheet has loaded.
 
-/* Inside the tender board (all three screens + their modals) the main
-   action color is the SafeAI green, per docs/UI_STYLE_GUIDE.md; the Hub
-   copper marks navigation state. */
-.dashboard-shell {
-  --primary-color: var(--brand-primary);
-  --primary-hover: var(--brand-primary-hover);
-  --primary-soft: var(--brand-primary-soft);
-}
+   Colors use design-system tokens directly: inside the tender board the main
+   action color is the SafeAI green (--brand-primary), per
+   docs/UI_STYLE_GUIDE.md; the Hub copper marks navigation state. */
 
 /* אתחול בסיסי והגדרות דף גלובליות */
-.tender-board-page {
+.tender-board-shell .tender-board-page {
   max-width: 1240px;
   margin: 0 auto;
   padding: 24px 26px 40px;
-  color: var(--text-main);
+  color: var(--text-primary);
   font-family: inherit;
 }
 
-.dashboard-shell, .page-shell, .manage-shell {
+.tender-board-shell, .tender-board-shell .page-shell, .tender-board-shell .manage-shell {
   width: 100%;
   box-sizing: border-box;
 }
 
-.tender-board-page h1,
-.tender-board-page h2,
-.tender-board-page h3,
-.tender-board-page h4 {
-  color: var(--text-main);
+.tender-board-shell .tender-board-page h1,
+.tender-board-shell .tender-board-page h2,
+.tender-board-shell .tender-board-page h3,
+.tender-board-shell .tender-board-page h4 {
+  color: var(--text-primary);
   margin: 0;
 }
 
-.tender-board-page p,
-.tender-board-page li,
-.tender-board-page span {
+.tender-board-shell .tender-board-page p,
+.tender-board-shell .tender-board-page li,
+.tender-board-shell .tender-board-page span {
   color: var(--text-secondary);
 }
 
 /* ========================================== */
 /* אלמנטים ניווט וכותרות עליונות (Headers) */
 /* ========================================== */
-.dashboard-page-header {
+.tender-board-shell .dashboard-page-header {
   margin-bottom: 20px;
 }
 
-.dashboard-page-nav {
+.tender-board-shell .dashboard-page-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -67,10 +56,10 @@
   border-radius: 0;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-default);
 }
 
-.dashboard-link {
+.tender-board-shell .dashboard-link {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -86,24 +75,24 @@
   transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
 }
 
-.dashboard-link:hover {
+.tender-board-shell .dashboard-link:hover {
   background: var(--bg-elevated);
   color: var(--text-primary);
 }
 
-.dashboard-link:focus-visible {
+.tender-board-shell .dashboard-link:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.dashboard-link.active {
+.tender-board-shell .dashboard-link.active {
   background: var(--brand-hub-soft);
   color: var(--brand-hub);
   border-bottom-color: var(--brand-hub);
 }
 
 /* אזור ה-Hero הראשי */
-.dashboard-hero {
+.tender-board-shell .dashboard-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -115,7 +104,7 @@
   border: none;
 }
 
-.dashboard-hero h1 {
+.tender-board-shell .dashboard-hero h1 {
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -123,7 +112,7 @@
   color: var(--text-primary);
 }
 
-.dashboard-hero .lead-copy {
+.tender-board-shell .dashboard-hero .lead-copy {
   margin-top: 4px;
   max-width: 600px;
   font-size: var(--font-md);
@@ -134,14 +123,14 @@
 /* ========================================== */
 /* שורות מידע סטטיסטיקה וחיפוש (Metrics & Search) */
 /* ========================================== */
-.dashboard-metrics, .manage-header-summary-wrapper {
+.tender-board-shell .dashboard-metrics, .tender-board-shell .manage-header-summary-wrapper {
   margin-bottom: 32px;
   width: 100%;
   display: flex;
   justify-content: center;
 }
 
-.metric-card, .manage-summary {
+.tender-board-shell .metric-card, .tender-board-shell .manage-summary {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
@@ -150,37 +139,35 @@
   padding: 14px 28px;
   border-radius: var(--radius-md);
   background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
   color: var(--color-success);
   font-size: 1.05rem;
   font-weight: 600;
   box-sizing: border-box;
 }
 
-.metric-card p, .manage-summary strong {
+.tender-board-shell .metric-card p, .tender-board-shell .manage-summary strong {
   margin: 0;
   color: var(--color-success);
 }
 
-.metric-card strong {
+.tender-board-shell .metric-card strong {
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 /* --- השינוי המבוקש מיושם כאן --- */
-.filters-section {
+.tender-board-shell .filters-section {
   margin-bottom: 32px;
   display: flex;
   justify-content: center;
   background-color: var(--bg-surface);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   padding: 16px 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
-.filters-row {
+.tender-board-shell .filters-row {
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: wrap !important;         /* יורד שורה רק כשאין מקום (למשל ליד הסיידבר של ה-Hub); לשדות רוחב קבוע, כך שאין קפיצות בלחיצה */
@@ -196,7 +183,7 @@
 }
 
 /* פקדי הסינון הפנימיים (הצמדת הלייבל לאינפוט ומניעת שבירת מילים) */
-.filters-row > div {
+.tender-board-shell .filters-row > div {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -204,11 +191,11 @@
 }
 
 /* התאמת עיצוב שדות האינפוט בשורה לשמירה על אחידות וקו נקי */
-.autocomplete-input,
-.filters-row input[type="number"] {
+.tender-board-shell .autocomplete-input,
+.tender-board-shell .filters-row input[type="number"] {
   width: 150px !important;            /* רוחב קבוע ואחיד המותאם למבנה השורה */
   padding: 8px 12px !important;       /* ריפוד מעודן ופחות בולט */
-  border: 1px solid var(--border-color) !important;
+  border: 1px solid var(--border-default) !important;
   border-radius: var(--radius-sm) !important;
   font-size: 0.9rem;
   background-color: var(--bg-surface) !important;
@@ -216,42 +203,40 @@
 }
 
 /* תיקון אייקון החיפוש במידה והוא מופעל על גבי שדה ה-autocomplete */
-.autocomplete-input {
-  padding-right: 36px !important;
+.tender-board-shell .autocomplete-input {
+  padding-inline-start: 36px !important;
   background-position: calc(100% - 10px) center !important;
   background-size: 16px !important;
 }
 
-.autocomplete-input:focus,
-.filters-row input[type="number"]:focus {
-  border-color: var(--primary-color) !important;
+.tender-board-shell .autocomplete-input:focus,
+.tender-board-shell .filters-row input[type="number"]:focus {
+  border-color: var(--brand-primary) !important;
   box-shadow: var(--focus-ring) !important;
   outline: none;
 }
 
 /* פתיחת תפריט ההצעות מעל התוכן ללא דחיפת השורה למטה */
-.autocomplete-list {
+.tender-board-shell .autocomplete-list {
   position: absolute;
   top: 100%;
-  right: 0;
-  left: 0;
+  inset-inline: 0;
   margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   z-index: 130;
 }
 /* --- סיום מקטע השינוי העיצובי --- */
 
-.autocomplete {
+.tender-board-shell .autocomplete {
   position: relative;
   width: 100%;
 }
 
-.autocomplete-item, .domains-option {
+.tender-board-shell .autocomplete-item, .tender-board-shell .domains-option {
   display: block;
   width: 100%;
   padding: 12px 16px;
@@ -265,14 +250,14 @@
   transition: background-color 0.2s var(--ease-out);
 }
 
-.autocomplete-item:hover, .domains-option:hover {
+.tender-board-shell .autocomplete-item:hover, .tender-board-shell .domains-option:hover {
   background: var(--bg-elevated);
 }
 
 /* ========================================== */
 /* כפתורים ופקדים גלובליים (Buttons & UI) */
 /* ========================================== */
-.tab-button, .primary-button, .secondary-button, .button-primary, .details-button, .submit-button {
+.tender-board-shell .tab-button, .tender-board-shell .primary-button, .tender-board-shell .secondary-button, .tender-board-shell .button-primary, .tender-board-shell .details-button, .tender-board-shell .submit-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -286,20 +271,20 @@
   cursor: pointer;
 }
 
-.tab-button:focus-visible, .primary-button:focus-visible, .secondary-button:focus-visible,
-.button-primary:focus-visible, .details-button:focus-visible, .submit-button:focus-visible {
+.tender-board-shell .tab-button:focus-visible, .tender-board-shell .primary-button:focus-visible, .tender-board-shell .secondary-button:focus-visible,
+.tender-board-shell .button-primary:focus-visible, .tender-board-shell .details-button:focus-visible, .tender-board-shell .submit-button:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.tab-button:disabled, .primary-button:disabled, .secondary-button:disabled,
-.button-primary:disabled, .details-button:disabled, .submit-button:disabled {
+.tender-board-shell .tab-button:disabled, .tender-board-shell .primary-button:disabled, .tender-board-shell .secondary-button:disabled,
+.tender-board-shell .button-primary:disabled, .tender-board-shell .details-button:disabled, .tender-board-shell .submit-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
 }
 
-.tab-button {
+.tender-board-shell .tab-button {
   background: var(--bg-surface);
   color: var(--text-secondary);
   border-color: var(--border-default);
@@ -307,37 +292,35 @@
   border-radius: var(--radius-sm);
 }
 
-.tab-button:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-hover);
+.tender-board-shell .tab-button:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary-hover);
 }
 
-.secondary-button {
+.tender-board-shell .secondary-button {
   background: var(--bg-surface);
   color: var(--color-danger);
   border: 1px solid var(--color-danger-border);
 }
 
-.secondary-button:hover {
+.tender-board-shell .secondary-button:hover {
   background: var(--color-danger-bg);
 }
 
-.primary-button, .button-primary, .submit-button, .details-button {
-  background: var(--primary-color);
+.tender-board-shell .primary-button, .tender-board-shell .button-primary, .tender-board-shell .submit-button, .tender-board-shell .details-button {
+  background: var(--brand-primary);
   color: var(--text-inverse);
 }
 
-.primary-button:hover:not(:disabled), .button-primary:hover:not(:disabled),
-.submit-button:hover:not(:disabled), .details-button:hover:not(:disabled) {
-  background: var(--primary-hover);
+.tender-board-shell .primary-button:hover:not(:disabled), .tender-board-shell .button-primary:hover:not(:disabled),
+.tender-board-shell .submit-button:hover:not(:disabled), .tender-board-shell .details-button:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-/* אינפוטים וטקסט-ארפיס גלובליים
-   NOTE: these selectors are unscoped (they apply site-wide once this
-   stylesheet has loaded), so they mirror the design-system field look. */
-.input, .textarea, textarea, input {
+/* Fields inside the tender board (scoped; mirrors the design-system field look) */
+.tender-board-shell .input, .tender-board-shell .textarea, .tender-board-shell textarea, .tender-board-shell input {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 16px;
@@ -351,14 +334,14 @@
   transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s var(--ease-out);
 }
 
-.input:focus, .textarea:focus, textarea:focus, input:focus {
+.tender-board-shell .input:focus, .tender-board-shell .textarea:focus, .tender-board-shell textarea:focus, .tender-board-shell input:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--brand-primary);
   box-shadow: var(--focus-ring);
   background: var(--bg-surface);
 }
 
-.textarea {
+.tender-board-shell .textarea {
   min-height: 110px;
   resize: vertical;
 }
@@ -366,52 +349,51 @@
 /* ========================================== */
 /* גריד כרטיסי מכרזים בלוח הראשי */
 /* ========================================== */
-.dashboard-grid {
+.tender-board-shell .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
-.tender-card {
+.tender-board-shell .tender-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 260px;
   padding: 24px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
   background: var(--bg-surface);
-  box-shadow: none;
+  box-shadow: var(--shadow-card);
   word-break: break-word;
   overflow-wrap: anywhere;
-  transition: transform 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
 
-.tender-card:hover,
-.tender-card:focus-within {
+.tender-board-shell .tender-card:hover,
+.tender-board-shell .tender-card:focus-within {
   transform: translateY(-2px);
-  border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
 }
 
-.tender-card:active {
+.tender-board-shell .tender-card:active {
   transform: translateY(0);
 }
 
-.tender-card--applied {
-  border: 1.5px solid var(--primary-color);
+/* Tenders I applied to: a thick accent bar on the start side, not a frame */
+.tender-board-shell .tender-card--applied {
+  border-inline-start: 4px solid var(--brand-primary);
 }
 
-.view-application__value {
+.tender-board-shell .view-application__value {
   margin: 0;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-success-border);
+  border: none;
   background: var(--brand-primary-soft);
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
-.tender-card__applied-badge {
+.tender-board-shell .tender-card__applied-badge {
   display: inline-flex;
   align-self: flex-start;
   align-items: center;
@@ -420,16 +402,15 @@
   padding: 4px 10px;
   border-radius: var(--radius-pill);
   background: var(--brand-primary-soft);
-  border: 1px solid var(--primary-color);
-  color: var(--primary-color);
+  color: var(--brand-primary);
   font-size: 0.78rem;
   font-weight: 600;
 }
 
-.applied-filter-toggle {
+.tender-board-shell .applied-filter-toggle {
   padding: 6px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   background: var(--bg-surface);
   color: var(--text-muted);
   font-family: inherit;
@@ -439,23 +420,23 @@
   transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
-.applied-filter-toggle:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+.tender-board-shell .applied-filter-toggle:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
 }
 
-.applied-filter-toggle:focus-visible {
+.tender-board-shell .applied-filter-toggle:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.applied-filter-toggle.active {
+.tender-board-shell .applied-filter-toggle.active {
   background: var(--brand-primary-soft);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
 }
 
-.tender-card__header h3 {
+.tender-board-shell .tender-card__header h3 {
   font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -464,49 +445,48 @@
   text-align: start;
 }
 
-.tender-card__summary {
+.tender-board-shell .tender-card__summary {
   margin: 18px 0;
   color: var(--text-secondary);
   line-height: 1.75;
 }
 
-.tender-card__meta {
+.tender-board-shell .tender-card__meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(120px, 1fr));
   gap: 12px 18px;
   margin-bottom: 18px;
 }
 
-.tender-card__meta div {
+.tender-board-shell .tender-card__meta div {
   display: grid;
   gap: 6px;
 }
 
-.tender-card__meta span {
+.tender-board-shell .tender-card__meta span {
   font-size: 0.82rem;
   color: var(--text-muted);
 }
 
-.tender-card__meta strong {
+.tender-board-shell .tender-card__meta strong {
   font-size: 1rem;
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
-.tender-card__tags {
+.tender-board-shell .tender-card__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 18px;
 }
 
-.domain-pill, .agent-pill {
+.tender-board-shell .domain-pill, .tender-board-shell .agent-pill {
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
   border-radius: var(--radius-pill);
   background: var(--color-success-bg);
   color: var(--color-success);
-  border: 1px solid var(--color-success-border);
   font-size: 0.85rem;
   font-weight: 600;
   gap: 6px;
@@ -515,18 +495,17 @@
 /* ========================================== */
 /* דף יצירת / הוספת מכרז חדש (Create Tender) */
 /* ========================================== */
-.tender-form {
+.tender-board-shell .tender-form {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
   padding: 32px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
   background: var(--bg-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
-.form-header {
+.tender-board-shell .form-header {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -535,27 +514,27 @@
   padding-bottom: 24px;
 }
 
-.form-header h1 {
+.tender-board-shell .form-header h1 {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
-.form-group {
+.tender-board-shell .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 20px;
 }
 
-.form-group label {
+.tender-board-shell .form-group label {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.tender-form .form-grid {
+.tender-board-shell .tender-form .form-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 32px;
@@ -563,98 +542,96 @@
   align-items: start;
 }
 
-.main-panel, .sidebar-panel {
+.tender-board-shell .main-panel, .tender-board-shell .sidebar-panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.sidebar-card {
+.tender-board-shell .sidebar-card {
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--secondary-bg);
+  background: var(--bg-elevated);
   padding: 24px;
 }
 
-.sidebar-card h2 {
+.tender-board-shell .sidebar-card h2 {
   font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: 4px;
 }
 
-.sidebar-card .helper-text {
+.tender-board-shell .sidebar-card .helper-text {
   color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0 0 16px 0;
 }
 
-.domain-list {
+.tender-board-shell .domain-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
   gap: 8px;
 }
 
-.domain-chip {
+.tender-board-shell .domain-chip {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
+  border: none;
   background: var(--bg-surface);
   color: var(--text-secondary);
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s var(--ease-out), border-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+  transition: background-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), color 0.2s var(--ease-out);
   text-align: center;
 }
 
-.domain-chip:hover:not(:disabled) {
-  border-color: var(--primary-color);
+.tender-board-shell .domain-chip:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
   color: var(--text-primary);
 }
 
-.domain-chip:focus-visible {
+.tender-board-shell .domain-chip:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.domain-chip.selected {
+.tender-board-shell .domain-chip.selected {
   background: var(--color-success-bg);
-  border-color: var(--primary-color);
   color: var(--color-success);
   font-weight: 600;
 }
 
-.domain-chip:disabled {
+.tender-board-shell .domain-chip:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* שורת אג'נטים דינמית */
-.form-section {
+.tender-board-shell .form-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.section-title {
+.tender-board-shell .section-title {
   font-size: 1.1rem;
   font-weight: 700;
 }
 
-.agent-list {
+.tender-board-shell .agent-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.agent-row {
+.tender-board-shell .agent-row {
   display: flex;
   gap: 12px;
   align-items: flex-start;
 }
 
-.remove-agent {
+.tender-board-shell .remove-agent {
   background: var(--color-danger);
   color: var(--text-inverse);
   border: none;
@@ -670,24 +647,24 @@
   transition: opacity 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 
-.remove-agent:hover {
+.tender-board-shell .remove-agent:hover {
   background: var(--color-danger);
   opacity: 0.88;
 }
 
-.remove-agent:focus-visible {
+.tender-board-shell .remove-agent:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.tender-form .bottom-row {
+.tender-board-shell .tender-form .bottom-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 20px;
 }
 
-.tender-form .footer-row {
+.tender-board-shell .tender-form .footer-row {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 32px;
@@ -696,26 +673,25 @@
 }
 
 /* עיצוב כפתור טוגל מיילים */
-.toggle-label {
+.tender-board-shell .toggle-label {
   display: inline-flex;
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--secondary-bg);
+  background: var(--bg-elevated);
   cursor: pointer;
   width: fit-content;
 }
 
-.toggle-input {
+.tender-board-shell .toggle-input {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.toggle-pill {
+.tender-board-shell .toggle-pill {
   position: relative;
   width: 44px;
   height: 24px;
@@ -724,11 +700,11 @@
   transition: background-color 0.2s var(--ease-out);
 }
 
-.toggle-pill::after {
+.tender-board-shell .toggle-pill::after {
   content: '';
   position: absolute;
   top: 3px;
-  right: 3px;
+  inset-inline-start: 3px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -737,41 +713,45 @@
   transition: transform 0.2s var(--ease-out);
 }
 
-.toggle-input:focus-visible + .toggle-pill {
+.tender-board-shell .toggle-input:focus-visible + .toggle-pill {
   box-shadow: var(--focus-ring);
 }
 
-.toggle-input:checked + .toggle-pill {
-  background: var(--primary-color);
+.tender-board-shell .toggle-input:checked + .toggle-pill {
+  background: var(--brand-primary);
 }
 
-.toggle-input:checked + .toggle-pill::after {
+.tender-board-shell .toggle-input:checked + .toggle-pill::after {
   transform: translateX(-20px);
+}
+
+/* In LTR the knob starts on the left, so it slides the other way */
+.tender-board-shell:dir(ltr) .toggle-input:checked + .toggle-pill::after {
+  transform: translateX(20px);
 }
 
 /* ========================================================================== */
 /* דף צפייה וניהול המכרזים שלי + פרטי המכרז ועדכון (ManageMyTenders) */
 /* ========================================================================== */
-.manage-shell {
+.tender-board-shell .manage-shell {
   max-width: 1240px;
   margin: 0 auto;
   padding: 24px 0;
 }
 
-.manage-header {
+.tender-board-shell .manage-header {
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 28px 32px;
   margin-bottom: 28px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
 }
 
-.manage-header h1 {
+.tender-board-shell .manage-header h1 {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -780,44 +760,43 @@
   margin-bottom: 8px;
 }
 
-.manage-header p {
+.tender-board-shell .manage-header p {
   color: var(--text-muted);
   font-size: 0.95rem;
   margin: 0;
 }
 
 /* מבנה חלוקה דו-עמודי מאוזן ויציב המונע מריחה של פאנל העדכון */
-.manage-content {
+.tender-board-shell .manage-content {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 28px;
   align-items: start;
 }
 
-.manage-list {
+.tender-board-shell .manage-list {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.manage-detail {
+.tender-board-shell .manage-detail {
   position: sticky;
   top: 24px;
 }
 
 /* פאנל עדכון פרטי המכרז */
-.detail-panel {
+.tender-board-shell .detail-panel {
   display: flex;
   flex-direction: column;
   gap: 18px;
   padding: 26px;
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card);
 }
 
-.detail-panel__header {
+.tender-board-shell .detail-panel__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -826,32 +805,32 @@
   margin-bottom: 4px;
 }
 
-.detail-panel__header h2 {
+.tender-board-shell .detail-panel__header h2 {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.detail-field {
+.tender-board-shell .detail-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.detail-field label {
+.tender-board-shell .detail-field label {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.detail-row {
+.tender-board-shell .detail-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
 /* רכיב בחירת תחומים ערוך בפאנל המכרזים שלי */
-.domains-select {
+.tender-board-shell .domains-select {
   position: relative;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
@@ -862,120 +841,116 @@
   gap: 8px;
 }
 
-.domains-input {
+.tender-board-shell .domains-input {
   border: none !important;
   background: transparent !important;
   padding: 6px 8px !important;
   box-shadow: none !important;
 }
 
-.domain-pill--editable {
+.tender-board-shell .domain-pill--editable {
   background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
   color: var(--color-success);
-  padding: 4px 10px 4px 6px;
+  padding-block: 4px;
+  padding-inline: 10px 6px;
 }
 
-.domain-remove {
+.tender-board-shell .domain-remove {
   background: transparent;
   border: none;
   color: var(--color-success);
-  margin-right: 4px;
+  margin-inline-start: 4px;
   cursor: pointer;
   font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
 }
 
-.domains-dropdown {
+.tender-board-shell .domains-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   margin-top: 6px;
   max-height: 180px;
   overflow-y: auto;
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   z-index: 50;
 }
 
-.field-help {
+.tender-board-shell .field-help {
   margin: 4px 0 0;
   color: var(--color-danger);
   font-size: 0.85rem;
 }
 
 /* קבוצות מועמדים רשומים */
-.applicants-section {
+.tender-board-shell .applicants-section {
   margin-top: 10px;
   border-top: 1px solid var(--border-muted);
   padding-top: 18px;
 }
 
-.applicants-section h3 {
+.tender-board-shell .applicants-section h3 {
   font-size: 1.05rem;
   font-weight: 700;
   margin-bottom: 12px;
 }
 
-.applicant-card {
+.tender-board-shell .applicant-card {
   padding: 14px 16px;
   border-radius: var(--radius-sm);
-  background: var(--secondary-bg);
-  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
   margin-bottom: 10px;
 }
 
-.applicant-card h4 {
+.tender-board-shell .applicant-card h4 {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 6px;
 }
 
-.applicant-card p {
+.tender-board-shell .applicant-card p {
   margin: 4px 0;
   font-size: 0.88rem;
   line-height: 1.6;
 }
 
-.detail-actions {
+.tender-board-shell .detail-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 12px;
 }
 
-.detail-actions .primary-button {
-  background: var(--primary-color);
+.tender-board-shell .detail-actions .primary-button {
+  background: var(--brand-primary);
 }
 
-.close-confirmation {
+.tender-board-shell .close-confirmation {
   margin-top: 10px;
   padding: 16px;
   border-radius: var(--radius-md);
   background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
   text-align: center;
 }
 
-.close-confirmation p {
+.tender-board-shell .close-confirmation p {
   margin: 0 0 12px 0;
   color: var(--color-danger);
   font-weight: 600;
 }
 
-.close-confirmation__actions {
+.tender-board-shell .close-confirmation__actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
 /* מצבי דף ריק */
-.manage-empty, .empty-state {
+.tender-board-shell .manage-empty, .tender-board-shell .empty-state {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -983,11 +958,11 @@
   text-align: center;
   padding: 48px 24px;
   border-radius: var(--radius-md);
-  border: 1px dashed var(--border-strong);
-  background: var(--secondary-bg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-card);
 }
 
-.manage-empty h2, .empty-state h2 {
+.tender-board-shell .manage-empty h2, .tender-board-shell .empty-state h2 {
   font-size: 1.2rem;
   color: var(--text-secondary);
   margin-bottom: 6px;
@@ -996,16 +971,15 @@
 /* ========================================== */
 /* הודעות מערכת ופופ-אפים */
 /* ========================================== */
-.success-banner, .success-message {
+.tender-board-shell .success-banner, .tender-board-shell .success-message {
   padding: 12px 16px;
   border-radius: var(--radius-sm);
   background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
   color: var(--color-success);
   font-weight: 600;
 }
 
-.success-modal-overlay {
+.tender-board-shell .success-modal-overlay {
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
@@ -1016,22 +990,21 @@
   z-index: 1100;
 }
 
-.success-modal {
+.tender-board-shell .success-modal {
   width: min(520px, 100%);
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
   box-shadow: var(--shadow-lg);
   padding: 30px 28px;
   text-align: center;
 }
 
-.success-modal__icon {
+.tender-board-shell .success-modal__icon {
   font-size: 2.2rem;
   margin-bottom: 14px;
 }
 
-.success-modal__text {
+.tender-board-shell .success-modal__text {
   margin: 0;
   color: var(--text-primary);
   font-weight: 700;
@@ -1039,17 +1012,16 @@
   line-height: 1.6;
 }
 
-.error-message {
+.tender-board-shell .error-message {
   padding: 12px 16px;
   border-radius: var(--radius-sm);
   background: var(--color-danger-bg);
-  border: 1px solid var(--color-danger-border);
   color: var(--color-danger);
   font-weight: 600;
 }
 
 /* מודל הרשמה למכרז */
-.modal-overlay {
+.tender-board-shell .modal-overlay {
   position: fixed;
   inset: 0;
   background: var(--bg-overlay);
@@ -1060,13 +1032,12 @@
   z-index: 1000;
 }
 
-.modal-content {
+.tender-board-shell .modal-content {
   width: min(640px, 100%);
   max-height: 90vh;
   overflow-y: auto;
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
   padding: 32px;
   word-break: break-word;
@@ -1076,73 +1047,76 @@
 /* ========================================== */
 /* טפסים בתוך מודלים (הרשמה למכרז, פרופיל מקצועי) */
 /* ========================================== */
-.apply-form .form-grid {
+.tender-board-shell .apply-form .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
   margin-bottom: 8px;
 }
 
-.apply-form .form-field {
+.tender-board-shell .apply-form .form-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  text-align: right;
+  text-align: start;
 }
 
-.apply-form .form-field.form-full {
+.tender-board-shell .apply-form .form-field.form-full {
   grid-column: 1 / -1;
 }
 
-.apply-form .form-label {
+.tender-board-shell .apply-form .form-label {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
-.apply-form .form-input,
-.apply-form .form-textarea {
+.tender-board-shell .apply-form .form-input,
+.tender-board-shell .apply-form .form-textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   background: var(--bg-surface);
   color: var(--text-primary);
   font-size: 0.95rem;
   font-family: inherit;
-  text-align: right;
+  text-align: start;
 }
 
-.apply-form .form-input:focus,
-.apply-form .form-textarea:focus {
+.tender-board-shell .apply-form .form-input:focus,
+.tender-board-shell .apply-form .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: var(--brand-primary);
   box-shadow: var(--focus-ring);
 }
 
-.apply-form .form-textarea {
+.tender-board-shell .apply-form .form-textarea {
   resize: vertical;
 }
 
-.apply-form .form-error {
+.tender-board-shell .apply-form .view-application__value {
+  border: none;
+}
+
+.tender-board-shell .apply-form .form-error {
   display: block;
   width: 100%;
   color: var(--color-danger);
   font-size: 0.8rem;
 }
 
-.apply-form .profile-attach-box {
+.tender-board-shell .apply-form .profile-attach-box {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  background: var(--secondary-bg);
+  background: var(--bg-elevated);
 }
 
-.apply-form .profile-attach-checkbox {
+.tender-board-shell .apply-form .profile-attach-checkbox {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1153,20 +1127,20 @@
   color: var(--text-secondary);
 }
 
-.apply-form .profile-attach-checkbox input[type='checkbox'],
-.apply-form .profile-attach-checkbox input[type='radio'] {
+.tender-board-shell .apply-form .profile-attach-checkbox input[type='checkbox'],
+.tender-board-shell .apply-form .profile-attach-checkbox input[type='radio'] {
   width: 16px;
   height: 16px;
   cursor: pointer;
 }
 
-.apply-form .no-profile-banner p {
+.tender-board-shell .apply-form .no-profile-banner p {
   margin: 0;
   font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
-.apply-form .resume-file-list {
+.tender-board-shell .apply-form .resume-file-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1175,18 +1149,18 @@
   gap: 6px;
 }
 
-.apply-form .resume-file-row {
+.tender-board-shell .apply-form .resume-file-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
-  background: var(--secondary-bg);
+  background: var(--bg-elevated);
   font-size: 0.9rem;
 }
 
-.apply-form .resume-file-row .pending-badge {
+.tender-board-shell .apply-form .resume-file-row .pending-badge {
   margin-inline-start: 8px;
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -1197,57 +1171,57 @@
 /* מדיה קווריס רספונסיביות (Responsive Design) */
 /* ========================================== */
 @media (max-width: 1024px) {
-  .tender-form .form-grid,
-  .apply-form .form-grid,
-  .tender-form .footer-row,
-  .manage-content,
-  .detail-row {
+  .tender-board-shell .tender-form .form-grid,
+  .tender-board-shell .apply-form .form-grid,
+  .tender-board-shell .tender-form .footer-row,
+  .tender-board-shell .manage-content,
+  .tender-board-shell .detail-row {
     grid-template-columns: 1fr;
   }
-  .tender-form .bottom-row {
+  .tender-board-shell .tender-form .bottom-row {
     grid-template-columns: 1fr;
   }
-  .toggle-label {
+  .tender-board-shell .toggle-label {
     width: 100%;
     justify-content: space-between;
   }
-  .manage-detail {
+  .tender-board-shell .manage-detail {
     position: static;
   }
 }
 
 @media (max-width: 760px) {
-  .tender-board-page {
+  .tender-board-shell .tender-board-page {
     padding: 18px 18px 30px;
   }
-  .dashboard-hero, .tender-form, .detail-panel, .manage-header {
+  .tender-board-shell .dashboard-hero, .tender-board-shell .tender-form, .tender-board-shell .detail-panel, .tender-board-shell .manage-header {
     padding: 20px;
   }
-  .tab-button, .primary-button, .secondary-button, .button-primary, .submit-button {
+  .tender-board-shell .tab-button, .tender-board-shell .primary-button, .tender-board-shell .secondary-button, .tender-board-shell .button-primary, .tender-board-shell .submit-button {
     width: 100%;
   }
 }
 
 /* --- AI Thinking Loader --- */
 
-.ai-thinking-dots {
+.tender-board-shell .ai-thinking-dots {
   display: flex;
   gap: 5px;
   align-items: center;
 }
 
-.ai-thinking-dots span {
+.tender-board-shell .ai-thinking-dots span {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   animation: bounce-dot 1.2s ease-in-out infinite;
 }
 
-.ai-thinking-dots span:nth-child(2) {
+.tender-board-shell .ai-thinking-dots span:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.ai-thinking-dots span:nth-child(3) {
+.tender-board-shell .ai-thinking-dots span:nth-child(3) {
   animation-delay: 0.4s;
 }
 
@@ -1262,24 +1236,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-link,
-  .tab-button, .primary-button, .secondary-button, .button-primary, .details-button, .submit-button,
-  .tender-card,
-  .applied-filter-toggle,
-  .domain-chip,
-  .toggle-pill,
-  .toggle-pill::after,
-  .remove-agent {
+  .tender-board-shell .dashboard-link,
+  .tender-board-shell .tab-button, .tender-board-shell .primary-button, .tender-board-shell .secondary-button, .tender-board-shell .button-primary, .tender-board-shell .details-button, .tender-board-shell .submit-button,
+  .tender-board-shell .tender-card,
+  .tender-board-shell .applied-filter-toggle,
+  .tender-board-shell .domain-chip,
+  .tender-board-shell .toggle-pill,
+  .tender-board-shell .toggle-pill::after,
+  .tender-board-shell .remove-agent {
     transition: none;
   }
 
-  .tender-card:hover,
-  .tender-card:focus-within,
-  .primary-button:hover, .button-primary:hover, .submit-button:hover, .details-button:hover {
+  .tender-board-shell .tender-card:hover,
+  .tender-board-shell .tender-card:focus-within,
+  .tender-board-shell .primary-button:hover, .tender-board-shell .button-primary:hover, .tender-board-shell .submit-button:hover, .tender-board-shell .details-button:hover {
     transform: none;
   }
 
-  .ai-thinking-dots span {
+  .tender-board-shell .ai-thinking-dots span {
     animation: none;
     opacity: 0.8;
   }

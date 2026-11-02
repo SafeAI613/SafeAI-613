@@ -67,53 +67,53 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
     if (!usingProfile) {
       const trimmedName = name.trim()
       if (!trimmedName) {
-        nextErrors.name = 'יש להזין שם'
+        nextErrors.name = t('tenders.apply.errors.nameRequired')
       } else if (trimmedName.length > INPUT_LIMITS.name) {
-        nextErrors.name = `שם יכול להכיל עד ${INPUT_LIMITS.name} תווים`
+        nextErrors.name = t('tenders.apply.errors.nameTooLong', { max: INPUT_LIMITS.name })
       }
     }
 
     const trimmedEmail = email.trim()
     if (!trimmedEmail) {
-      nextErrors.email = 'יש להזין אימייל'
+      nextErrors.email = t('tenders.apply.errors.emailRequired')
     } else if (!EMAIL_REGEX.test(trimmedEmail)) {
-      nextErrors.email = 'יש להזין כתובת אימייל תקינה'
+      nextErrors.email = t('tenders.apply.errors.emailInvalid')
     } else if (trimmedEmail.length > INPUT_LIMITS.email) {
-      nextErrors.email = `אימייל יכול להכיל עד ${INPUT_LIMITS.email} תווים`
+      nextErrors.email = t('tenders.apply.errors.emailTooLong', { max: INPUT_LIMITS.email })
     }
 
     if (!usingProfile) {
       const trimmedDetails = details.trim()
       if (!trimmedDetails) {
-        nextErrors.details = 'יש להזין פרטים'
+        nextErrors.details = t('tenders.apply.errors.detailsRequired')
       } else if (trimmedDetails.length > INPUT_LIMITS.details) {
-        nextErrors.details = `פרטים יכולים להכיל עד ${INPUT_LIMITS.details} תווים`
+        nextErrors.details = t('tenders.apply.errors.detailsTooLong', { max: INPUT_LIMITS.details })
       }
     }
 
     if (proposal !== undefined && proposal < 0) {
-      nextErrors.proposal = 'ההצעה חייבת להיות מספר חיובי'
+      nextErrors.proposal = t('tenders.apply.errors.proposalPositive')
     }
 
     const trimmedContactMethod = contactMethod.trim()
     if (trimmedContactMethod && trimmedContactMethod.length > INPUT_LIMITS.contactMethod) {
-      nextErrors.contactMethod = `אמצעי תקשורת יכול להכיל עד ${INPUT_LIMITS.contactMethod} תווים`
+      nextErrors.contactMethod = t('tenders.apply.errors.contactMethodTooLong', { max: INPUT_LIMITS.contactMethod })
     }
 
     const trimmedPortfolioLink = portfolioLink.trim()
     if (trimmedPortfolioLink) {
       if (trimmedPortfolioLink.length > INPUT_LIMITS.portfolioLink) {
-        nextErrors.portfolioLink = `הקישור יכול להכיל עד ${INPUT_LIMITS.portfolioLink} תווים`
+        nextErrors.portfolioLink = t('tenders.apply.errors.portfolioLinkTooLong', { max: INPUT_LIMITS.portfolioLink })
       } else if (!URL_REGEX.test(trimmedPortfolioLink)) {
-        nextErrors.portfolioLink = 'יש להזין קישור תקין (החל ב-http:// או https://)'
+        nextErrors.portfolioLink = t('tenders.apply.errors.portfolioLinkInvalid')
       }
     }
 
     if (resumeFile) {
       if (resumeFile.type !== RESUME_ALLOWED_TYPE) {
-        nextErrors.resumeFile = 'ניתן לצרף קובץ PDF בלבד'
+        nextErrors.resumeFile = t('tenders.apply.errors.resumePdfOnly')
       } else if (resumeFile.size > RESUME_MAX_SIZE_BYTES) {
-        nextErrors.resumeFile = 'גודל הקובץ חייב להיות עד 5MB'
+        nextErrors.resumeFile = t('tenders.apply.errors.resumeTooLarge')
       }
     }
 
@@ -149,7 +149,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
     })
 
     if (!awsResponse.ok) {
-      throw new Error('העלאת קובץ קורות החיים ל-S3 נכשלה')
+      throw new Error('Uploading the resume file to S3 failed')
     }
 
     return fileUrl
@@ -172,7 +172,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
         resumeFileKey = await uploadResume(resumeFile)
       } catch (error) {
         console.error('Failed to upload resume file', error)
-        setErrors((prev) => ({ ...prev, resumeFile: 'העלאת קובץ קורות החיים נכשלה, נסה שוב' }))
+        setErrors((prev) => ({ ...prev, resumeFile: t('tenders.apply.errors.resumeUploadFailed') }))
         setIsSubmitting(false)
         return
       }
@@ -206,7 +206,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
           </div>
           <div>
             <button type="button" className="tab-button" onClick={onCancel}>
-              Close
+              {t('common.close')}
             </button>
           </div>
         </header>
@@ -223,7 +223,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
                       checked={applicationMode === 'profile'}
                       onChange={() => setApplicationMode('profile')}
                     />
-                    השתמש בפרופיל המקצועי שלי ({profile.name})
+                    {t('tenders.apply.useMyProfile', { name: profile.name })}
                   </label>
                   <label className="profile-attach-checkbox">
                     <input
@@ -232,7 +232,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
                       checked={applicationMode === 'manual'}
                       onChange={() => setApplicationMode('manual')}
                     />
-                    מילוי פרטים ידני
+                    {t('tenders.apply.fillManually')}
                   </label>
 
                   {usingProfile && profile.resumeFiles.length > 0 && (
@@ -241,7 +241,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
                       value={selectedResumeKey}
                       onChange={(e) => setSelectedResumeKey(e.target.value)}
                     >
-                      <option value="">בחר קובץ קורות חיים (אופציונלי)</option>
+                      <option value="">{t('tenders.apply.chooseResumeOptional')}</option>
                       {profile.resumeFiles.map((file) => (
                         <option key={file.fileKey} value={file.fileKey}>
                           {file.fileName}
@@ -256,9 +256,9 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
             {!profile && (
               <div className="form-field form-full">
                 <div className="profile-attach-box no-profile-banner">
-                  <p>עדיין אין לך פרופיל מקצועי. יצירת פרופיל תאפשר לך להגיש מועמדות מהר יותר בפעם הבאה.</p>
+                  <p>{t('tenders.apply.noProfileMessage')}</p>
                   <button type="button" className="secondary-button" onClick={() => setShowCreateProfileModal(true)}>
-                    צור פרופיל מקצועי
+                    {t('tenders.apply.createProfileBtn')}
                   </button>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
 
             {!usingProfile && (
               <label className="form-field">
-                <span className="form-label">קורות חיים (PDF, עד 5MB)</span>
+                <span className="form-label">{t('tenders.apply.resumeLabel')}</span>
                 <input
                   className="form-input"
                   type="file"
@@ -379,7 +379,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
 
             {!usingProfile && (
               <label className="form-field">
-                <span className="form-label">קישור לתיק עבודות</span>
+                <span className="form-label">{t('tenders.apply.portfolioLinkLabel')}</span>
                 <input
                   className="form-input"
                   type="url"
@@ -400,7 +400,7 @@ export default function ApplyForTender({ tender, onSubmit, onCancel }: Props) {
 
           <div className="modal-actions mt-18 actions-row">
             <button type="submit" className="primary-button" disabled={isSubmitting}>
-              {isSubmitting ? 'שולח...' : t('tenders.submitApplicationBtn')}
+              {isSubmitting ? t('tenders.apply.submitting') : t('tenders.submitApplicationBtn')}
             </button>
             <button type="button" className="secondary-button" onClick={onCancel} disabled={isSubmitting}>
               {t('common.cancel')}

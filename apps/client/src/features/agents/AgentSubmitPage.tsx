@@ -7,6 +7,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import { fetchManifest, generateIcon, submitAgent } from "./api/agentsApi";
 import type { AgentManifest } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
@@ -15,6 +16,7 @@ import { ROUTES } from "../../router/paths";
 type Step = "idle" | "loading-manifest" | "manifest-ready" | "generating-icon" | "submitting" | "done" | "error";
 
 export default function AgentSubmitPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [repoUrl, setRepoUrl] = useState("");
   const [step, setStep] = useState<Step>("idle");
@@ -36,7 +38,7 @@ export default function AgentSubmitPage() {
       setUrlValid(res.urlValidation);
       setStep("manifest-ready");
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "שגיאה בטעינת ה-manifest");
+      setErrorMsg(err instanceof Error ? err.message : t("agents.submit.manifestError"));
       setStep("error");
     }
   };
@@ -50,7 +52,7 @@ export default function AgentSubmitPage() {
       setIcon(res.svg);
       setStep("manifest-ready");
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "שגיאה ביצירת האייקון");
+      setErrorMsg(err instanceof Error ? err.message : t("agents.submit.iconError"));
       setStep("manifest-ready"); // stay on manifest-ready, just show error
     }
   };
@@ -64,7 +66,7 @@ export default function AgentSubmitPage() {
       setStep("done");
       setTimeout(() => navigate(ROUTES.hub.agents), 1500);
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "שגיאה בשליחת האייג'נט");
+      setErrorMsg(err instanceof Error ? err.message : t("agents.submit.submitError"));
       setStep("manifest-ready");
     }
   };
@@ -73,22 +75,22 @@ export default function AgentSubmitPage() {
     return (
       <div className="agent-submit-success">
         <span>✅</span>
-        <h2>האייג'נט נשלח בהצלחה!</h2>
-        <p>מעבירה אותך לגלריה...</p>
+        <h2>{t("agents.submit.successTitle")}</h2>
+        <p>{t("agents.submit.redirecting")}</p>
       </div>
     );
   }
 
   return (
     <div className="agent-submit-page">
-      <h1>➕ הוסיפי אייג'נט חדש</h1>
+      <h1>➕ {t("agents.submit.title")}</h1>
       <p className="agent-submit-subtitle">
-        הריפו חייב להכיל קובץ <code>manifest.json</code> בשורש הענף <code>main</code>
+        <Trans i18nKey="agents.submit.subtitle" components={{ code: <code /> }} />
       </p>
 
       {/* Step 1: Repo URL */}
       <div className="agent-submit-section">
-        <label>🔗 קישור ל-GitHub Repo (ציבורי)</label>
+        <label>🔗 {t("agents.submit.repoLabel")}</label>
         <div className="agent-submit-row">
           <input
             type="url"
@@ -103,7 +105,7 @@ export default function AgentSubmitPage() {
             onClick={handleFetchManifest}
             disabled={!repoUrl.trim() || step === "loading-manifest"}
           >
-            {step === "loading-manifest" ? "טוען..." : "🔍 טען manifest"}
+            {step === "loading-manifest" ? t("agents.submit.loading") : `🔍 ${t("agents.submit.loadManifest")}`}
           </button>
         </div>
       </div>
@@ -115,25 +117,25 @@ export default function AgentSubmitPage() {
       {manifest && (
         <div className="agent-manifest-preview">
           <div className="agent-manifest-header">
-            <span className="agent-manifest-ok">✅ manifest נטען בהצלחה</span>
+            <span className="agent-manifest-ok">✅ {t("agents.submit.manifestLoaded")}</span>
           </div>
 
           <div className="agent-manifest-grid">
-            <ManifestRow label="שם" value={manifest.name} />
-            <ManifestRow label="יוצרת" value={manifest.creator_name} />
-            <ManifestRow label="גרסה" value={manifest.version} />
-            <ManifestRow label="תיאור" value={manifest.description} />
+            <ManifestRow label={t("agents.submit.fieldName")} value={manifest.name} />
+            <ManifestRow label={t("agents.submit.fieldCreator")} value={manifest.creator_name} />
+            <ManifestRow label={t("agents.submit.fieldVersion")} value={manifest.version} />
+            <ManifestRow label={t("agents.submit.fieldDescription")} value={manifest.description} />
             {manifest.target_audience && (
-              <ManifestRow label="קהל יעד" value={manifest.target_audience} />
+              <ManifestRow label={t("agents.submit.fieldTargetAudience")} value={manifest.target_audience} />
             )}
           </div>
 
           {/* download_url validation */}
           <div className="agent-url-validation">
-            <span>📦 קישור הורדה: <code>{manifest.download_url}</code></span>
+            <span>📦 {t("agents.submit.downloadLink")} <code>{manifest.download_url}</code></span>
             {urlValid && (
               <span className={urlValid.valid ? "validation-ok" : "validation-err"}>
-                {urlValid.valid ? "✅ הקישור תקין" : `❌ ${urlValid.error}`}
+                {urlValid.valid ? `✅ ${t("agents.submit.linkValid")}` : `❌ ${urlValid.error}`}
               </span>
             )}
           </div>
@@ -152,7 +154,7 @@ export default function AgentSubmitPage() {
       {/* Step 3: Generate icon */}
       {manifest && (
         <div className="agent-submit-section">
-          <label>🎨 אייקון לאייג'נט</label>
+          <label>🎨 {t("agents.submit.iconLabel")}</label>
 
           {icon ? (
             <div className="agent-icon-preview-wrapper">
@@ -164,7 +166,7 @@ export default function AgentSubmitPage() {
                 onClick={handleGenerateIcon}
                 disabled={step === "generating-icon"}
               >
-                🔄 צרי אייקון חדש
+                🔄 {t("agents.submit.regenerateIcon")}
               </button>
             </div>
           ) : (
@@ -173,7 +175,7 @@ export default function AgentSubmitPage() {
               onClick={handleGenerateIcon}
               disabled={step === "generating-icon"}
             >
-              {step === "generating-icon" ? "יוצרת אייקון..." : "🎨 צרי אייקון אוטומטי"}
+              {step === "generating-icon" ? t("agents.submit.generatingIcon") : `🎨 ${t("agents.submit.generateIcon")}`}
             </button>
           )}
         </div>
@@ -187,7 +189,7 @@ export default function AgentSubmitPage() {
             onClick={handleSubmit}
             disabled={step === "submitting"}
           >
-            {step === "submitting" ? "שולחת..." : "📤 שלחי לאישור"}
+            {step === "submitting" ? t("agents.submit.submitting") : `📤 ${t("agents.submit.submitForApproval")}`}
           </button>
         </div>
       )}

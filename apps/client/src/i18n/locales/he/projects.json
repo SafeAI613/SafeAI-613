@@ -1,0 +1,210 @@
+{
+  "tenders": {
+    "budgetWithCurrency": "{{amount}} ש\"ח",
+    "timeValue": "{{value}} {{unit}}",
+    "timeUnits": {
+      "hours": "שעות",
+      "days": "ימים",
+      "weeks": "שבועות",
+      "months": "חודשים",
+      "years": "שנים"
+    },
+    "timeOne": {
+      "hours": "שעה",
+      "days": "יום",
+      "weeks": "שבוע",
+      "months": "חודש",
+      "years": "שנה"
+    },
+    "timeMany": {
+      "hours": "{{value}} שעות",
+      "days": "{{value}} ימים",
+      "weeks": "{{value}} שבועות",
+      "months": "{{value}} חודשים",
+      "years": "{{value}} שנים"
+    },
+    "board": {
+      "closeSmartSearch": "סגור חיפוש חכם",
+      "appliedFilter": "מכרזים שהגשתי להם הצעה",
+      "clearAppliedFilter": "ניקוי החיפוש",
+      "alreadyApplied": "כבר נרשמת למכרז זה בעבר",
+      "registrationCancelled": "הרישום בוטל"
+    },
+    "card": {
+      "appliedOn": "הגשתי הצעה ב-{{date}}",
+      "offersBtn": "הצעות",
+      "newOffersAria": "{{count}} הצעות חדשות"
+    },
+    "details": {
+      "appliedOnDate": "הגשת הצעה בתאריך {{date}}",
+      "viewMyApplicationBtn": "לצפייה בהצעה שהגשתי"
+    },
+    "myApplication": {
+      "title": "ההצעה שהגשתי",
+      "submittedOn": "תאריך הגשה",
+      "proposalInShekels": "הצעה - בשקלים"
+    },
+    "manage": {
+      "newOffersTotal": "יש לך {{count}} הצעות חדשות",
+      "newOffersForTender": "יש {{count}} הצעות חדשות למכרז:"
+    },
+    "offers": {
+      "markViewedError": "לא ניתן היה לסמן את ההצעות כנצפו",
+      "title": "הצעות למכרז: {{title}}",
+      "professionalProfile": "פרופיל מקצועי - {{name}}",
+      "experience": "ניסיון:",
+      "resume": "קורות חיים:",
+      "openFile": "לפתיחת הקובץ",
+      "portfolio": "תיק עבודות:"
+    },
+    "apply": {
+      "useMyProfile": "השתמש בפרופיל המקצועי שלי ({{name}})",
+      "fillManually": "מילוי פרטים ידני",
+      "chooseResumeOptional": "בחר קובץ קורות חיים (אופציונלי)",
+      "noProfileMessage": "עדיין אין לך פרופיל מקצועי. יצירת פרופיל תאפשר לך להגיש מועמדות מהר יותר בפעם הבאה.",
+      "createProfileBtn": "צור פרופיל מקצועי",
+      "resumeLabel": "קורות חיים (PDF, עד 5MB)",
+      "portfolioLinkLabel": "קישור לתיק עבודות",
+      "submitting": "שולח...",
+      "errors": {
+        "nameRequired": "יש להזין שם",
+        "nameTooLong": "שם יכול להכיל עד {{max}} תווים",
+        "emailRequired": "יש להזין אימייל",
+        "emailInvalid": "יש להזין כתובת אימייל תקינה",
+        "emailTooLong": "אימייל יכול להכיל עד {{max}} תווים",
+        "detailsRequired": "יש להזין פרטים",
+        "detailsTooLong": "פרטים יכולים להכיל עד {{max}} תווים",
+        "proposalPositive": "ההצעה חייבת להיות מספר חיובי",
+        "contactMethodTooLong": "אמצעי תקשורת יכול להכיל עד {{max}} תווים",
+        "portfolioLinkTooLong": "הקישור יכול להכיל עד {{max}} תווים",
+        "portfolioLinkInvalid": "יש להזין קישור תקין (החל ב-http:// או https://)",
+        "resumePdfOnly": "ניתן לצרף קובץ PDF בלבד",
+        "resumeTooLarge": "גודל הקובץ חייב להיות עד 5MB",
+        "resumeUploadFailed": "העלאת קובץ קורות החיים נכשלה, נסה שוב"
+      }
+    },
+    "create": {
+      "topicMismatchError": "הטקסט שהזנת אינו מתאר בקשה ליצירת מכרז. אנא תאר את הפרויקט או השירות שברצונך לפרסם.",
+      "phoneInvalid": "יש להזין מספר טלפון תקין",
+      "durationValuePlaceholder": "מספר"
+    },
+    "spec": {
+      "panelTitle": "אפיון ראשוני והמלצת פיתוח",
+      "panelDescription": "הפקה אוטומטית של המלצה טכנולוגית, פרויקטים דומים בקוד פתוח, מקורות קריאה ומסמך אפיון ראשוני",
+      "title": "אפיון ראשוני והמלצת פיתוח:",
+      "regenerateBtn": "הפק אפיון מחדש",
+      "generateBtn": "צור אפיון ראשוני והמלצת פיתוח",
+      "generating": "ה-agent מפיק את האפיון, זה עשוי לקחת מספר דקות...",
+      "cancelling": "מבטל...",
+      "failed": "הפקת האפיון נכשלה.",
+      "techStack": "המלצה טכנולוגית:",
+      "openSource": "פרויקטים דומים בקוד פתוח:",
+      "readingSources": "מקורות קריאה מומלצים:",
+      "document": "מסמך אפיון:",
+      "unpublishBtn": "הסר פרסום (השאר פרטי)",
+      "publishBtn": "פרסם יחד עם המכרז",
+      "visiblePublic": "האפיון גלוי כרגע גם למועמדים הצופים במכרז",
+      "visiblePrivate": "האפיון גלוי כרגע רק לך כבעל המכרז",
+      "requestError": "שגיאה בבקשת הפקת אפיון",
+      "cancelError": "שגיאה בביטול הפקת האפיון",
+      "publishError": "שגיאה בעדכון סטטוס הפרסום"
+    }
+  },
+  "agents": {
+    "title": "🤖 Agents Marketplace",
+    "subtitle": "גלי, הורידי והוסיפי אייג'נטים לקהילה",
+    "byCreator": "מאת {{name}}",
+    "tabs": {
+      "gallery": "🏠 גלריה",
+      "submit": "➕ הוסיפי אייג'נט",
+      "stats": "📊 סטטיסטיקות",
+      "desktop": "⬇️ אפליקציית Desktop"
+    },
+    "fields": {
+      "financialManagement": "ניהול פיננסי",
+      "legal": "משפטי",
+      "medical": "רפואה",
+      "education": "חינוך",
+      "businessAutomation": "אוטומציה עסקית",
+      "softwareDevelopment": "פיתוח תוכנה"
+    },
+    "marketplace": {
+      "loadError": "שגיאה בטעינת האייג'נטים. נסי שוב.",
+      "searchPlaceholder": "חפשי אייג'נט לפי שם או תיאור...",
+      "allFields": "כל התחומים",
+      "allFrameworks": "כל ה-Frameworks",
+      "sort": {
+        "downloads": "🔥 הכי פופולרי",
+        "rating": "⭐ הכי מדורג",
+        "newest": "🆕 החדש ביותר"
+      },
+      "resultsCount": "{{count}} אייג'נטים נמצאו",
+      "loading": "טוען אייג'נטים...",
+      "empty": "לא נמצאו אייג'נטים התואמים את החיפוש",
+      "moreDetails": "פרטים נוספים ›",
+      "prev": "‹ הקודם",
+      "next": "הבא ›",
+      "page": "עמוד {{page}}"
+    },
+    "detail": {
+      "notFound": "האייג'נט לא נמצא.",
+      "loading": "טוען...",
+      "unknownError": "שגיאה לא ידועה",
+      "backToGallery": "‹ חזרה לגלריה",
+      "by": "מאת",
+      "ratingsCount": "{{count}} דירוגים",
+      "downloadNow": "הורד עכשיו",
+      "description": "תיאור",
+      "targetAudience": "קהל יעד",
+      "professionalFields": "תחומים מקצועיים",
+      "tasks": "משימות",
+      "exampleQuestions": "דוגמאות לשאלות מתאימות",
+      "techSpecs": "מפרט טכני",
+      "supportedModels": "מודלים נתמכים",
+      "requiredPermissions": "הרשאות נדרשות",
+      "links": "קישורים",
+      "releaseDate": "תאריך שחרור: {{date}}",
+      "downloadsCount": "{{formatted}} הורדות",
+      "versionLabel": "גרסה {{version}}"
+    },
+    "stats": {
+      "loadError": "שגיאה בטעינת הסטטיסטיקות",
+      "loading": "טוען סטטיסטיקות...",
+      "title": "סטטיסטיקות Marketplace",
+      "totalAgents": "סה\"כ אייג'נטים",
+      "totalDownloads": "סה\"כ הורדות",
+      "mostPopular": "הכי פופולרים",
+      "newest": "חדשים ביותר",
+      "topRated": "הכי מדורגים",
+      "popularFrameworks": "Frameworks פופולריים",
+      "unknown": "לא ידוע",
+      "noData": "אין נתונים עדיין"
+    },
+    "submit": {
+      "manifestError": "שגיאה בטעינת ה-manifest",
+      "iconError": "שגיאה ביצירת האייקון",
+      "submitError": "שגיאה בשליחת האייג'נט",
+      "successTitle": "האייג'נט נשלח בהצלחה!",
+      "redirecting": "מעבירה אותך לגלריה...",
+      "title": "הוסיפי אייג'נט חדש",
+      "subtitle": "הריפו חייב להכיל קובץ <code>manifest.json</code> בשורש הענף <code>main</code>",
+      "repoLabel": "קישור ל-GitHub Repo (ציבורי)",
+      "loading": "טוען...",
+      "loadManifest": "טען manifest",
+      "manifestLoaded": "manifest נטען בהצלחה",
+      "fieldName": "שם",
+      "fieldCreator": "יוצרת",
+      "fieldVersion": "גרסה",
+      "fieldDescription": "תיאור",
+      "fieldTargetAudience": "קהל יעד",
+      "downloadLink": "קישור הורדה:",
+      "linkValid": "הקישור תקין",
+      "iconLabel": "אייקון לאייג'נט",
+      "regenerateIcon": "צרי אייקון חדש",
+      "generatingIcon": "יוצרת אייקון...",
+      "generateIcon": "צרי אייקון אוטומטי",
+      "submitting": "שולחת...",
+      "submitForApproval": "שלחי לאישור"
+    }
+  }
+}

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiCall, API_ENDPOINTS } from '../../config/api'
 import type { Tender, TenderSpecification, TenderTime } from './types'
+import { TIME_UNITS, timeUnitLabel } from './timeUnits'
+import { useLocale } from '../../i18n/useLocale'
 import AiThinkingLoader from './AiThinkingLoader.tsx'
 
 interface ManageTenderDetailsProps {
@@ -19,7 +21,8 @@ export default function ManageTenderDetails({
   onUpdateTender,
   onDeleteTender,
 }: ManageTenderDetailsProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const { dir } = useLocale()
   // שמירת מצב הטופס בהתאם למבנה הנתונים הקים במכרז
   const [draftTender, setDraftTender] = useState<Tender>({ ...tender })
   const [agents, setAgents] = useState<string[]>(tender.agentsRequired ?? ['', ''])
@@ -83,7 +86,7 @@ export default function ManageTenderDetails({
       }
       startPolling(draftTender.id)
     } catch (error) {
-      setSpecificationError(error instanceof Error ? error.message : 'שגיאה בבקשת הפקת אפיון')
+      setSpecificationError(error instanceof Error ? error.message : t('tenders.spec.requestError'))
     } finally {
       setIsRequestingSpecification(false)
     }
@@ -98,7 +101,7 @@ export default function ManageTenderDetails({
       // הסטטוס יתעדכן ל-'failed' (עם הודעה שהמשתמש ביטל) דרך ה-polling הקיים,
       // שכבר רץ מאז שהופעלה ההפקה - אין צורך לעדכן סטייט ידנית כאן.
     } catch (error) {
-      setSpecificationError(error instanceof Error ? error.message : 'שגיאה בביטול הפקת האפיון')
+      setSpecificationError(error instanceof Error ? error.message : t('tenders.spec.cancelError'))
     } finally {
       setIsCancellingSpecification(false)
     }
@@ -117,14 +120,13 @@ export default function ManageTenderDetails({
         onUpdateTender(response.tender)
       }
     } catch (error) {
-      setSpecificationError(error instanceof Error ? error.message : 'שגיאה בעדכון סטטוס הפרסום')
+      setSpecificationError(error instanceof Error ? error.message : t('tenders.spec.publishError'))
     }
   }
 
   const [productTypeOptions, setProductTypeOptions] = useState<string[]>([])
   const [aiApplicationOptions, setAiApplicationOptions] = useState<string[]>([])
   
-  const timeUnits = ['שעות','ימים','שבועות','חודשים','שנים'] as const
   
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -248,7 +250,7 @@ export default function ManageTenderDetails({
   const showAgentsSection = draftTender.aiApplicationType === 'אייגנט' || draftTender.aiApplicationType === 'מולטי אייגנט'
 
   return (
-    <article className="detail-panel content-page-full" style={{ padding: '24px', maxWidth: '95%', margin: '0 auto', boxSizing: 'border-box' }} dir={i18n.dir()}>
+    <article className="detail-panel content-page-full" style={{ padding: '24px', maxWidth: '95%', margin: '0 auto', boxSizing: 'border-box' }} dir={dir}>
       <header className="detail-panel__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h2>{t('tenders.updateTenderDetailsTitle')}</h2>
         <button type="button" className="tab-button" onClick={onClose}>
@@ -259,13 +261,13 @@ export default function ManageTenderDetails({
       {/* אפיון אוטומטי + המלצת פיתוח (SCRUM-291) */}
       <section
         className="spec-generation-panel"
-        style={{ marginBottom: '30px', padding: '20px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)' }}
+        style={{ marginBottom: '30px', padding: '20px', borderRadius: 'var(--radius-md)', background: 'var(--bg-elevated)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h3 style={{ margin: 0 }}>אפיון ראשוני והמלצת פיתוח</h3>
+            <h3 style={{ margin: 0 }}>{t('tenders.spec.panelTitle')}</h3>
             <p className="helper-text" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              הפקה אוטומטית של המלצה טכנולוגית, פרויקטים דומים בקוד פתוח, מקורות קריאה ומסמך אפיון ראשוני
+              {t('tenders.spec.panelDescription')}
             </p>
           </div>
           <button
@@ -292,8 +294,8 @@ export default function ManageTenderDetails({
             ) : (
               <>
                 {specification?.status === 'ready' || specification?.status === 'failed'
-                  ? 'הפק אפיון מחדש'
-                  : 'צור אפיון ראשוני והמלצת פיתוח'}
+                  ? t('tenders.spec.regenerateBtn')
+                  : t('tenders.spec.generateBtn')}
               </>
             )}
           </button>
@@ -307,7 +309,7 @@ export default function ManageTenderDetails({
 
         {isSpecificationBusy && (
           <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <p style={{ margin: 0, color: 'var(--text-muted)' }}>ה-agent מפיק את האפיון, זה עשוי לקחת מספר דקות...</p>
+            <p style={{ margin: 0, color: 'var(--text-muted)' }}>{t('tenders.spec.generating')}</p>
             <button
               type="button"
               className="secondary-button"
@@ -320,14 +322,14 @@ export default function ManageTenderDetails({
                 opacity: isCancellingSpecification ? 0.6 : 1,
               }}
             >
-              {isCancellingSpecification ? 'מבטל...' : 'ביטול'}
+              {isCancellingSpecification ? t('tenders.spec.cancelling') : t('common.cancel')}
             </button>
           </div>
         )}
 
         {specification?.status === 'failed' && (
           <div className="error-message" style={{ color: 'var(--color-danger)', background: 'var(--color-danger-bg)', padding: '12px', borderRadius: 'var(--radius-sm)', marginTop: '12px' }}>
-            <strong>הפקת האפיון נכשלה.</strong>
+            <strong>{t('tenders.spec.failed')}</strong>
             {specification.errorMessage && <p style={{ margin: '6px 0 0' }}>{specification.errorMessage}</p>}
           </div>
         )}
@@ -342,15 +344,15 @@ export default function ManageTenderDetails({
 
             {specification.techStackRecommendation && (
               <div>
-                <strong>המלצה טכנולוגית:</strong>
+                <strong>{t('tenders.spec.techStack')}</strong>
                 <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)' }}>{specification.techStackRecommendation}</p>
               </div>
             )}
 
             {specification.openSourceReferences && specification.openSourceReferences.length > 0 && (
               <div>
-                <strong>פרויקטים דומים בקוד פתוח:</strong>
-                <ul style={{ margin: '6px 0 0', paddingRight: '20px' }}>
+                <strong>{t('tenders.spec.openSource')}</strong>
+                <ul style={{ margin: '6px 0 0', paddingInlineStart: '20px' }}>
                   {specification.openSourceReferences.map((ref) => (
                     <li key={ref.url}>
                       <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
@@ -363,8 +365,8 @@ export default function ManageTenderDetails({
 
             {specification.readingSources && specification.readingSources.length > 0 && (
               <div>
-                <strong>מקורות קריאה מומלצים:</strong>
-                <ul style={{ margin: '6px 0 0', paddingRight: '20px' }}>
+                <strong>{t('tenders.spec.readingSources')}</strong>
+                <ul style={{ margin: '6px 0 0', paddingInlineStart: '20px' }}>
                   {specification.readingSources.map((ref) => (
                     <li key={ref.url}>
                       <a href={ref.url} target="_blank" rel="noopener noreferrer">{ref.title}</a>
@@ -377,8 +379,8 @@ export default function ManageTenderDetails({
 
             {specification.document && (
               <div>
-                <strong>מסמך אפיון:</strong>
-                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '12px', marginTop: '6px' }}>
+                <strong>{t('tenders.spec.document')}</strong>
+                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', padding: '12px', marginTop: '6px' }}>
                   {specification.document}
                 </pre>
               </div>
@@ -391,12 +393,12 @@ export default function ManageTenderDetails({
                 onClick={handleTogglePublishSpecification}
                 style={{ padding: '8px 16px', cursor: 'pointer' }}
               >
-                {specification.isPublished ? 'הסר פרסום (השאר פרטי)' : 'פרסם יחד עם המכרז'}
+                {specification.isPublished ? t('tenders.spec.unpublishBtn') : t('tenders.spec.publishBtn')}
               </button>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 {specification.isPublished
-                  ? 'האפיון גלוי כרגע גם למועמדים הצופים במכרז'
-                  : 'האפיון גלוי כרגע רק לך כבעל המכרז'}
+                  ? t('tenders.spec.visiblePublic')
+                  : t('tenders.spec.visiblePrivate')}
               </span>
             </div>
           </div>
@@ -432,7 +434,7 @@ export default function ManageTenderDetails({
         <div className="selection-cards-row" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           
           {/* קוביה א': סוג המוצר */}
-          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
             <h3 style={{ margin: '0 0 4px 0' }}>{t('tenders.productTypeHeading')}</h3>
             <p className="helper-text" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>{t('tenders.productTypeHelperText')}</p>
             <div className="domain-list" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -446,8 +448,7 @@ export default function ManageTenderDetails({
                     style={{
                       padding: '6px 12px',
                       borderRadius: 'var(--radius-pill)',
-                      border: '1px solid',
-                      borderColor: selected ? 'var(--link-color)' : 'var(--border-strong)',
+                      border: 'none',
                       backgroundColor: selected ? 'var(--color-info-bg)' : 'var(--bg-surface)',
                       color: selected ? 'var(--link-color)' : 'var(--text-secondary)',
                       cursor: 'pointer'
@@ -462,7 +463,7 @@ export default function ManageTenderDetails({
           </div>
 
           {/* קוביה ב': צורת שימוש ב-AI */}
-          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
+          <div className="sidebar-card" style={{ flex: '1', minWidth: '280px', padding: '15px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)' }}>
             <h3 style={{ margin: '0 0 4px 0' }}>{t('tenders.aiApplicationHeading')}</h3>
             <p className="helper-text" style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>{t('tenders.aiApplicationHelperText')}</p>
             <div className="domain-list" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -476,8 +477,7 @@ export default function ManageTenderDetails({
                     style={{
                       padding: '6px 12px',
                       borderRadius: 'var(--radius-pill)',
-                      border: '1px solid',
-                      borderColor: selected ? 'var(--link-color)' : 'var(--border-strong)',
+                      border: 'none',
                       backgroundColor: selected ? 'var(--color-info-bg)' : 'var(--bg-surface)',
                       color: selected ? 'var(--link-color)' : 'var(--text-secondary)',
                       cursor: 'pointer'
@@ -553,8 +553,8 @@ export default function ManageTenderDetails({
                 onChange={(e) => handleFieldChange('timeRequired', { ...draftTender.timeRequired, unit: e.target.value } as TenderTime)}
                 style={{ padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', width: '60%' }}
               >
-                {timeUnits.map((u) => (
-                  <option key={u} value={u}>{u}</option>
+                {TIME_UNITS.map((u) => (
+                  <option key={u} value={u}>{timeUnitLabel(t, u)}</option>
                 ))}
               </select>
             </div>

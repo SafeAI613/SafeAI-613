@@ -392,7 +392,7 @@ export default function TenderBoardPage() {
               onClick={() => setIsSmartSearchOpen(!isSmartSearchOpen)}
               style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontWeight: 'bold', cursor: 'pointer' }}
             >
-              {isSmartSearchOpen ? <span>סגור חיפוש חכם</span> : <span>{t('tenders.smartSearchToggleBtn')}</span>}
+              {isSmartSearchOpen ? <span>{t('tenders.board.closeSmartSearch')}</span> : <span>{t('tenders.smartSearchToggleBtn')}</span>}
             </button>
 
             {!isSmartSearchOpen && (
@@ -402,7 +402,7 @@ export default function TenderBoardPage() {
                 onClick={() => setShowOnlyApplied((v) => !v)}
                 aria-pressed={showOnlyApplied}
               >
-                {showOnlyApplied ? 'ניקוי החיפוש' : 'מכרזים שהגשתי להם הצעה'}
+                {showOnlyApplied ? t('tenders.board.clearAppliedFilter') : t('tenders.board.appliedFilter')}
               </button>
             )}
 
@@ -434,7 +434,7 @@ export default function TenderBoardPage() {
                 onClick={() => setShowOnlyApplied((v) => !v)}
                 aria-pressed={showOnlyApplied}
               >
-                {showOnlyApplied ? 'ניקוי החיפוש' : 'מכרזים שהגשתי להם הצעה'}
+                {showOnlyApplied ? t('tenders.board.clearAppliedFilter') : t('tenders.board.appliedFilter')}
               </button>
             )}
           </div>
@@ -631,8 +631,8 @@ export default function TenderBoardPage() {
         {showAlreadyAppliedNotice && (
           <div className="success-modal-overlay" role="alert" aria-live="assertive">
             <div className="success-modal">
-              <div className="success-modal__text">כבר נרשמת למכרז זה בעבר</div>
-              <div className="success-modal__text">הרישום בוטל</div>
+              <div className="success-modal__text">{t('tenders.board.alreadyApplied')}</div>
+              <div className="success-modal__text">{t('tenders.board.registrationCancelled')}</div>
             </div>
           </div>
         )}
@@ -641,7 +641,7 @@ export default function TenderBoardPage() {
   }
 
   return (
-    <main className="dashboard-shell">
+    <main className="dashboard-shell tender-board-shell">
       <section className="dashboard-page-header">
         <nav className="dashboard-page-nav" aria-label={t('tenders.pageNavAriaLabel')}>
           <button

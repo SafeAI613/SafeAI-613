@@ -6,18 +6,32 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { generatePath, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchAgents } from "./api/agentsApi";
 import type { Agent, AgentFilters } from "./types/agent.types";
 import AgentIcon from "./AgentIcon";
 import { ROUTES } from "../../router/paths";
+import { useLocale } from "../../i18n/useLocale";
 
 const SORT_OPTIONS = [
-  { value: "downloads", label: "🔥 הכי פופולרי" },
-  { value: "rating", label: "⭐ הכי מדורג" },
-  { value: "newest", label: "🆕 החדש ביותר" },
+  { value: "downloads", labelKey: "agents.marketplace.sort.downloads" },
+  { value: "rating", labelKey: "agents.marketplace.sort.rating" },
+  { value: "newest", labelKey: "agents.marketplace.sort.newest" },
+];
+
+// Values are sent to the server as-is; only the labels are translated.
+const FIELD_OPTIONS = [
+  { value: "Financial Management", labelKey: "agents.fields.financialManagement" },
+  { value: "Legal", labelKey: "agents.fields.legal" },
+  { value: "Medical", labelKey: "agents.fields.medical" },
+  { value: "Education", labelKey: "agents.fields.education" },
+  { value: "Business Automation", labelKey: "agents.fields.businessAutomation" },
+  { value: "Software Development", labelKey: "agents.fields.softwareDevelopment" },
 ];
 
 export default function AgentsMarketplace() {
+  const { t } = useTranslation();
+  const { locale } = useLocale();
   const navigate = useNavigate();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [total, setTotal] = useState(0);
@@ -40,15 +54,15 @@ export default function AgentsMarketplace() {
       setAgents(res.agents);
       setTotal(res.total);
     } catch {
-      setError("שגיאה בטעינת האייג'נטים. נסי שוב.");
+      setError(t("agents.marketplace.loadError"));
     } finally {
       setLoading(false);
     }
-  }, [filters, page]);
+  }, [filters, page, t]);
 
   useEffect(() => {
-    const t = setTimeout(load, filters.search ? 400 : 0);
-    return () => clearTimeout(t);
+    const timer = setTimeout(load, filters.search ? 400 : 0);
+    return () => clearTimeout(timer);
   }, [load, filters.search]);
 
   const setFilter = (key: keyof AgentFilters, value: string) => {
@@ -65,7 +79,7 @@ export default function AgentsMarketplace() {
           <input
             className="agents-search-input"
             type="text"
-            placeholder="חפשי אייג'נט לפי שם או תיאור..."
+            placeholder={t("agents.marketplace.searchPlaceholder")}
             value={filters.search}
             onChange={(e) => setFilter("search", e.target.value)}
           />
@@ -77,13 +91,10 @@ export default function AgentsMarketplace() {
             onChange={(e) => setFilter("professional_field", e.target.value)}
             className="agents-filter-select"
           >
-            <option value="">כל התחומים</option>
-            <option value="Financial Management">ניהול פיננסי</option>
-            <option value="Legal">משפטי</option>
-            <option value="Medical">רפואה</option>
-            <option value="Education">חינוך</option>
-            <option value="Business Automation">אוטומציה עסקית</option>
-            <option value="Software Development">פיתוח תוכנה</option>
+            <option value="">{t("agents.marketplace.allFields")}</option>
+            {FIELD_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
+            ))}
           </select>
 
           <select
@@ -91,7 +102,7 @@ export default function AgentsMarketplace() {
             onChange={(e) => setFilter("framework", e.target.value)}
             className="agents-filter-select"
           >
-            <option value="">כל ה-Frameworks</option>
+            <option value="">{t("agents.marketplace.allFrameworks")}</option>
             <option value="LangGraph">LangGraph</option>
             <option value="CrewAI">CrewAI</option>
             <option value="AutoGen">AutoGen</option>
@@ -105,7 +116,7 @@ export default function AgentsMarketplace() {
             className="agents-filter-select"
           >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+              <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
             ))}
           </select>
         </div>
@@ -114,7 +125,7 @@ export default function AgentsMarketplace() {
       {/* Results count */}
       {!loading && (
         <p className="agents-results-count">
-          {total} אייג'נטים נמצאו
+          {t("agents.marketplace.resultsCount", { count: total })}
         </p>
       )}
 
@@ -125,12 +136,12 @@ export default function AgentsMarketplace() {
       {loading ? (
         <div className="agents-loading">
           <div className="agents-spinner" />
-          <p>טוען אייג'נטים...</p>
+          <p>{t("agents.marketplace.loading")}</p>
         </div>
       ) : agents.length === 0 ? (
         <div className="agents-empty">
           <span>🤖</span>
-          <p>לא נמצאו אייג'נטים התואמים את החיפוש</p>
+          <p>{t("agents.marketplace.empty")}</p>
         </div>
       ) : (
         <div className="agents-grid">
@@ -146,7 +157,7 @@ export default function AgentsMarketplace() {
 
               <div className="agent-card-body">
                 <h3 className="agent-card-name">{agent.name}</h3>
-                <p className="agent-card-creator">מאת {agent.creator_name}</p>
+                <p className="agent-card-creator">{t("agents.byCreator", { name: agent.creator_name })}</p>
                 <p className="agent-card-desc">{agent.description}</p>
 
                 <div className="agent-card-tags">
@@ -162,11 +173,11 @@ export default function AgentsMarketplace() {
               </div>
 
               <div className="agent-card-footer">
-                <span className="agent-stat">⬇ {agent.downloads.toLocaleString()}</span>
+                <span className="agent-stat">⬇ {agent.downloads.toLocaleString(locale)}</span>
                 {agent.ratingCount > 0 && (
                   <span className="agent-stat">⭐ {agent.rating.toFixed(1)}</span>
                 )}
-                <button className="agent-btn-details">פרטים נוספים ›</button>
+                <button className="agent-btn-details">{t("agents.marketplace.moreDetails")}</button>
               </div>
             </div>
           ))}
@@ -176,9 +187,9 @@ export default function AgentsMarketplace() {
       {/* Pagination */}
       {total > 12 && (
         <div className="agents-pagination">
-          <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>‹ הקודם</button>
-          <span>עמוד {page}</span>
-          <button disabled={agents.length < 12} onClick={() => setPage((p) => p + 1)}>הבא ›</button>
+          <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>{t("agents.marketplace.prev")}</button>
+          <span>{t("agents.marketplace.page", { page })}</span>
+          <button disabled={agents.length < 12} onClick={() => setPage((p) => p + 1)}>{t("agents.marketplace.next")}</button>
         </div>
       )}
     </div>
