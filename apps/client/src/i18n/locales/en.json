@@ -797,7 +797,7 @@
     "cannotRestoreKey": "You will not be able to recover the key after closing this window",
     "oldKeyNoLongerWorks": "The old key no longer works",
     "downloadAsFileButton": "Download as file",
-    "closeCannotSeeAgainButton": "Close \u2190 (I won't be able to see the key again)"
+    "closeCannotSeeAgainButton": "Close (I won't be able to see the key again)"
   },
   "providerKeysManagement": {
     "errorLoadingKeys": "Error loading keys",
@@ -1067,7 +1067,7 @@
     "loadOrgDetailsFailedFallback": "Failed to load organization details",
     "loadingOrgDetails": "Loading organization details...",
     "orgNotFound": "Organization not found",
-    "backToOrgsListBtn": "→ Back to Organizations List",
+    "backToOrgsListBtn": "← Back to Organizations List",
     "ownerLabel": "Owner:",
     "totalRequestsCard": "Total Requests",
     "totalTokensCard": "Total Tokens",
