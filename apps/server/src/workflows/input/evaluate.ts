@@ -18,9 +18,16 @@ import { EvaluateRequest, EvaluateResponse } from "../../types/proxyTypes";
 import { runInputWorkflow  } from "./inputFilterWorkflow";
 import { NodeTrace } from "../types";
 
+export type EvaluateResult = EvaluateResponse & {
+  blockedBy?: string;
+  /** true כשהחסימה נובעת משגיאה בסינון ולא מהחלטת מדיניות. */
+  errored?: boolean;
+  trace?: NodeTrace[];
+};
+
 export async function evaluateText(
   req: EvaluateRequest,
-): Promise<EvaluateResponse & { blockedBy?: string; trace?: NodeTrace[] }> {
+): Promise<EvaluateResult> {
   const { profileId, text, auditDisabled } = req;
 
   if (!profileId || !text) {
@@ -49,7 +56,11 @@ export async function evaluateText(
         text,
         vectorScores: {},
         initialDecision: result.reason,
-        llmFinalDecision: result.allowed ? "allowed" : "blocked",
+        llmFinalDecision: result.errored
+          ? "error"
+          : result.allowed
+            ? "allowed"
+            : "blocked",
         trace: result.trace as unknown as Record<string, unknown>[],
         ...(result.blockedBy !== undefined ? { blockedBy: result.blockedBy } : {}),
       });
@@ -58,11 +69,12 @@ export async function evaluateText(
     }
   }
 
-  const ret: EvaluateResponse & { blockedBy?: string; trace?: NodeTrace[] } = {
+  const ret: EvaluateResult = {
     allowed: result.allowed,
     reason: result.reason,
     trace: result.trace,
   };
   if (result.blockedBy !== undefined) ret.blockedBy = result.blockedBy;
+  if (result.errored) ret.errored = true;
   return ret;
 }

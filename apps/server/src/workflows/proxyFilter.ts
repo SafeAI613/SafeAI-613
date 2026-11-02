@@ -14,6 +14,7 @@
 
 import logger from "../logger";
 import {
+  BlockKind,
   buildBlockedAnthropicMessage,
   buildBlockedChatCompletion,
   buildBlockedResponsesApi,
@@ -51,22 +52,23 @@ export async function guardInput(
   }
 
   const reason = result.reason || "Unknown reason";
-  logger.info(
-    JSON.stringify({
-      event: "proxy.blocked",
-      api,
-      model,
-      reason,
-      blockedBy: result.blockedBy,
-    }),
-  );
+  const kind: BlockKind = result.errored ? "unavailable" : "policy";
+  const logLine = JSON.stringify({
+    event: result.errored ? "proxy.filter_error" : "proxy.blocked",
+    api,
+    model,
+    reason,
+    blockedBy: result.blockedBy,
+  });
+  if (result.errored) logger.error(logLine);
+  else logger.info(logLine);
 
   const payload =
     api === "anthropic"
-      ? buildBlockedAnthropicMessage(model, reason)
+      ? buildBlockedAnthropicMessage(model, reason, kind)
       : api === "responses"
-        ? buildBlockedResponsesApi(model, reason)
-        : buildBlockedChatCompletion(model, reason);
+        ? buildBlockedResponsesApi(model, reason, kind)
+        : buildBlockedChatCompletion(model, reason, kind);
 
   return stream ? toSSEStream(payload) : payload;
 }
