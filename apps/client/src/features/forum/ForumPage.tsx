@@ -153,7 +153,7 @@ export const ForumPage: React.FC = () => {
     if (!currentUser?._id) return showAlert(t('forum.list.notLoggedIn'), { type: 'error' });
 
     try {
-      const response = await moderatePostApi(postId, currentUser._id, actionType);
+      const response = await moderatePostApi(postId, actionType);
 
       if (response.ok) {
         fetchPosts(searchQuery, currentPage);

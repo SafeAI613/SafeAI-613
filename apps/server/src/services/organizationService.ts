@@ -105,19 +105,58 @@ export async function getOrganizationUsers(orgId: string) {
   }
 }
 
-export async function addUserToOrganization(orgId: string, userId: string, role: string = "user") {
+/**
+ * Roles that may be assigned through the organization member routes.
+ * "admin" (system administrator) can NEVER be granted here - it is managed only
+ * through the admin-only /users routes. Org owners may only add regular members;
+ * only a system admin may make someone an org_owner.
+ */
+export type OrganizationMemberRole = "user" | "org_owner";
+
+export function resolveOrganizationMemberRole(
+  requestedRole: unknown,
+  actorRole: string
+): OrganizationMemberRole {
+  if (requestedRole === undefined || requestedRole === null || requestedRole === "" || requestedRole === "user") {
+    return "user";
+  }
+  if (requestedRole === "org_owner" && actorRole === "admin") {
+    return "org_owner";
+  }
+  throw new Error("Invalid role for organization member");
+}
+
+export async function addUserToOrganization(
+  orgId: string,
+  userId: string,
+  requestedRole: unknown = "user",
+  actorRole: string = "user"
+) {
   try {
     const organization = await repo.getOrganizationById(orgId);
     if (!organization) {
       throw new Error("Organization not found");
     }
 
+    const role = resolveOrganizationMemberRole(requestedRole, actorRole);
+
     const user = await userRepo.getUserById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
-    const alreadyInOrg = (user as any).organizationId?.toString() === orgId;
+    // A system admin's role must never be changed (demoted) through an org route
+    if ((user as any).role === "admin") {
+      throw new Error("Cannot change the organization or role of a system admin");
+    }
+
+    const currentOrgId = (user as any).organizationId?.toString();
+    const alreadyInOrg = currentOrgId === orgId;
+
+    // Only a system admin may move a user out of another organization
+    if (currentOrgId && !alreadyInOrg && actorRole !== "admin") {
+      throw new Error("User already belongs to another organization");
+    }
     if (!alreadyInOrg) {
       const maxUsers = (organization as any).settings?.maxUsers ?? 10;
       const currentUserCount = await userRepo.countUsersByOrganization(orgId);
@@ -182,14 +221,15 @@ export async function removeUserFromOrganization(userId: string) {
 export async function addUserToOrganizationByEmail(
   orgId: string,
   email: string,
-  role: string = "user"
+  requestedRole: unknown = "user",
+  actorRole: string = "user"
 ) {
   const user = await userRepo.findUserByEmail(email.toLowerCase().trim());
   if (!user) {
     throw new Error("User not found");
   }
 
-  return addUserToOrganization(orgId, user._id.toString(), role);
+  return addUserToOrganization(orgId, user._id.toString(), requestedRole, actorRole);
 }
 
 /**
@@ -199,9 +239,12 @@ export async function addUserToOrganizationByEmail(
  */
 export async function createOrganizationMember(
   orgId: string,
-  data: { name: string; email: string; role?: string }
+  data: { name: string; email: string; role?: unknown },
+  actorRole: string = "user"
 ) {
   try {
+    const role = resolveOrganizationMemberRole(data.role, actorRole);
+
     const organization = await repo.getOrganizationById(orgId);
     if (!organization) {
       throw new Error("Organization not found");
@@ -220,7 +263,7 @@ export async function createOrganizationMember(
       password: temporaryPassword,
       name: data.name,
       organizationId: orgId,
-      role: data.role || "user",
+      role,
       skipEmailVerification: true,
       mustChangePassword: true,
     });

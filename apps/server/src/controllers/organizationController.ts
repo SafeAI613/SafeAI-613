@@ -241,7 +241,7 @@ export async function addUserToOrganizationHandler(
       return res.status(403).json({ error: "Access denied" });
     }
 
-    await addUserToOrganization(orgId, userId, role || "user");
+    await addUserToOrganization(orgId, userId, role, user.role);
     res.json({ success: true, message: "User added to organization" });
   } catch (error: any) {
     logger.error("Failed to add user to organization", {
@@ -284,7 +284,7 @@ export async function createOrganizationMemberHandler(
       name: name.trim(),
       email: email.trim(),
       role,
-    });
+    }, user.role);
 
     res.status(201).json({
       success: true,
@@ -331,7 +331,8 @@ export async function addUserByEmailToOrganizationHandler(
     const updatedOrg = await addUserToOrganizationByEmail(
       orgId,
       email,
-      role || "user"
+      role,
+      user.role
     );
     res.json({
       success: true,
@@ -416,7 +417,8 @@ export async function getPendingOrganizationsHandler(
 }
 
 /**
- * Top up organization wallet (Admin or Org Owner) - Mock Only
+ * Manual top-up of an organization wallet (system admin only - enforced by requireAdmin
+ * in organizationRouter). No payment is taken; real top-ups go through PayMe.
  */
 export async function topUpOrganizationWalletHandler(
   req: Request<{ id: string }>,
