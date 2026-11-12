@@ -110,9 +110,10 @@ jobs:
               \"cd /opt/safeai-613\",
               \"export IMAGE_REGISTRY=$IMAGE_REGISTRY\",
               \"export IMAGE_TAG=$IMAGE_TAG\",
+              \"docker image prune -af --filter until=24h\",
               \"docker compose -f docker-compose.prod.yml pull\",
               \"docker compose -f docker-compose.prod.yml up -d\",
-              \"docker image prune -f\"
+              \"docker image prune -af\"
             ]}" \
             --query "Command.CommandId" --output text)
 
