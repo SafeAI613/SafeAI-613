@@ -29,7 +29,7 @@
 לפני שליחת הבקשה ל-AI, הקובץ:
 - מחלץ את הטקסט הרלוונטי מתוך הבקשה
 - בונה query מסודר לבדיקה
-- מעביר את הטקסט ל-`guardInput(...)`
+- מעביר את הטקסט ל-`filterInput(...)` → `evaluateInput` (ראו `services/filter/`)
 
 אם הסינון מחזיר חסימה, הפונקציה מחזירה תשובת חסימה במקום להמשיך לעיבוד.
 
@@ -209,14 +209,15 @@ Client Response
 ## קבצים ותלויות מרכזיות
 
 ### ייבואי ליבה
-- `AIProfile` - קריאת פרופיל ה-AI של המשתמש
+- `getFullProfileById` - קריאת הפרופיל המלא (כולל קטגוריות ו-prompts שמוגדרים `select:false`)
 - `decryptSecret` - פענוח מפתחות מוצפנים
 - `getProviderKeyByUserAndProvider` - שליפת מפתח ספק של משתמש
 - `getSystemProviderKey` - שליפת מפתח מערכת
 - `logUsage` - רישום שימוש וחיוב
 - `isProviderKeyFree` - בדיקה האם המפתח פטור מחיוב
 - `buildSystemPrompt` - בניית system prompt מהפרופיל
-- `guardInput` - סינון קלט
+- `evaluateInput`, `extractFilterText`, `buildBlockedResponse` - סינון קלט
+- `RequestTrace` - רשומת מעקב אחת לכל בקשה
 
 ### חישובי עלות
 - `calculateCostFromTokens`

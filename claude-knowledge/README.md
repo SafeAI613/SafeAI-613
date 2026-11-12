@@ -18,7 +18,7 @@
 | `02-backend-architecture.md` | שכבות השרת, זרימת בקשה, middleware, הרשמת routes |
 | `03-data-models.md` | מודלי Mongoose (User, Organization, AIProfile, Logs...) |
 | `04-api-reference.md` | מפת ה-endpoints של ה-REST API |
-| `05-safety-filter-engine.md` | מנוע הסינון: workflows, nodes, guardInput, embeddings/LLM |
+| `05-safety-filter-engine.md` | מנוע הסינון: extractFilterText, judge, תשובות חסימה, RequestLog |
 | `06-frontend.md` | מבנה ה-client, routing, Redux, auth, features |
 | `07-deployment-and-env.md` | Docker, LiteLLM, משתני סביבה, פריסה |
 

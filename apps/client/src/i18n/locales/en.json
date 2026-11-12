@@ -749,6 +749,8 @@
     "reasonAllowedByLlm": "Approved by the language model",
     "reasonBlockedByLlm": "Blocked by the language model",
     "reasonLowConfidence": "Low confidence level",
+    "reasonFilterError": "The filter service failed (see the error below)",
+    "judgeReasonLabel": "Model's explanation:",
     "title": "Profile Tester",
     "selectProfileLabel": "Select a profile to test *",
     "testTextLabel": "Text to test *",

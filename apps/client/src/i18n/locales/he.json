@@ -749,6 +749,8 @@
     "reasonAllowedByLlm": "אושר על ידי מודל השפה",
     "reasonBlockedByLlm": "נחסם על ידי מודל השפה",
     "reasonLowConfidence": "רמת ביטחון נמוכה",
+    "reasonFilterError": "שירות הסינון נכשל (השגיאה מופיעה למטה)",
+    "judgeReasonLabel": "הסבר המודל:",
     "title": "בדיקת פרופיל",
     "selectProfileLabel": "בחר פרופיל לבדיקה *",
     "testTextLabel": "טקסט לבדיקה *",

@@ -316,8 +316,9 @@ docs/
 - **userService.ts** - ניהול משתמשים, CRUD operations, ניהול הרשאות
 
 ### AI & Filtering
-- **filterService.ts** - סינון תוכן AI, יצירת embeddings, הערכת טקסט
-- **llmService.ts** - קבלת החלטות מ-LLM, בניית prompts
+- **filter/** - סינון תוכן: חילוץ הטקסט, judge (החלטת LLM), תשובות חסימה
+- **trace/** - רשומת מעקב אחת לכל בקשה בפרוקסי (RequestLog)
+- **filterService.ts** - embeddings (סינון וקטורי ישן, לא בשימוש)
 - **promptBuilder.ts** - בניית prompts מותאמים אישית לפי פרופילים
 - **promptService.ts** - ניהול prompts, CRUD operations
 

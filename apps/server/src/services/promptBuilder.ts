@@ -10,7 +10,7 @@ export async function buildSystemPrompt(profile: any): Promise<string> {
 
   const dbPrompt = await PromptService.getPromptByCode("SYSTEM_PROMPT");
 
-  logger.info(`Building system prompt for profile: ${profile?.name || "N/A"} PROMPT: ${dbPrompt}`);
+  logger.debug(`Building system prompt for profile: ${profile?.name || "N/A"}`);
 
 
   return [
@@ -32,7 +32,7 @@ export async function buildFilterPrompt(
   const dbPrompt = await PromptService.getPromptByCode("FILTER_PROMPT");
 
 
-  logger.info(`Building filter prompt for profile: ${profileName}\n ${profileDesc}\n PROMPT: ${dbPrompt}`);
+  logger.debug(`Building filter prompt for profile: ${profileName}`);
 
   return `
 ${dbPrompt.content}
@@ -40,6 +40,8 @@ ${dbPrompt.content}
 Profile name: ${profileName}
 Profile description: ${profileDesc}
 
-Respond only with "allowed" or "blocked".
+Respond in JSON with:
+- "verdict": "allowed" or "blocked"
+- "reason": one short English sentence explaining the decision (which category matched).
 `.trim();
 }
