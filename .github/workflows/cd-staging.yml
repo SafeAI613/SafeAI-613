@@ -91,9 +91,16 @@ jobs:
             git checkout develop
             git reset --hard origin/develop
 
+            # Free disk BEFORE pulling. Every deploy adds a uniquely tagged server
+            # image, so old images are not "dangling" and plain `prune -f` never
+            # removed them - the disk filled up (see docs/DEPLOYMENT.md, item 11).
+            # -a removes only images not used by any container; running ones stay.
+            docker image prune -af --filter "until=24h"
+            df -h /
+
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d
-            docker image prune -f
+            docker image prune -af
 
             cd apps/client
             npm ci
