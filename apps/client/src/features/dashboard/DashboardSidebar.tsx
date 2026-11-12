@@ -1,10 +1,11 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { HomeIcon } from "../landing/icons";
 import { ROUTES } from "../../router/paths";
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "../../components/ThemeToggle";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import { useAuth } from "../../context/authStore";
 
 export interface SidebarItem {
   key: string;
@@ -36,6 +37,14 @@ const itemClassName = ({ isActive }: { isActive: boolean }) =>
 // decision (SCRUM-227) they serve the same audience, so both stay reachable.
 export default function DashboardSidebar({ homeLabel, homePath, items, crossLink, footer }: DashboardSidebarProps) {
   const { t } = useTranslation();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate(ROUTES.home);
+  };
+
   return (
     <nav className="dash-sidebar" aria-label={homeLabel}>
       <Link to={ROUTES.home} className="dash-sidebar-brand">
@@ -59,6 +68,21 @@ export default function DashboardSidebar({ homeLabel, homePath, items, crossLink
         <span>{crossLink.label}</span>
       </Link>
       {footer}
+      {isAuthenticated && (
+        <div className="dash-sidebar-account" role="group" aria-label={t("shell.sidebar.account")}>
+          {user?.name && (
+            <span className="dash-sidebar-user" title={user.email}>
+              {user.name}
+            </span>
+          )}
+          <NavLink to={ROUTES.changePassword} className={itemClassName}>
+            <span>{t("shell.sidebar.changePassword")}</span>
+          </NavLink>
+          <button type="button" className="dash-sidebar-item dash-sidebar-logout" onClick={handleLogout}>
+            <span>{t("shell.sidebar.logout")}</span>
+          </button>
+        </div>
+      )}
       <div className="dash-sidebar-tools" role="group" aria-label={t("shell.sidebar.tools")}>
         <ThemeToggle />
         <LanguageSwitcher placement="sidebar" />

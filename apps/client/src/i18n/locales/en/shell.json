@@ -4,6 +4,9 @@
       "home": "Home",
       "login": "Log in",
       "tools": "Display settings",
+      "account": "My account",
+      "changePassword": "Change password",
+      "logout": "Sign out",
       "hub": {
         "news": "AI News",
         "forum": "Forum",

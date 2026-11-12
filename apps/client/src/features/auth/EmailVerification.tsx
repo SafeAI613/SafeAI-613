@@ -45,9 +45,7 @@ export default function EmailVerification() {
               navigate(
                 response.user!.mustChangePassword
                   ? ROUTES.changePassword
-                  : response.user!.profileId
-                    ? ROUTES.home
-                    : ROUTES.login,
+                  : ROUTES.home,
               );
             }, 3000);
           } else {

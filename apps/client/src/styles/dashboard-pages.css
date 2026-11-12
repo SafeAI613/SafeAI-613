@@ -54,6 +54,24 @@
   margin: 10px 4px;
 }
 
+.dash-sidebar-account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-default);
+}
+
+.dash-sidebar-user {
+  padding: 4px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dash-sidebar-tools {
   display: flex;
   align-items: center;
@@ -470,6 +488,17 @@
     border-inline-end: none;
     border-bottom: 1px solid var(--lv2-line);
     padding: 16px 20px;
+  }
+
+  .dash-sidebar-account {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+
+  .dash-sidebar-account .dash-sidebar-item {
+    width: auto;
   }
 
   .dash-main {

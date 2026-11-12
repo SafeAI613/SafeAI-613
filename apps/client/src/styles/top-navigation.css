@@ -301,7 +301,11 @@
     display: none;
   }
 
-  .top-nav-btn-secondary {
-    display: none;
+  /* Keep both auth buttons on small phones — returning users need "login"
+     most — and just make them compact instead of hiding one. */
+  .top-nav-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    white-space: nowrap;
   }
 }

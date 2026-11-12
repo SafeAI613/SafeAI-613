@@ -3,6 +3,7 @@ import "./styles/design-system.css";
 import "./styles/auth-form.css";
 import './App.css'
 import AppRouter from './router/AppRouter'
+import SessionWarningDialog from './components/SessionWarningDialog'
 import { AuthProvider } from './context/AuthContext'
 import { AlertProvider } from './context/AlertContext'
 import { initializeTokenManager, cleanupTokenManager } from './utils/tokenManager'
@@ -30,6 +31,7 @@ function App() {
     <AlertProvider>
       <AuthProvider>
         <AppRouter />
+        <SessionWarningDialog />
       </AuthProvider>
     </AlertProvider>
   );
