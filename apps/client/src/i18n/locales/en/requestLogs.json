@@ -1,0 +1,52 @@
+{
+  "safeaiNav": {
+    "requestLogs": "AI Request Log"
+  },
+  "requestLogs": {
+    "title": "AI Request Log",
+    "subtitle": "Every request that went through the proxy: the text that was checked, the filter decision, the provider's answer and errors. Records are kept for 30 days.",
+    "allStatuses": "All statuses",
+    "allApis": "All APIs",
+    "requestIdPlaceholder": "Request ID (x-request-id)",
+    "searchById": "Find by ID",
+    "loadMore": "Load more",
+    "empty": "No requests to show.",
+    "loadFailed": "Failed to load requests. Please try again.",
+    "forbidden": "You don't have permission to view requests.",
+    "notFound": "No request found with ID {{id}}.",
+    "timeColumn": "Time",
+    "userColumn": "User",
+    "apiColumn": "API",
+    "statusColumn": "Status",
+    "questionColumn": "Question",
+    "durationColumn": "Duration",
+    "ms": "{{value}} ms",
+    "requestId": "Request ID",
+    "model": "Model",
+    "duration": "Total duration",
+    "providerResponseId": "Provider response ID",
+    "questionTitle": "Checked text",
+    "filterTitle": "Filter decision",
+    "errorTitle": "Error",
+    "answerTitle": "Answer",
+    "noContent": "No content (not stored or empty)",
+    "status": {
+      "completed": "Completed",
+      "blocked": "Blocked",
+      "filter_error": "Filter error",
+      "error": "Error"
+    },
+    "verdict": {
+      "allowed": "Allowed",
+      "blocked": "Blocked",
+      "error": "Filter failed",
+      "skipped": "Not checked (no user text)"
+    },
+    "stage": {
+      "setup": "Request setup",
+      "filter": "Filter",
+      "provider": "Provider",
+      "stream": "Stream"
+    }
+  }
+}

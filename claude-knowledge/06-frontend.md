@@ -15,7 +15,7 @@ client/src/
 ├─ components/              # TopNavigation, BetaBanner, ProfileSelectionModal...
 ├─ features/                # Redux slices + UI לפי דומיין
 │  ├─ auth/                 # Login/Register/Forgot/Reset/ApiKeyDisplay/Google
-│  ├─ safeai-ui/            # הליבה: ProfilesManagement, UsersManagement,
+│  ├─ safeai-ui/            # הליבה: ProfilesManagement, UsersManagement, RequestLogsList (ניטור בקשות AI),
 │  │                        #   ProviderKeysManagement, Statistics, UserDashboard,
 │  │                        #   ProfileTester, UserApiKeysPage
 │  ├─ organizations/        # api/ + components/ + pages/ (PendingOrganizations)

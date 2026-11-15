@@ -83,6 +83,7 @@ export const API_ENDPOINTS = {
   contactAttachments: `${API_BASE_URL}/contact/attachments`,
   myRequests: `${API_BASE_URL}/contact/my-requests`,
   allRequests: `${API_BASE_URL}/contact/all`,
+  requestLogs: `${API_BASE_URL}/admin/request-logs`,
   // AI News endpoints
   news: `${API_BASE_URL}/api/news`,
   // Forum endpoints

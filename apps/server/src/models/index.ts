@@ -14,3 +14,4 @@ export * from "./organization";
 export * from "./walletTransaction";
 export * from "./fundingRequest";
 export * from "./agent";
+export * from "./requestLog";

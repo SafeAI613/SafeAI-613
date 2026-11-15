@@ -1,4 +1,4 @@
-import { AIProfile } from "../models";
+import { getFullProfileById } from "../repositories/profileRepository";
 import { decryptSecret } from "../utils/crypto";
 import {
   getProviderKeyByUserAndProvider,
@@ -13,7 +13,11 @@ import {
 } from "../utils/costs";
 import logger from "../logger";
 import { buildSystemPrompt } from "./promptBuilder";
-import { guardInput } from "../workflows/proxyFilter";
+import { evaluateInput, FilterProfile, reasonCode } from "./filter/inputFilter";
+import { buildBlockedResponse } from "./filter/blockedResponse";
+import { extractFilterText, FilterApi } from "./filter/extractFilterText";
+import { RequestTrace } from "./trace/requestTrace";
+import { extractAnswer } from "./trace/answerExtractor";
 /**
  * מזהה provider מתוך model
  */
@@ -86,147 +90,104 @@ function getLiteLLMCost(response: Response, data?: any): number | undefined {
   return undefined;
 }
 
-function extractTextFromMessageContent(content: any): string {
-  if (typeof content === "string") {
-    return content;
-  }
+/**
+ * סינון הקלט — זהה לכל ה-APIs: חילוץ טקסט המשתמש ובדיקתו מול הפרופיל.
+ * מחזיר תשובת חסימה מוכנה ללקוח, או null אם מותר להמשיך לספק.
+ */
+async function filterInput(
+  api: FilterApi,
+  body: any,
+  profile: FilterProfile,
+  model: string,
+  trace: RequestTrace,
+): Promise<object | ReadableStream | null> {
+  trace.setStage("filter");
+  const text = extractFilterText(api, body);
 
-  if (Array.isArray(content)) {
-    return content
-      .map((part: any) => {
-        if (part.type === "text" || part.type === "input_text") {
-          return part.text || "";
-        }
-
-        // תוצאת כלי - יכולה להיות string או array של בלוקים
-        if (part.type === "tool_result") {
-          if (typeof part.content === "string") return part.content;
-          if (Array.isArray(part.content)) {
-            return part.content
-              .map((c: any) => (typeof c === "string" ? c : c?.text || ""))
-              .join("\n");
-          }
-          return "";
-        }
-
-        // קריאה לכלי - שם + input, כדי שה-judge יראה קונטקסט
-        if (part.type === "tool_use") {
-          return `[tool_use: ${part.name || "unknown"}] ${JSON.stringify(part.input || {})}`;
-        }
-
-        return "";
-      })
-      .filter(Boolean)
-      .join("\n");
-  }
-
-  return "";
-}
-
-function extractLastMessagesForFilter(messages: any[], count = 3): string {
-  return messages
-    .slice(-count)
-    .map((msg: any, index: number) => {
-      const text = extractTextFromMessageContent(msg.content).trim();
-      if (!text) return "";
-
-      return `Message ${index + 1} (${msg.role || "unknown"}):\n${text}`;
-    })
-    .filter(Boolean)
-    .join("\n\n---\n\n");
-}
-
-function isAgentNoiseForFilter(text: string): boolean {
-  const lower = text.toLowerCase();
-
-  return (
-    lower.includes("<system-reminder>") ||
-    lower.includes("</system-reminder>") ||
-    lower.includes("todowrite tool") ||
-    lower.includes("you did not use a tool") ||
-    lower.includes("<environment_details>") ||
-    lower.includes("<tool_use_instructions>") ||
-    lower.includes("tool output for") ||
-    lower.includes("attempt_completion") ||
-    lower.includes("ask_followup_question") ||
-    lower.includes("current mode act mode") ||
-    lower.includes("visible files") ||
-    lower.includes("open tabs") ||
-    lower.includes("tool_name:") ||
-    lower.includes("begin_arg:") ||
-    lower.includes("end_arg")
-  );
-}
-
-function extractUserIntentForFilter(messages: any[], count = 3): string {
-  const cleanUserMessages = messages
-    .filter((msg: any) => msg.role === "user")
-    .map((msg: any) => {
-      return {
-        role: msg.role || "user",
-        text: extractTextFromMessageContent(msg.content).trim(),
-      };
-    })
-    .filter((msg) => msg.text)
-    .filter((msg) => !isAgentNoiseForFilter(msg.text));
-
-  const selectedMessages =
-    cleanUserMessages.length > 0
-      ? cleanUserMessages.slice(-count)
-      : messages
-          // 🎯 רק user/assistant בפולבאק - לא developer/system,
-          // כדי לא לחשוף system prompts של agents ל-judge
-          .filter((msg: any) => msg.role === "user" || msg.role === "assistant")
-          .map((msg: any) => {
-            return {
-              role: msg.role || "unknown",
-              text: extractTextFromMessageContent(msg.content).trim(),
-            };
-          })
-          .filter((msg) => msg.text)
-          .filter((msg) => !isAgentNoiseForFilter(msg.text))
-          .slice(-count);
-
-  logger.info(`Hello!!!!!!!!!!!!!!:`);
-  selectedMessages.forEach((msg, index) =>
+  if (!text) {
+    trace.recordFilter("", null);
     logger.info(
-      `Message ${index + 1} (${msg.role}): ${msg.text.substring(0, 100)}...`,
-    ),
-  );
+      JSON.stringify({ event: "filter.skipped", api, reason: "no-user-text" }),
+    );
+    return null;
+  }
 
-  return selectedMessages
-    .map((msg, index) => {
-      return `Message ${index + 1} (${msg.role}):\n${msg.text}`;
-    })
-    .join("\n\n---\n\n");
+  const result = await evaluateInput(profile, text);
+  trace.recordFilter(text, result);
+  if (result.verdict === "allowed") return null;
+
+  const reason = reasonCode(result);
+  const logLine = JSON.stringify({
+    event: result.verdict === "error" ? "proxy.filter_error" : "proxy.blocked",
+    api,
+    model,
+    reason,
+  });
+  if (result.verdict === "error") logger.error(logLine);
+  else logger.info(logLine);
+
+  return buildBlockedResponse(
+    // לתמונות אין עדיין פורמט חסימה ייעודי — מוחזרת תשובה בפורמט chat.
+    api === "image" ? "chat" : api,
+    model,
+    reason,
+    result.verdict === "error" ? "unavailable" : "policy",
+    body.stream,
+  );
 }
 
-function extractLastInputsForResponses(input: any[], count = 3): string {
-  return input
-    .slice(-count)
-    .map((item: any, index: number) => {
-      let text = "";
+/**
+ * טוען את הפרופיל המלא של המשתמש — כולל הקטגוריות וה-prompts, שמוגדרים
+ * select:false בסכמה (findById רגיל מחזיר אותם ריקים).
+ */
+async function loadProfile(user: any) {
+  const profile = user?.profileId
+    ? await getFullProfileById(user.profileId.toString())
+    : null;
+  if (!profile) throw new Error("Profile not found");
+  return profile;
+}
 
-      if (typeof item.content === "string") {
-        text = item.content;
-      } else if (Array.isArray(item.content)) {
-        text = item.content
-          .filter((p: any) => p.type === "text" || p.type === "input_text")
-          .map((p: any) => p.text || "")
-          .join("\n");
-      }
+/**
+ * עוטף פונקציית proxy ברשומת מעקב אחת (RequestLog):
+ * מתעד שגיאות, את התשובה (רגילה או stream), ושומר בסוף.
+ */
+async function withTrace<T>(
+  api: FilterApi,
+  user: any,
+  body: any,
+  run: (trace: RequestTrace) => Promise<T>,
+): Promise<T | ReadableStream<Uint8Array>> {
+  const trace = new RequestTrace({ api, user, body });
 
-      if (!text.trim()) return "";
+  let result: T;
+  try {
+    result = await run(trace);
+  } catch (err) {
+    trace.fail(err);
+    void trace.save();
+    throw err;
+  }
 
-      return `Message ${index + 1} (${item.role || "unknown"}):\n${text}`;
-    })
-    .filter(Boolean)
-    .join("\n\n---\n\n");
+  // תשובת stream אמיתית מהספק — הרשומה תישמר כשה-stream יסתיים.
+  if (result instanceof ReadableStream && !trace.isBlocked) {
+    return trace.tapStream(result as ReadableStream<Uint8Array>);
+  }
+
+  if (!trace.isBlocked) trace.recordAnswer(extractAnswer(api, result));
+  void trace.save();
+  return result;
 }
 
 // ---------- proxies ---------------
 
 export async function proxyChatCompletion(user: any, body: any) {
+  return withTrace("chat", user, body, (trace) =>
+    proxyChatCompletionImpl(user, body, trace),
+  );
+}
+
+async function proxyChatCompletionImpl(user: any, body: any, trace: RequestTrace) {
   const model = body.model;
 
   if (!model) {
@@ -252,29 +213,12 @@ export async function proxyChatCompletion(user: any, body: any) {
   const isFree = isProviderKeyFree(user, providerKeyDoc._id.toString());
 
   // 3. סינון טקסט (Content Filtering)
-  const profile = await AIProfile.findById(user.profileId);
+  const profile = await loadProfile(user);
 
-  if (!profile) {
-    throw new Error("Profile not found");
-  }
-
-  // חילוץ ההודעה האחרונה מהמערך
-  const userQuery = extractLastMessagesForFilter(body.messages || [], 3);
-
-  if (userQuery && userQuery.trim() !== "") {
-    const blocked = await guardInput({
-      profile,
-      text: userQuery,
-      model,
-      api: "chat",
-      stream: body.stream,
-    });
-    if (blocked) return blocked;
-  } else {
-    logger.info(
-      "⚠️ No textual content to moderate (chat) - skipping guardInput",
-    );
-  }
+  const blocked = await filterInput("chat", body, profile, model, trace);
+  if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
   // 4. הוספת system prompts
 
   const systemPrompt = await buildSystemPrompt(profile);
@@ -514,6 +458,12 @@ export async function proxyChatCompletion(user: any, body: any) {
 }
 
 export async function proxyResponses(user: any, body: any) {
+  return withTrace("responses", user, body, (trace) =>
+    proxyResponsesImpl(user, body, trace),
+  );
+}
+
+async function proxyResponsesImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model;
 
@@ -537,30 +487,12 @@ export async function proxyResponses(user: any, body: any) {
     throw new Error("LiteLLM Proxy Key could not be decrypted or is missing");
 
   // Content filtering - אותו לוגיק כמו בchat completions
-  const profile = await AIProfile.findById(user.profileId);
-  if (!profile) throw new Error("Profile not found");
+  const profile = await loadProfile(user);
 
-  const userQuery =
-    typeof body.input === "string"
-      ? body.input
-      : Array.isArray(body.input)
-        ? extractLastInputsForResponses(body.input, 3)
-        : "";
-
-  if (userQuery && userQuery.trim() !== "") {
-    const blocked = await guardInput({
-      profile,
-      text: userQuery,
-      model,
-      api: "responses",
-      stream: body.stream,
-    });
-    if (blocked) return blocked;
-  } else {
-    logger.info(
-      "⚠️ No textual content to moderate (responses) - skipping guardInput",
-    );
-  }
+  const blocked = await filterInput("responses", body, profile, model, trace);
+  if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   // System prompt מה-profile
   const systemPrompt = await buildSystemPrompt(profile);
@@ -740,6 +672,12 @@ export async function proxyResponses(user: any, body: any) {
 }
 
 export async function proxyAnthropicMessages(user: any, body: any) {
+  return withTrace("anthropic", user, body, (trace) =>
+    proxyAnthropicMessagesImpl(user, body, trace),
+  );
+}
+
+async function proxyAnthropicMessagesImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model;
 
@@ -766,27 +704,12 @@ export async function proxyAnthropicMessages(user: any, body: any) {
     throw new Error("LiteLLM Proxy Key could not be decrypted or is missing");
   }
 
-  const profile = await AIProfile.findById(user.profileId);
-  if (!profile) {
-    throw new Error("Profile not found");
-  }
+  const profile = await loadProfile(user);
 
-  const userQuery = extractUserIntentForFilter(body.messages || [], 3);
-
-  if (userQuery && userQuery.trim() !== "") {
-    const blocked = await guardInput({
-      profile,
-      text: userQuery,
-      model,
-      api: "anthropic",
-      stream: body.stream,
-    });
-    if (blocked) return blocked;
-  } else {
-    logger.info(
-      "⚠️ No textual content to moderate (anthropic) - skipping guardInput",
-    );
-  }
+  const blocked = await filterInput("anthropic", body, profile, model, trace);
+  if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   const systemPrompt = await buildSystemPrompt(profile);
 
@@ -886,10 +809,16 @@ export async function proxyAnthropicMessages(user: any, body: any) {
 
 // ========== IMAGE GENERATION ==========
 export async function proxyImageGeneration(user: any, body: any) {
+  return withTrace("image", user, body, (trace) =>
+    proxyImageGenerationImpl(user, body, trace),
+  );
+}
+
+async function proxyImageGenerationImpl(user: any, body: any, trace: RequestTrace) {
   const startTime = Date.now();
   const model = body.model || "dall-e-3";
 
-  const profile = await AIProfile.findById(user.profileId);
+  const profile = await loadProfile(user);
 
   const provider = getProviderFromModel(model);
 
@@ -904,18 +833,10 @@ export async function proxyImageGeneration(user: any, body: any) {
   const isFree = isProviderKeyFree(user, providerKeyDoc._id.toString());
   const decryptedLiteLLMKey = decryptSecret(user.litellmKeyEncrypted);
 
-  const imagePrompt =
-    typeof body.prompt === "string" && body.prompt.trim()
-      ? body.prompt
-      : "No text content";
-
-  const blocked = await guardInput({
-    profile,
-    text: imagePrompt,
-    model,
-    api: "chat",
-  });
+  const blocked = await filterInput("image", body, profile, model, trace);
   if (blocked) return blocked;
+  // מכאן: בניית הבקשה לספק וקריאה אליו.
+  trace.setStage("provider");
 
   if (!decryptedLiteLLMKey) throw new Error("LiteLLM key missing");
 

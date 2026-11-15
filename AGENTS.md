@@ -16,11 +16,10 @@ This file defines the roles, responsibilities, and communication protocols for A
 
 **Ownership Scope**
 - Express routes and controllers (`server/src/routes/`, `server/src/controllers/`)
-- Business logic services (`server/src/services/`, including authService, filterService, usageTracker, etc.)
+- Business logic services (`server/src/services/`, including authService, the content filter in `services/filter/`, usageTracker, etc.)
 - Data access repositories (`server/src/repositories/`)
 - Mongoose models and database schema (`server/src/models/`)
 - Middleware and authentication (`server/src/middleware/`)
-- Complex workflows (`server/src/workflows/`)
 - Server configuration and environment setup (`server/.env`, `server/tsconfig.json`, etc.)
 
 **Core Principle (Boundary Constraint):** Do not modify frontend code (`client/src/**`) unless explicitly asked. Expose clean, well-documented APIs for frontend to consume. Maintain the separation of concerns: Routes → Controllers → Services → Repositories.

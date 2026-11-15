@@ -88,13 +88,11 @@ npm run lint       # ESLint check
 
 ## Architecture Patterns
 
-**Server Request Flow (3-layer + workflows)**
+**Server Request Flow (3-layer)**
 ```
-Routes (13 routers) → Controllers → Services → Repositories → Mongoose Models
-                                         ↓
-                                   Workflows (for multi-step business logic)
-                                         ↓
-                                   Middleware (auth, logging, error handling)
+Routes → Controllers → Services → Repositories → Mongoose Models
+   ↑
+Middleware (auth, logging, error handling)
 ```
 
 **Layer Responsibilities**
@@ -103,7 +101,6 @@ Routes (13 routers) → Controllers → Services → Repositories → Mongoose M
 - **Services** (`server/src/services/`): Business logic; call repositories; no direct HTTP
 - **Repositories** (`server/src/repositories/`): Data access only; query Mongoose models; no business logic
 - **Models** (`server/src/models/`): Mongoose schemas with full TypeScript types
-- **Workflows** (`server/src/workflows/`): Complex multi-step processes (e.g., input filtering, profile evaluation)
 
 **Middleware Stack** (`server/src/middleware/`)
 - `authenticateToken()`: Verifies JWT; attaches `req.user`
@@ -119,9 +116,9 @@ Routes (13 routers) → Controllers → Services → Repositories → Mongoose M
 | `authService.ts` | Login, register, JWT/refresh, password reset |
 | `userService.ts` | User CRUD, permissions, role management |
 | `profileService.ts` | AI profile management (BYOK/MANAGED modes) |
-| `filterService.ts` | Text evaluation against filter rules (core feature) |
+| `filter/` | Content filter (core feature): `extractFilterText`, `judge`, `inputFilter`, `blockedResponse` |
 | `organizationService.ts` | Multi-tenant org management |
-| `llmService.ts` | LLM provider orchestration |
+| `trace/` | `RequestTrace`: one `RequestLog` per proxy request (question, filter, answer, error) |
 | `proxyService.ts` | LiteLLM proxy integration |
 | `usageTracker.ts` | Cost & usage analytics |
 | `promptService.ts` | Prompt template management |
@@ -183,7 +180,7 @@ Example: `features/auth/` (login, register, OAuth), `features/FilterManagement/`
 | Call backend from client | [config/api.ts](client/src/config/api.ts); use `apiCall()` which auto-attaches auth and handles 401 |
 | Add new UI feature | Follow pattern in [features/auth/](client/src/features/auth/); create Redux slice + components |
 | Track costs/usage | [utils/costs.ts](server/src/utils/costs.ts) + [services/usageTracker.ts](server/src/services/usageTracker.ts) |
-| Evaluate text against filters | [filterService.ts](server/src/services/filterService.ts); main business logic in workflows/input/inputFilterWorkflow.ts |
+| Evaluate text against filters | [services/filter/inputFilter.ts](server/src/services/filter/inputFilter.ts); see [05-safety-filter-engine.md](../claude-knowledge/05-safety-filter-engine.md) |
 | Understand role-based access | [middleware/auth.ts](server/src/middleware/auth.ts); admin routes use `requireAdmin` middleware |
 | Manage provider API keys | [providerKeyService.ts](server/src/services/providerKeyService.ts); uses AES-256-GCM encryption |
 
@@ -207,5 +204,5 @@ These docs are authoritative sources—link to them rather than duplicating:
 - When in doubt, look at [client/src/config/api.ts](client/src/config/api.ts) for request handling and [server/src/index.ts](server/src/index.ts) for route wiring.
 - Keep the frontend/backend boundary clear: frontend changes should not assume backend implementation details beyond the exposed API contract.
 - Preserve existing route semantics and auth patterns unless you are intentionally improving them.
-- For complex multi-step logic, follow the Workflow pattern used in [server/src/workflows/](server/src/workflows/); don't embed business logic in services.
+- Business logic lives in services (Routes → Controllers → Services → Repositories). The content filter is in [server/src/services/filter/](server/src/services/filter/); prefer plain functions over generic pipeline frameworks until there is more than one step to run.
 - All sensitive data (API keys, passwords, encryption keys) must be encrypted using AES-256-GCM before storage.

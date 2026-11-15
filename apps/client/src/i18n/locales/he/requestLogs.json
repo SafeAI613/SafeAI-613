@@ -1,0 +1,52 @@
+{
+  "safeaiNav": {
+    "requestLogs": "ניטור בקשות AI"
+  },
+  "requestLogs": {
+    "title": "ניטור בקשות AI",
+    "subtitle": "כל בקשה שעברה בפרוקסי: השאלה שנבדקה, החלטת הסינון, התשובה מהספק ושגיאות. הרשומות נשמרות 30 יום.",
+    "allStatuses": "כל הסטטוסים",
+    "allApis": "כל סוגי ה-API",
+    "requestIdPlaceholder": "מזהה בקשה (x-request-id)",
+    "searchById": "חיפוש לפי מזהה",
+    "loadMore": "טען עוד",
+    "empty": "אין בקשות להצגה.",
+    "loadFailed": "טעינת הבקשות נכשלה. נסו שוב.",
+    "forbidden": "אין לך הרשאה לצפות בבקשות.",
+    "notFound": "לא נמצאה בקשה עם המזהה {{id}}.",
+    "timeColumn": "זמן",
+    "userColumn": "משתמש",
+    "apiColumn": "API",
+    "statusColumn": "סטטוס",
+    "questionColumn": "שאלה",
+    "durationColumn": "משך",
+    "ms": "{{value}} ms",
+    "requestId": "מזהה בקשה",
+    "model": "מודל",
+    "duration": "משך כולל",
+    "providerResponseId": "מזהה אצל הספק",
+    "questionTitle": "השאלה שנבדקה",
+    "filterTitle": "החלטת הסינון",
+    "errorTitle": "שגיאה",
+    "answerTitle": "התשובה",
+    "noContent": "אין תוכן (לא נשמר או ריק)",
+    "status": {
+      "completed": "הושלמה",
+      "blocked": "נחסמה",
+      "filter_error": "שגיאת סינון",
+      "error": "שגיאה"
+    },
+    "verdict": {
+      "allowed": "אושרה",
+      "blocked": "נחסמה",
+      "error": "הסינון נכשל",
+      "skipped": "לא נבדקה (אין טקסט משתמש)"
+    },
+    "stage": {
+      "setup": "הכנת הבקשה",
+      "filter": "סינון",
+      "provider": "הספק",
+      "stream": "העברת ה-stream"
+    }
+  }
+}

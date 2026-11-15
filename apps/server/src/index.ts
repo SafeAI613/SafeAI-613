@@ -27,6 +27,7 @@ import newsRouter from "./routes/newsRouter";
 import articlesRouter from "./routes/articlesRouter";
 
 import { requestLogger } from "./middleware/requestLogger";
+import requestLogRouter from "./routes/requestLogRouter";
 import { errorHandler } from "./middleware/errorHandler";
 import { connectDatabase } from "./config/db";
 import { authenticateToken, requireAdmin } from "./middleware/auth";
@@ -51,6 +52,7 @@ app.use(cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["x-request-id"],
 }));
 
 app.use(cookieParser());
@@ -64,8 +66,11 @@ app.use(express.json({ limit: "50mb" }));
 // PayMe's Sale Callback (webhook) is posted as x-www-form-urlencoded.
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-app.use((req, _res, next) => {
-  requestContext.run({ requestId: randomUUID() }, next);
+app.use((_req, res, next) => {
+  const requestId = randomUUID();
+  // מוחזר ללקוח כדי שיוכל לדווח על בקשה ספציפית; זהה ל-RequestLog.requestId.
+  res.setHeader("x-request-id", requestId);
+  requestContext.run({ requestId }, next);
 });
 
 app.use(requestLogger);
@@ -97,6 +102,7 @@ app.use("/provider-keys", authenticateToken, providerKeyRouter);
 app.use("/proxy-key", proxyKeyRouter); // User's own proxy key management
 app.use("/professional-profile", professionalProfileRouter); // User's own professional profile (tender board)
 app.use("/admin/stats", adminStatsRouter); // Admin stats already has auth middleware
+app.use("/admin/request-logs", requestLogRouter); // Admin only (auth middleware in router)
 app.use("/prompts", authenticateToken, promptRouter); // Prompt management (admin routes protected in router)
 // paymeWebhookRouter must be mounted before organizationRouter: its route
 // is intentionally public (PayMe cannot carry our auth token), but

@@ -7,9 +7,15 @@ interface Profile {
   name: string;
 }
 
+/** POST /filter/evaluate — ראו server/src/controllers/filterController.ts */
 interface EvaluateResponse {
   allowed: boolean;
+  verdict?: "allowed" | "blocked" | "error";
   reason: string;
+  /** ההסבר של מודל הסינון. */
+  judgeReason?: string;
+  /** הודעת השגיאה כששירות הסינון נכשל. */
+  error?: string;
 }
 
 interface ProfileTesterProps {
@@ -62,6 +68,7 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
       "allowed-by-llm": t("profileTester.reasonAllowedByLlm"),
       "blocked-by-llm": t("profileTester.reasonBlockedByLlm"),
       "low-confidence": t("profileTester.reasonLowConfidence"),
+      "filter-error": t("profileTester.reasonFilterError"),
     };
     return reasons[reason] || reason;
   };
@@ -164,6 +171,12 @@ export default function ProfileTester({ profiles }: ProfileTesterProps) {
             fontSize: "14px"
           }}>
             <strong>{t("profileTester.reasonLabel")}</strong> {getReasonText(result.reason)}
+            {(result.judgeReason || result.error) && (
+              <div style={{ marginTop: "6px" }}>
+                <strong>{t("profileTester.judgeReasonLabel")}</strong>{" "}
+                <span dir="auto">{result.judgeReason || result.error}</span>
+              </div>
+            )}
           </div>
 
           <div style={{

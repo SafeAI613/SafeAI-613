@@ -27,7 +27,7 @@
 │     ├─ repositories/    # גישה ל-DB
 │     ├─ models/          # סכמות Mongoose
 │     ├─ middleware/      # auth, proxyAuth, rateLimiter, errorHandler, logger
-│     ├─ workflows/       # מנוע הסינון (input/output/instructions + runner)
+│     ├─ services/filter/ # מנוע הסינון (חילוץ טקסט, judge, תשובות חסימה)
 │     ├─ utils/           # crypto, jwt, costs, email, validation, streamHandler
 │     └─ index.ts         # נקודת כניסה (רישום routes + CORS + DB)
 ├─ docs/                  # אפיון, מדריכים, GIT rules, litellm config

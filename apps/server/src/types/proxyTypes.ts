@@ -9,17 +9,6 @@ export interface EmbeddingRequest {
   originText: string;
 }
 
-export interface EvaluateRequest {
-  profileId: string;
-  text: string;
-  auditDisabled?: boolean;
-}
-
-export interface EvaluateResponse {
-  allowed: boolean;
-  reason: string;
-}
-
 export interface AIProfileInput {
   name: string;
   allowedCategories?: string[];

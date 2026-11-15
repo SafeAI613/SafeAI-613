@@ -1,67 +1,75 @@
-# SafeAI — מנוע הסינון (Workflows)
+# SafeAI — מנוע הסינון
 
-הלב של המוצר. כל הקוד תחת `server/src/workflows/`.
+הלב של המוצר. הקוד תחת `server/src/services/filter/` ו-`server/src/services/trace/`.
 
-## מבנה כללי
+## מבנה
 ```
-workflows/
-├─ runner.ts                 # שני runners גנריים (guard + transform)
-├─ types.ts                  # GuardNode, GuardContext, NodeTrace, TransformNode...
-├─ proxyFilter.ts            # guardInput — הדבק בין ה-proxy ל-workflow
-├─ blockedResponse.ts        # בניית "תשובות דמה" כשנחסם (chat/responses/anthropic + SSE)
-├─ input/
-│  ├─ evaluate.ts            # evaluateText — מביא פרופיל, מריץ workflow, כותב EvaluationLog
-│  ├─ inputFilterWorkflow.ts # INPUT_NODES = רשימת ה-guard nodes לפי סדר
-│  └─ nodes/llmDecisionNode.ts
-├─ output/outputFilterWorkflow.ts
-└─ instructions/             # בניית system prompt (transform pipeline)
+services/filter/
+├─ extractFilterText.ts  # איזה טקסט נבדק — כלל אחד לכל ה-APIs
+├─ judge.ts              # judgeText — LLM-as-a-judge עם Structured Output
+├─ inputFilter.ts        # evaluateInput — judge + כתיבת EvaluationLog
+└─ blockedResponse.ts    # "תשובות דמה" כשנחסם (chat/responses/anthropic + SSE)
+
+services/trace/
+├─ requestTrace.ts       # RequestTrace — רשומת RequestLog אחת לכל בקשה
+└─ answerExtractor.ts    # חילוץ טקסט התשובה (רגיל + stream)
 ```
 
-## שני סוגי pipelines (`runner.ts`)
-1. **`runGuardPipeline`** — לסינון (input/output). **fail-fast**: עוצר ב-node הראשון שמחזיר `block`.
-   **fail-closed**: אם node זורק שגיאה → נחשב חסום (`error-in-<node>`). מחזיר `{ allowed, reason, blockedBy?, trace[] }`.
-2. **`runTransformPipeline`** — לבניית הנחיות/output: מריץ את כל ה-nodes ברצף וצובר context. שגיאה כאן **כן** מתפוצצת (לא בולעים).
-
-שניהם מודדים זמן ומוציאים **structured JSON log** לכל שלב (`node.completed`, `workflow.blocked`, וכו') — נוח ל-log aggregator.
-
-## Guard node — החוזה
-כל node ממש את `GuardNode`:
-```ts
-{ name: string, run(ctx): Promise<{ verdict: "allow"|"block", reason: string, metadata?: {...} }> }
+## הזרימה בפרוקסי (`proxyService.ts`)
 ```
-`ctx: GuardContext = { text, profile, profileId }`.
-
-## ה-Input workflow כיום
-`INPUT_NODES = [llmDecisionNode]` — כרגע **node יחיד** פעיל.
-- **`llmDecisionNode`** (`input/nodes/llmDecisionNode.ts`): בונה תיאור פרופיל
-  (`allowed categories: ... blocked categories: ...`) וקורא ל-`getLLMDecision(text, profileName, profileDesc)`
-  ב-`services/llmService.ts`. מחזיר `allow`/`block`.
-
-> **הרחבה עתידית מתוכננת** (קיימת כהערות בקוד, לא פעילה): `promptInjectionNode`, `embeddingGuardNode`.
-> מוסיפים node פשוט ע"י הוספתו למערך `INPUT_NODES` לפי הסדר הרצוי (זול/ודאי קודם, כי fail-fast).
-> ה-embedding guard ישתמש ב-`utils/cosineSimilarity.ts` ובספים מתוך הפרופיל
-> (`thresholdAllowed`, `thresholdBlocked`, `similarityMargin`).
-
-## evaluateText (`input/evaluate.ts`)
-נקודת הכניסה לאורקסטרציה. נקראת משני מקומות:
-1. **ה-proxy** דרך `guardInput` (שמתרגם חסימה לתשובת דמה).
-2. **endpoint ישיר** `/filter` (`evaluateHandler`) שמחזיר verdict כ-JSON.
-
-זרימה: מביא פרופיל מלא (`getFullProfileById` — כולל שדות `select:false`) → `runInputWorkflow` (טהור, ללא DB) → כותב `EvaluationLog` (audit, אלא אם `auditDisabled`) → מחזיר `{ allowed, reason, trace, blockedBy? }`.
-
-## guardInput (`proxyFilter.ts`) — שילוב ב-proxy
-```ts
-const blocked = await guardInput({ profile, text, model, api, stream });
-if (blocked) return blocked;   // תשובת דמה (לא Error) — ממשיכים רגיל אם null
+withTrace(api)                       ← RequestTrace אחד לבקשה
+ └─ loadProfile(user)                ← getFullProfileById: כולל שדות select:false
+ └─ filterInput(api, body, profile)
+     ├─ extractFilterText            ← "" → filter.skipped, ממשיכים
+     ├─ evaluateInput → judgeText    ← allowed / blocked / error
+     └─ blocked/error → buildBlockedResponse (לא Error, תשובת LLM רגילה לכאורה)
+ └─ buildSystemPrompt(profile) → LiteLLM
+ └─ התשובה (או ה-stream דרך tapStream) נרשמת ב-RequestLog
 ```
-- `api`: `"chat" | "responses" | "anthropic"`.
-- אם **מאושר** → מחזיר `null` (ה-proxy ממשיך ל-LiteLLM).
-- אם **נחסם** → לוג `proxy.blocked` + בונה payload לפי ה-API:
-  - `buildBlockedAnthropicMessage` / `buildBlockedResponsesApi` / `buildBlockedChatCompletion`.
-  - אם `stream` → עוטף ב-`toSSEStream` (Server-Sent Events).
-  כלומר ללקוח חוזרת **תשובת LLM רגילה לכאורה** עם הסבר החסימה, לא שגיאת 4xx — שומר על תאימות client.
 
-## נקודות מפתח לזכור
-- הסינון הוא **fail-closed** — בספק/בשגיאה חוסמים.
-- ה-`trace` המלא נשמר ב-EvaluationLog לניתוח/דיבוג false-positives.
-- הפרדה נקייה: `inputFilterWorkflow` טהור (ללא DB) ↔ `evaluate.ts` מוסיף audit ↔ `proxyFilter` מוסיף תרגום לתשובת HTTP.
+> חשוב: `AIProfile.findById` רגיל **לא** מחזיר את `allowedCategories`, `blockedCategories`
+> ו-`*Prompts` (מוגדרים `select:false`). תמיד להשתמש ב-`getFullProfileById`.
+
+## extractFilterText — מה נבדק
+- רק הודעות `role: "user"`. לא `system` / `developer` / `assistant`.
+- רק בלוקי טקסט (`text`, `input_text`). תוצאות כלים (`tool_result`, `function_call_output`)
+  וקריאות לכלים **לא** נבדקות — זה תוכן קבצים/פקודות של agents, לא כוונת המשתמש.
+  סינון תוכן כזה הוא תפקיד של סינון פלט עתידי.
+- תגיות של agents (`<system-reminder>`, `<environment_details>`, `<tool_use_instructions>`)
+  **מוסרות מהטקסט**, וההודעה עצמה נבדקת. (בעבר הודעה כזו נזרקה כולה — פרצת עקיפה.)
+- 3 הודעות המשתמש האחרונות, כל אחת מקוצרת מהאמצע ל-4000 תווים.
+
+## judgeText (`judge.ts`)
+- מודל: `LLM_AS_A_JUDGE_MODEL` (ברירת מחדל `gpt-5.4-nano`). בלי `temperature` — מודלי reasoning דוחים אותו.
+- `response_format: json_schema` (strict) → `{ verdict: "allowed" | "blocked", reason }`.
+- timeout 15 שניות, ניסיון חוזר אחד.
+- **שגיאה אינה חסימה**: כל כשל מוחזר כ-`{ verdict: "error", error }`. סירוב של המודל (refusal) = `blocked`.
+- ה-prompt: `FILTER_PROMPT` מה-DB + שם הפרופיל + הקטגוריות + הוראת פורמט ה-JSON (`promptBuilder.buildFilterPrompt`).
+
+## החלטה ← מה המשתמש מקבל
+| verdict | התנהגות | `safeai.kind` | RequestLog.status |
+|---|---|---|---|
+| `allowed` | ממשיכים לספק | — | `completed` / `error` |
+| `blocked` | תשובת חסימה: "נסחו מחדש" | `policy` | `blocked` |
+| `error` | **fail-closed**: "השירות אינו זמין זמנית" | `unavailable` | `filter_error` |
+
+קוד הסיבה (`reasonCode`): `allowed-by-llm` / `blocked-by-llm` / `filter-error`.
+
+## מעקב
+- **RequestLog** (`models/requestLog.ts`): רשומה אחת לכל בקשה בפרוקסי — שאלה, החלטת סינון
+  (`verdict`, `judgeReason`, `judgeModel`, `latencyMs`, `error`), תשובה, `providerResponseId`
+  (= `UsageLog.requestId`), סטטוס, `error.stage` (`setup`/`filter`/`provider`/`stream`).
+  `requestId` זהה ל-`ApplicationLog.requestId` ולכותרת `x-request-id`.
+  TTL של 30 יום; `REQUEST_LOG_STORE_CONTENT=false` → בלי תוכן.
+  צפייה: `GET /admin/request-logs`, `GET /admin/request-logs/:requestId` (אדמין).
+- **EvaluationLog**: כל הפעלה של `evaluateInput` (פרוקסי + `/filter/evaluate`).
+  `llmFinalDecision`: `allowed`/`blocked`/`error`, ועוד `judgeReason`, `judgeModel`, `latencyMs`.
+  משמש את סטטיסטיקות האדמין (ספירת חסימות).
+
+## `/filter/evaluate`
+אדמין בלבד (`authenticateToken` + `requireAdmin`) — משמש את ProfileTester.
+body: `{ profileId, text, auditDisabled? }` → `{ allowed, verdict, reason, judgeReason?, error?, judgeModel, latencyMs }`.
+
+## הוספת שלב בדיקה
+אין runner גנרי (היה, עם node אחד בלבד — הוסר). שלב נוסף (למשל prompt-injection או embedding guard)
+מוסיפים ב-`evaluateInput`, לפני/אחרי `judgeText`, ומחזירים את אותו `FilterResult`.

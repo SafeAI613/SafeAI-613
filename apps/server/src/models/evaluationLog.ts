@@ -10,14 +10,24 @@ import mongoose from "mongoose";
 export interface EvaluationLogDoc extends mongoose.Document {
   profileId: mongoose.Types.ObjectId;
   text: string;
-  vectorScores: {
+  /** שדה ישן (סינון וקטורי) — לא נכתב יותר, נשאר לרשומות קיימות. */
+  vectorScores?: {
     bestAllowed: number;
     bestBlocked: number;
   };
+  /** קוד סיבה: allowed-by-llm / blocked-by-llm / filter-error. */
   initialDecision: string;
+  /** allowed / blocked / error. */
   llmFinalDecision: string;
   isManuallyReviewed: boolean;
   blockedBy?: string;
+  /** ההסבר של ה-judge. */
+  judgeReason?: string;
+  /** הודעת השגיאה כשה-judge נכשל. */
+  error?: string;
+  judgeModel?: string;
+  latencyMs?: number;
+  /** שדה ישן (trace של ה-workflow) — לא נכתב יותר, נשאר לרשומות קיימות. */
   trace?: Record<string, unknown>[];
 }
 
@@ -33,6 +43,10 @@ const EvaluationLogSchema = new mongoose.Schema(
     llmFinalDecision: String,
     isManuallyReviewed: { type: Boolean, default: false },
     blockedBy: { type: String },
+    judgeReason: String,
+    error: String,
+    judgeModel: String,
+    latencyMs: Number,
     trace: { type: [mongoose.Schema.Types.Mixed] },
   },
   { timestamps: true },

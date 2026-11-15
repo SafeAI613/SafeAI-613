@@ -867,3 +867,109 @@
     transform: none;
   }
 }
+
+/* ============================================================
+ * ניטור בקשות AI (RequestLogsList) — אדמין
+ * ============================================================ */
+
+.safeai-ui-page .request-logs-page .request-logs-lookup {
+  margin-top: 12px;
+}
+
+.safeai-ui-page .request-logs-table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.safeai-ui-page .request-logs-page .requests-table {
+  margin-top: 0;
+}
+
+.safeai-ui-page .request-log-row {
+  cursor: pointer;
+}
+
+.safeai-ui-page .request-log-row:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.safeai-ui-page .request-log-details-row,
+.safeai-ui-page .request-log-details-row:hover {
+  background-color: var(--bg-elevated);
+}
+
+.safeai-ui-page .request-log-details {
+  display: grid;
+  gap: 16px;
+}
+
+.safeai-ui-page .request-log-details h4 {
+  margin: 0 0 6px;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.safeai-ui-page .request-log-details p {
+  margin: 0;
+}
+
+.safeai-ui-page .request-log-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 16px;
+  margin: 0;
+  font-size: var(--font-sm);
+}
+
+.safeai-ui-page .request-log-meta dt {
+  color: var(--text-muted);
+}
+
+.safeai-ui-page .request-log-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.safeai-ui-page .request-log-text {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: 12px;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+}
+
+.safeai-ui-page .request-log-error {
+  color: var(--color-danger);
+  overflow-wrap: anywhere;
+}
+
+.safeai-ui-page .request-log-muted {
+  color: var(--text-muted);
+  font-size: var(--font-sm);
+}
+
+.safeai-ui-page .request-logs-more {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.safeai-ui-page .request-logs-page .request-log-nowrap {
+  white-space: nowrap;
+}
+
+.safeai-ui-page .request-logs-page .request-log-judge {
+  /* bdi הוא dir=ltr, לכן "start" שלו הוא שמאל גם בעברית — רווח משני הצדדים */
+  margin-inline: 6px;
+}

@@ -64,7 +64,8 @@
 | `/proxy-key` | — | ניהול ה-proxy key של המשתמש |
 | `/prompts` | JWT (admin בראוטר) | תבניות prompt |
 | `/contact` | JWT | טופס צור קשר |
-| `/filter` | **ציבורי** | הערכת סינון ישירה (evaluateText) |
+| `/filter/evaluate` | JWT + admin | הערכת סינון ישירה (ProfileTester) |
+| `/admin/request-logs` | JWT + admin | רשומות מעקב של הפרוקסי (RequestLog) |
 | `/health` | ציבורי | health check |
 
 > קבצי `.http` לדוגמאות בקשות נמצאים תחת `server/http/`.

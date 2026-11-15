@@ -1,8 +1,9 @@
 /**
  * server/src/services/filterService.ts
  *
- * הערכת טקסט מול פרופיל. הלוגיקה עברה ל-input workflow;
- * הקובץ הזה נשאר נקודת הכניסה ושומר את ה-EvaluationLog (כולל trace).
+ * שירותי embeddings (סינון וקטורי ישן). לא בשימוש בזרימת הסינון הנוכחית,
+ * וה-handlers שלהם ב-filterController לא מחוברים לאף route.
+ * סינון הקלט עצמו נמצא ב-services/filter/.
  */
 
 import { Embedding } from "../models";
